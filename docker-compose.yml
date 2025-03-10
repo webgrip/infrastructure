@@ -1,0 +1,9 @@
+services:
+  github-runner:
+    build:
+      context: ops/docker/github-runner
+      dockerfile: Dockerfile
+  helm-deploy:
+    build:
+      context: ops/docker/helm-deploy
+      dockerfile: Dockerfile

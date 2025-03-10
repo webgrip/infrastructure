@@ -1,0 +1,39 @@
+name: '[Workflow] On Dockerfile Change'
+
+concurrency:
+  group: push-${{ github.branch }}
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'ops/docker/**'
+
+jobs:
+  determine-changed-directories:
+    name: "Docker"
+    uses: webgrip/workflows/.github/workflows/determine-changed-directories.yml@main
+    with:
+      inside-dir: 'ops/docker'
+
+  build-and-push-changed-dirs:
+    name: "Build and Push"
+    needs: [ determine-changed-directories ]
+    if: >
+      always()
+      && needs.determine-changed-directories.result == 'success'
+      && needs.determine-changed-directories.outputs.matrix != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.determine-changed-directories.outputs.matrix) }}
+    uses: webgrip/workflows/.github/workflows/docker-build-and-push.yml@main
+    with:
+      docker-context: ${{ matrix.path }}
+      docker-file: Dockerfile
+      docker-tags: |
+        ${{ github.event.repository.name }}/${{ matrix.basename }}:latest
+        ${{ github.event.repository.name }}/${{ matrix.basename }}:${{ github.sha }}
+    secrets:
+      DIGITALOCEAN_DOCR_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_DOCR_ACCESS_TOKEN }}
