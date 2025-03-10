@@ -2,7 +2,6 @@ name: '[Workflow] On Dockerfile Change'
 
 concurrency:
   group: push-${{ github.branch }}
-  cancel-in-progress: true
 
 on:
   push:
