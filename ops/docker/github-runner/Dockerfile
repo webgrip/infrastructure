@@ -13,4 +13,3 @@ RUN apt-get update && apt-get install -y \
 LABEL maintainer="Ryan Grippeling <ryan@webgrip.nl>"
 
 USER runner
-
