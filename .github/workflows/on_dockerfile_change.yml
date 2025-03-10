@@ -36,4 +36,5 @@ jobs:
         ${{ github.event.repository.name }}/${{ matrix.basename }}:latest
         ${{ github.event.repository.name }}/${{ matrix.basename }}:${{ github.sha }}
     secrets:
-      DIGITALOCEAN_DOCR_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_DOCR_ACCESS_TOKEN }}
+      DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
