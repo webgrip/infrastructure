@@ -47,4 +47,3 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" &&
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["npx", "playwright", "test"]
-
