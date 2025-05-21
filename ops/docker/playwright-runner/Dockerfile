@@ -1,8 +1,15 @@
-FROM ghcr.io/actions/actions-runner:2.324.0 AS runner
+FROM mcr.microsoft.com/playwright:v1.51.0-noble
 
-LABEL maintainer="Ryan Grippeling <ryan@webgrip.nl>"
+ARG TZ=Europe/Amsterdam
+ENV TZ=${TZ}
 
-USER root
+WORKDIR /app
+
+RUN npx playwright install --with-deps
+
+COPY ./seccomp_profile.json /etc/seccomp_profile.json
+COPY ./docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
 RUN apt-get update && \
     apt-get install -y \
@@ -13,10 +20,10 @@ RUN apt-get update && \
         patch \
         unzip \
         rsync \
-        software-properties-common
+        software-properties-common \
+        yq
 
 RUN add-apt-repository ppa:ondrej/php -y && \
-    apt-get update && \
     apt-get install -y \
       php8.3-cli \
       php8.3-common \
@@ -32,11 +39,12 @@ RUN add-apt-repository ppa:ondrej/php -y && \
       php8.3-zip \
     && apt-get clean
 
-# Install Composer using the official installer
+
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
     php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
     php -r "unlink('composer-setup.php');" && \
     chmod +x /usr/local/bin/composer
 
-USER runner
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["npx", "playwright", "test"]
 

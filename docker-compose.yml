@@ -7,3 +7,9 @@ services:
     build:
       context: ops/docker/helm-deploy
       dockerfile: Dockerfile
+  playwright-runner:
+    build:
+      context: ops/docker/playwright-runner
+      dockerfile: Dockerfile
+    volumes:
+      - ./tests/playwright-runner:/app

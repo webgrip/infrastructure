@@ -1,6 +1,6 @@
 FROM alpine:3.21.3
 
-LABEL maintainer="Ryan Grippeling <ryan@vendic.nl>"
+LABEL maintainer="Ryan Grippeling <ryan@webgrip.nl>"
 
 RUN apk add --no-cache \
     ca-certificates \
