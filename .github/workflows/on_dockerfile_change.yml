@@ -13,7 +13,7 @@ on:
 jobs:
   determine-changed-directories:
     name: "Docker"
-    uses: webgrip/workflows/.github/workflows/determine-changed-directories.yml@main
+    uses: webgrip/workflows/.github/workflows/determine-changed-directories.yml@ubuntu-latest
     with:
       inside-dir: 'ops/docker'
 
@@ -28,7 +28,7 @@ jobs:
       fail-fast: false
       matrix:
         include: ${{ fromJson(needs.determine-changed-directories.outputs.matrix) }}
-    uses: webgrip/workflows/.github/workflows/docker-build-and-push.yml@main
+    uses: webgrip/workflows/.github/workflows/docker-build-and-push.yml@ubuntu-latest
     with:
       docker-context: ${{ matrix.path }}
       docker-file: Dockerfile
