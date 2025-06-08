@@ -15,4 +15,8 @@ RUN set -eux; \
     && rustup toolchain install nightly \
     && rustup component add rustfmt clippy
 
+RUN set -eux; \
+    && cargo install --locked cargo-nextest \
+    && cargo install --locked cargo-tarpaulin
+
 CMD ["bash"]
