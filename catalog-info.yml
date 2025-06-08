@@ -1,0 +1,25 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: infrastructure-docker-images
+  namespace: webgrip
+  title: CI Docker Images
+  description: |
+    The CI Docker images for WebGrip
+  labels:
+    tier: "3"
+  links:
+    - title: URL
+      url: https://webgrip.nl
+  tags:
+    - webgrip
+  annotations:
+    backstage.io/adr-location: docs/adr
+    backstage.io/techdocs-ref: dir:./docs/techdocs
+    github.com/project-slug: webgrip/infrastructure
+    simpleicons.org/icon-slug: docker
+spec:
+  type: service
+  owner: group:webgrip/ops
+  lifecycle: experimental
+  system: webgrip-system

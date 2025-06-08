@@ -13,3 +13,7 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ./tests/playwright-runner:/app
+  rust-ci-runner:
+    build:
+      context: ops/docker/rust-ci-runner
+      dockerfile: Dockerfile
