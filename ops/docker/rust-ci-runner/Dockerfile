@@ -33,6 +33,8 @@ RUN rustup toolchain install nightly \
 # 1.5  Pin stable as the default so the rustup shim can resolve `cargo`
 RUN rustup default ${RUST_VERSION}
 
+# 1.6  🔧 Install clippy & rustfmt for the *stable* toolchain too
+RUN rustup component add clippy rustfmt
 
 # ────────────────────────────────────────────────────────────────────────────────
 # 2️⃣  Runtime stage – tiny Debian image with the tools & toolchains
