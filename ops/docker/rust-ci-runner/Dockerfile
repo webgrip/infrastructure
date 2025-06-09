@@ -1,27 +1,14 @@
-# syntax=docker/dockerfile:1.7
 ARG RUST_VERSION=1.87.0
-FROM --platform=$BUILDPLATFORM rust:${RUST_VERSION}-slim-bullseye AS base
 
-# ----------------------------------------------------------------------
-# 1. system deps
-# ----------------------------------------------------------------------
+FROM --platform=$BUILDPLATFORM rust:${RUST_VERSION}-slim-bullseye AS build
+
 RUN apt-get update -qq \
  && apt-get install -y --no-install-recommends \
       curl ca-certificates pkg-config libssl-dev \
  && rm -rf /var/lib/apt/lists/*
 
-ENV PATH="${PATH}:${HOME}/.cargo/bin"
-
-# ----------------------------------------------------------------------
-# 2. install cargo-binstall once
-# ----------------------------------------------------------------------
 RUN cargo install --locked cargo-binstall
 
-# ----------------------------------------------------------------------
-# 3. grab all the Rust CLI tools
-#    anything that *doesn't* ship binaries still falls back to cargo install,
-#    but that’s only a handful of tiny crates so the build stays fast.
-# ----------------------------------------------------------------------
 RUN set -eux; \
     cargo binstall --no-confirm \
       cargo-audit \
@@ -33,15 +20,22 @@ RUN set -eux; \
       cargo-nextest \
       cargo-tarpaulin
 
-# ----------------------------------------------------------------------
-# 4. optional nightly + components
-# ----------------------------------------------------------------------
 RUN rustup toolchain install nightly \
- && rustup component add rustfmt clippy --toolchain nightly
+ && rustup component add --toolchain nightly rustfmt clippy
 
-# ----------------------------------------------------------------------
-# 6. final stage (tiny runtime image with the tools in /usr/local/bin)
-# ----------------------------------------------------------------------
+RUN rustup default ${RUST_VERSION}
+
+
 FROM debian:bullseye-slim AS final
-COPY --from=base /usr/local/cargo/bin/ /usr/local/bin/
+
+RUN apt-get update -qq \
+ && apt-get install -y --no-install-recommends \
+      ca-certificates libssl1.1 libgcc-s1 libzstd1 \
+ && rm -rf /var/lib/apt/lists/*
+
+COPY --from=build /usr/local/cargo/  /usr/local/cargo/
+COPY --from=build /usr/local/rustup/ /usr/local/rustup/
+
+ENV PATH="/usr/local/cargo/bin:${PATH}"
+
 ENTRYPOINT ["bash"]
