@@ -29,27 +29,12 @@ RUN set -eux; \
       cargo-outdated \
       cargo-udeps \
       cargo-msrv \
-      cargo-sort
+      cargo-sort \
+      cargo-nextest \
+      cargo-tarpaulin
 
 # ----------------------------------------------------------------------
-# 4. grab nextest + tarpaulin from GitHub Releases
-#    (cargo-binstall could do this too; a manual curl keeps the image minimal)
-# ----------------------------------------------------------------------
-ARG TARGETARCH
-RUN set -eux; \
-    case "$TARGETARCH" in \
-        amd64)   PLATFORM="x86_64-unknown-linux-gnu" ;; \
-        arm64)   PLATFORM="aarch64-unknown-linux-gnu" ;; \
-        *)       echo "unsupported arch $TARGETARCH" && exit 1 ;; \
-    esac; \
-    curl -LsSf "https://get.nexte.st/latest/${PLATFORM}" \
-      | tar xz -C "${HOME}/.cargo/bin"; \
-    curl -LsSf \
-      "https://github.com/xd009642/tarpaulin/releases/latest/download/cargo-tarpaulin-${PLATFORM}.tar.gz" \
-      | tar xz --strip-components=1 -C "${HOME}/.cargo/bin";
-
-# ----------------------------------------------------------------------
-# 5. optional nightly + components
+# 4. optional nightly + components
 # ----------------------------------------------------------------------
 RUN rustup toolchain install nightly -y \
  && rustup component add rustfmt clippy --toolchain nightly
