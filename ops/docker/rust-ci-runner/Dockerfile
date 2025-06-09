@@ -36,12 +36,12 @@ RUN set -eux; \
 # ----------------------------------------------------------------------
 # 4. optional nightly + components
 # ----------------------------------------------------------------------
-RUN rustup toolchain install nightly -y \
+RUN rustup toolchain install nightly \
  && rustup component add rustfmt clippy --toolchain nightly
 
 # ----------------------------------------------------------------------
 # 6. final stage (tiny runtime image with the tools in /usr/local/bin)
 # ----------------------------------------------------------------------
 FROM debian:bullseye-slim AS final
-COPY --from=base /root/.cargo/bin/ /usr/local/bin/
+COPY --from=base /usr/local/cargo/bin/ /usr/local/bin/
 ENTRYPOINT ["bash"]
