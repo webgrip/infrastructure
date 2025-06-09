@@ -24,12 +24,12 @@ RUN cargo install --locked cargo-binstall
 # ----------------------------------------------------------------------
 RUN set -eux; \
     cargo binstall --no-confirm \
-      cargo-audit@latest \
-      cargo-deny@latest \
-      cargo-outdated@latest \
-      cargo-udeps@latest \
-      cargo-msrv@latest \
-      cargo-sort@latest
+      cargo-audit \
+      cargo-deny \
+      cargo-outdated \
+      cargo-udeps \
+      cargo-msrv \
+      cargo-sort
 
 # ----------------------------------------------------------------------
 # 4. grab nextest + tarpaulin from GitHub Releases
