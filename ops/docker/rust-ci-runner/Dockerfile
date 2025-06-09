@@ -38,6 +38,4 @@ COPY --from=build /usr/local/rustup/ /usr/local/rustup/
 
 ENV PATH="/usr/local/cargo/bin:${PATH}"
 
-RUN rustup default stable
-
 ENTRYPOINT ["bash"]
