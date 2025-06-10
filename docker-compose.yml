@@ -17,3 +17,7 @@ services:
     build:
       context: ops/docker/rust-ci-runner
       dockerfile: Dockerfile
+  rust-releaser:
+    build:
+      context: ops/docker/rust-releaser
+      dockerfile: Dockerfile
