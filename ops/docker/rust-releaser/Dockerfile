@@ -6,7 +6,7 @@ FROM node:22-bookworm-slim
 ENV DEBIAN_FRONTEND=noninteractive
 
 ###############################################################################
-# OS-level build tooling + Docker CLI + QEMU for cross-compilation
+# OS-level build tooling, Docker CLI and QEMU for cross-compilation
 ###############################################################################
 RUN apt-get update -yq && \
     apt-get install -y --no-install-recommends \
@@ -16,8 +16,8 @@ RUN apt-get update -yq && \
         ca-certificates \
         curl \
         git \
-        docker.io \               # for `cross` — uses host Docker daemon
-        qemu-user-static \        # foreign-arch emulation inside target images
+        docker.io \
+        qemu-user-static \
         binfmt-support \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
