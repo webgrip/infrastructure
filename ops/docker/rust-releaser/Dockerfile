@@ -3,13 +3,10 @@
 ###############################################################################
 FROM node:22-bookworm-slim
 
-###############################################################################
-# Non-interactive APT
-###############################################################################
 ENV DEBIAN_FRONTEND=noninteractive
 
 ###############################################################################
-# Core build tooling + Docker CLI + QEMU (for cross-compilation images)
+# Core build tooling, Docker CLI, QEMU (for cross-compilation)
 ###############################################################################
 RUN apt-get update -yq && \
     apt-get install -y --no-install-recommends \
@@ -25,28 +22,16 @@ RUN apt-get update -yq && \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ###############################################################################
-# Tell every subsequent layer that “home” is /github/home (same as GHA runner)
+# Rust toolchain (stable, minimal)  ➜  lives in /usr/local/cargo
 ###############################################################################
-ENV HOME=/github/home
-RUN mkdir -p "$HOME"
+ENV RUSTUP_HOME=/usr/local/rustup
+ENV CARGO_HOME=/usr/local/cargo
+ENV PATH=/usr/local/cargo/bin:$PATH
 
-###############################################################################
-# Rust toolchain (stable, minimal profile) — installs into $HOME/.cargo
-###############################################################################
 RUN curl -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain stable
 
 ###############################################################################
-# Add Cargo to PATH for all shells
-###############################################################################
-ENV PATH="$HOME/.cargo/bin:$PATH"
-
-###############################################################################
 # Rust helpers
-###############################################################################
-#  - cargo-binstall      -> lightning-fast pre-built binaries
-#  - cross               -> painless cross-compiles via Docker images
-#  - wasm-bindgen-cli    -> produce browser-friendly .wasm
-#  - cargo-release & git-cliff (already used in your repo)
 ###############################################################################
 RUN cargo install --locked cargo-binstall && \
     cargo binstall --no-confirm cargo-release git-cliff && \
