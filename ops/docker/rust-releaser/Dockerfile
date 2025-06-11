@@ -6,7 +6,7 @@ FROM node:22-bookworm-slim
 ENV DEBIAN_FRONTEND=noninteractive
 
 ###############################################################################
-# OS-level build tooling
+# OS-level build tooling + Docker CLI + QEMU for cross-compilation
 ###############################################################################
 RUN apt-get update -yq && \
     apt-get install -y --no-install-recommends \
@@ -16,14 +16,13 @@ RUN apt-get update -yq && \
         ca-certificates \
         curl \
         git \
+        docker.io \               # for `cross` — uses host Docker daemon
+        qemu-user-static \        # foreign-arch emulation inside target images
+        binfmt-support \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 ###############################################################################
-# Rust toolchain (stable, minimal profile) + cargo-binstall
-#
-# GitHub Actions sets HOME to /github/home inside container jobs.  Installing
-# toolchains under a deterministic prefix keeps them visible no matter what
-# HOME points to.
+# Rust toolchain (stable, minimal profile)
 ###############################################################################
 ENV RUSTUP_HOME=/usr/local/rustup \
     CARGO_HOME=/usr/local/cargo \
@@ -31,15 +30,23 @@ ENV RUSTUP_HOME=/usr/local/rustup \
 
 RUN set -eux; \
     mkdir -p "$RUSTUP_HOME" "$CARGO_HOME"; \
-    curl -sSf https://sh.rustup.rs \
-      | sh -s -- -y --profile minimal --default-toolchain stable
-
-# Fast installer for pre-built Rust binaries
-RUN cargo install --locked cargo-binstall && \
-    cargo binstall --no-confirm cargo-release git-cliff
+    curl -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain stable
 
 ###############################################################################
-# semantic-release core + every plugin used in the action
+# Rust helpers
+###############################################################################
+#  - cargo-binstall      -> lightning-fast pre-built binaries
+#  - cross               -> painless cross-compiles via Docker images
+#  - wasm-bindgen-cli    -> produce browser-friendly .wasm
+#  - cargo-release & git-cliff (already used in your repo)
+###############################################################################
+RUN cargo install --locked cargo-binstall && \
+    cargo binstall --no-confirm cargo-release git-cliff && \
+    cargo install --locked cross wasm-bindgen-cli && \
+    rustup target add wasm32-unknown-unknown
+
+###############################################################################
+# semantic-release core + plugins
 ###############################################################################
 RUN npm install -g \
       semantic-release \
