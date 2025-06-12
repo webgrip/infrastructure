@@ -57,6 +57,7 @@ RUN npm install -g \
 # Default entry
 ###############################################################################
 
-RUN ln -s /usr/local/cargo/bin/{cargo,rustc,rustup} /usr/local/bin/
+RUN mkdir -p /root/.cargo/bin && \
+    ln -sf /usr/local/cargo/bin/{cargo,rustc,rustup} /root/.cargo/bin/
 
 ENTRYPOINT ["bash"]
