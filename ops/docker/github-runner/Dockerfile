@@ -1,4 +1,4 @@
-FROM ghcr.io/actions/actions-runner:2.324.0 AS runner
+FROM ghcr.io/actions/actions-runner:2.328.0 AS runner
 
 LABEL maintainer="Ryan Grippeling <ryan@webgrip.nl>"
 

@@ -18,6 +18,8 @@ services:
       context: ops/docker/rust-ci-runner
       dockerfile: Dockerfile
   rust-releaser:
+    image: aaaaaa/rust-releaser:latest
+    container_name: rust-releaser
     build:
       context: ops/docker/rust-releaser
       dockerfile: Dockerfile
