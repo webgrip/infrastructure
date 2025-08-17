@@ -29,7 +29,7 @@ jobs:
       fail-fast: false
       matrix:
         include: ${{ fromJson(needs.determine-changed-directories.outputs.matrix) }}
-    uses: webgrip/workflows/.github/workflows/docker-build-and-push.yml@main
+    uses: webgrip/workflows/.github/workflows/docker-build-and-push.yml@ubuntu-latest
     with:
       docker-context: ${{ matrix.path }}
       docker-file: Dockerfile
