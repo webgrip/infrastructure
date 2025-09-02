@@ -26,6 +26,7 @@ nav:
     - Building Locally: operations/building-locally.md
     - Contributing Images: operations/contributing-images.md
     - Maintenance: operations/maintenance.md
+    - Maintaining TechDocs: operations/maintaining-techdocs.md
   - ADRs: adrs/index.md
 
 plugins:

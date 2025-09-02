@@ -1,0 +1,2155 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="CI/CD Infrastructure and Docker Images for WebGrip">
+      
+      
+      
+        <link rel="canonical" href="https://webgrip.github.io/infrastructure/cicd/docker-registry/">
+      
+      
+        <link rel="prev" href="../automated-building/">
+      
+      
+        <link rel="next" href="../workflow-details/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
+    
+    
+      
+        <title>Docker Registry - WebGrip Infrastructure</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#docker-registry" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="WebGrip Infrastructure" class="md-header__button md-logo" aria-label="WebGrip Infrastructure" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            WebGrip Infrastructure
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Docker Registry
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="blue"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../overview/purpose/" class="md-tabs__link">
+          
+  
+  
+  Overview
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../docker-images/rust-ci-runner/" class="md-tabs__link">
+          
+  
+  
+  Docker Images
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../automated-building/" class="md-tabs__link">
+          
+  
+  
+  CI/CD Pipeline
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../testing/playwright-setup/" class="md-tabs__link">
+          
+  
+  
+  Testing
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../operations/building-locally/" class="md-tabs__link">
+          
+  
+  
+  Operations
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../adrs/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  ADRs
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="WebGrip Infrastructure" class="md-nav__button md-logo" aria-label="WebGrip Infrastructure" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    WebGrip Infrastructure
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Overview
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/purpose/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Purpose & Scope
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Quick Start
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Docker Images
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Docker Images
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/rust-ci-runner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Rust CI Runner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/github-runner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    GitHub Actions Runner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/helm-deploy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Helm Deploy
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/playwright-runner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Playwright Runner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/act-runner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ACT Runner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/rust-releaser/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Rust Releaser
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    CI/CD Pipeline
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            CI/CD Pipeline
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../automated-building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Automated Building
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Docker Registry
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Docker Registry
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#registry-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Registry Configuration
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Registry Configuration">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#docker-hub-organization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docker Hub Organization
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#image-repositories" class="md-nav__link">
+    <span class="md-ellipsis">
+      Image Repositories
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tagging-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tagging Strategy
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tagging Strategy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#standard-tags" class="md-nav__link">
+    <span class="md-ellipsis">
+      Standard Tags
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#semantic-versioning-future" class="md-nav__link">
+    <span class="md-ellipsis">
+      Semantic Versioning (Future)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tag-lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tag Lifecycle
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#authentication-and-access" class="md-nav__link">
+    <span class="md-ellipsis">
+      Authentication and Access
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Authentication and Access">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#registry-credentials" class="md-nav__link">
+    <span class="md-ellipsis">
+      Registry Credentials
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#access-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      Access Patterns
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#permission-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      Permission Model
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#image-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Image Management
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Image Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#build-and-push-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      Build and Push Process
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#image-size-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Image Size Optimization
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Image Size Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multi-stage-builds" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-stage Builds
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#layer-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Layer Optimization
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#base-image-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Base Image Selection
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#registry-storage-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Registry Storage Management
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Registry Storage Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automated-cleanup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Automated Cleanup
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#storage-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      Storage Monitoring
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-and-compliance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security and Compliance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security and Compliance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#image-security-scanning" class="md-nav__link">
+    <span class="md-ellipsis">
+      Image Security Scanning
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#vulnerability-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Vulnerability Management
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#supply-chain-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      Supply Chain Security
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#access-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      Access Security
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-and-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance and Optimization
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance and Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pull-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Pull Performance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Pull Performance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#layer-caching-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Layer Caching Strategy
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#registry-proximity" class="md-nav__link">
+    <span class="md-ellipsis">
+      Registry Proximity
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Build Performance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Build Performance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#parallel-builds" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parallel Builds
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-cache-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Build Cache Optimization
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#monitoring-and-alerting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Monitoring and Alerting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Monitoring and Alerting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#registry-health-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      Registry Health Monitoring
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alerting-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Alerting Configuration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#backup-and-disaster-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      Backup and Disaster Recovery
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Backup and Disaster Recovery">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#backup-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Backup Strategy
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recovery-procedures" class="md-nav__link">
+    <span class="md-ellipsis">
+      Recovery Procedures
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Recovery Procedures">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quick-recovery-mirror-registry" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Recovery (Mirror Registry)
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#source-based-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      Source-based Recovery
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#local-backup-recovery" class="md-nav__link">
+    <span class="md-ellipsis">
+      Local Backup Recovery
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#future-improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Future Improvements
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Future Improvements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#planned-enhancements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Planned Enhancements
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#migration-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Migration Considerations
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Issues
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related Documentation
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../workflow-details/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Workflow Details
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Testing
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Testing
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/playwright-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Playwright Setup
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/test-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Test Execution
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Operations
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Operations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operations/building-locally/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Building Locally
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operations/contributing-images/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing Images
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operations/maintenance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Maintenance
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operations/maintaining-techdocs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Maintaining TechDocs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ADRs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="docker-registry">Docker Registry<a class="headerlink" href="#docker-registry" title="Permanent link">&para;</a></h1>
+<p>Our Docker Registry strategy and configuration for storing and distributing infrastructure container images.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>WebGrip uses <strong>Docker Hub</strong> as the primary registry for hosting our infrastructure container images, providing:</p>
+<ul>
+<li>✅ <strong>Public accessibility</strong> for all team members and CI/CD systems</li>
+<li>✅ <strong>Automated pushing</strong> from GitHub Actions workflows  </li>
+<li>✅ <strong>Version management</strong> with semantic tagging strategies</li>
+<li>✅ <strong>Security scanning</strong> and vulnerability management</li>
+<li>✅ <strong>Global CDN</strong> for fast image pulls worldwide</li>
+</ul>
+<h2 id="registry-configuration">Registry Configuration<a class="headerlink" href="#registry-configuration" title="Permanent link">&para;</a></h2>
+<h3 id="docker-hub-organization">Docker Hub Organization<a class="headerlink" href="#docker-hub-organization" title="Permanent link">&para;</a></h3>
+<p><strong>Organization</strong>: <a href="https://hub.docker.com/u/webgrip"><code>webgrip</code></a><br />
+<strong>Visibility</strong>: Public repositories<br />
+<strong>Access Control</strong>: Organization-managed credentials</p>
+<h3 id="image-repositories">Image Repositories<a class="headerlink" href="#image-repositories" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Repository</th>
+<th>Purpose</th>
+<th>Latest Size</th>
+<th>Tags</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://hub.docker.com/r/webgrip/rust-ci-runner"><code>webgrip/rust-ci-runner</code></a></td>
+<td>Rust development environment</td>
+<td>~800MB</td>
+<td><code>latest</code>, commit SHAs</td>
+</tr>
+<tr>
+<td><a href="https://hub.docker.com/r/webgrip/github-runner"><code>webgrip/github-runner</code></a></td>
+<td>Self-hosted GitHub Actions runner</td>
+<td>~500MB</td>
+<td><code>latest</code>, commit SHAs</td>
+</tr>
+<tr>
+<td><a href="https://hub.docker.com/r/webgrip/helm-deploy"><code>webgrip/helm-deploy</code></a></td>
+<td>Kubernetes deployment tools</td>
+<td>~150MB</td>
+<td><code>latest</code>, commit SHAs</td>
+</tr>
+<tr>
+<td><a href="https://hub.docker.com/r/webgrip/playwright-runner"><code>webgrip/playwright-runner</code></a></td>
+<td>E2E testing environment</td>
+<td>~2GB</td>
+<td><code>latest</code>, commit SHAs</td>
+</tr>
+<tr>
+<td><a href="https://hub.docker.com/r/webgrip/act-runner"><code>webgrip/act-runner</code></a></td>
+<td>Local GitHub Actions testing</td>
+<td>~100MB</td>
+<td><code>latest</code>, commit SHAs</td>
+</tr>
+<tr>
+<td><a href="https://hub.docker.com/r/webgrip/rust-releaser"><code>webgrip/rust-releaser</code></a></td>
+<td>Release automation</td>
+<td>~2GB</td>
+<td><code>latest</code>, commit SHAs</td>
+</tr>
+</tbody>
+</table>
+<h2 id="tagging-strategy">Tagging Strategy<a class="headerlink" href="#tagging-strategy" title="Permanent link">&para;</a></h2>
+<h3 id="standard-tags">Standard Tags<a class="headerlink" href="#standard-tags" title="Permanent link">&para;</a></h3>
+<p>Every successful build produces consistent tags:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Latest stable version (moves with each build)</span>
+webgrip/rust-ci-runner:latest
+
+<span class="c1"># Specific commit version (immutable)</span>
+webgrip/rust-ci-runner:a1b2c3d4567890abcdef1234567890abcdef1234
+</code></pre></div>
+<h3 id="semantic-versioning-future">Semantic Versioning (Future)<a class="headerlink" href="#semantic-versioning-future" title="Permanent link">&para;</a></h3>
+<p>For stable releases, we plan to implement semantic versioning:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Major.Minor.Patch versions</span>
+webgrip/rust-ci-runner:1.0.0
+webgrip/rust-ci-runner:1.0.1
+webgrip/rust-ci-runner:1.1.0
+
+<span class="c1"># Pre-release versions</span>
+webgrip/rust-ci-runner:2.0.0-beta.1
+webgrip/rust-ci-runner:2.0.0-rc.1
+</code></pre></div>
+<h3 id="tag-lifecycle">Tag Lifecycle<a class="headerlink" href="#tag-lifecycle" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>flowchart TD
+    COMMIT[Git Commit] --&gt; BUILD[Automated Build]
+    BUILD --&gt; SHA_TAG[Create SHA Tag]
+    BUILD --&gt; LATEST_TAG[Update Latest Tag]
+
+    SHA_TAG --&gt; IMMUTABLE[Immutable Reference]
+    LATEST_TAG --&gt; MOVING[Moving Reference]
+
+    IMMUTABLE --&gt; LONG_TERM[Long-term Storage]
+    MOVING --&gt; CURRENT[Current Version]
+
+    subgraph "Tag Retention"
+        LONG_TERM --&gt; CLEANUP[Cleanup Old SHAs]
+        CURRENT --&gt; ALWAYS[Always Available]
+    end</code></pre>
+<h2 id="authentication-and-access">Authentication and Access<a class="headerlink" href="#authentication-and-access" title="Permanent link">&para;</a></h2>
+<h3 id="registry-credentials">Registry Credentials<a class="headerlink" href="#registry-credentials" title="Permanent link">&para;</a></h3>
+<p>Access to push images is controlled via GitHub organization secrets:</p>
+<table>
+<thead>
+<tr>
+<th>Secret</th>
+<th>Purpose</th>
+<th>Access Level</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DOCKER_USERNAME</code></td>
+<td>Docker Hub username</td>
+<td>Organization-wide</td>
+</tr>
+<tr>
+<td><code>DOCKER_TOKEN</code></td>
+<td>Docker Hub access token</td>
+<td>Organization-wide</td>
+</tr>
+</tbody>
+</table>
+<h3 id="access-patterns">Access Patterns<a class="headerlink" href="#access-patterns" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># CI/CD Push Access</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Login to Docker Hub</span>
+<span class="w">  </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker/login-action@v2</span>
+<span class="w">  </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">username</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ secrets.DOCKER_USERNAME }}</span>
+<span class="w">    </span><span class="nt">password</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ secrets.DOCKER_TOKEN }}</span>
+
+<span class="c1"># Public Pull Access (no authentication required)</span>
+<span class="l l-Scalar l-Scalar-Plain">docker pull webgrip/rust-ci-runner:latest</span>
+</code></pre></div>
+<h3 id="permission-model">Permission Model<a class="headerlink" href="#permission-model" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>flowchart LR
+    subgraph "GitHub Organization"
+        ORG_SECRETS[Organization Secrets]
+        WORKFLOWS[GitHub Actions Workflows]
+    end
+
+    subgraph "Docker Hub"
+        WEBGRIP_ORG[webgrip Organization]
+        REPOSITORIES[Image Repositories]
+    end
+
+    subgraph "Users"
+        DEVELOPERS[Developers - Pull Only]
+        CI_CD[CI/CD - Push Access]
+        PUBLIC[Public - Pull Only]
+    end
+
+    ORG_SECRETS --&gt; WORKFLOWS
+    WORKFLOWS --&gt; CI_CD
+    CI_CD --&gt; WEBGRIP_ORG
+    WEBGRIP_ORG --&gt; REPOSITORIES
+
+    DEVELOPERS --&gt; REPOSITORIES
+    PUBLIC --&gt; REPOSITORIES</code></pre>
+<h2 id="image-management">Image Management<a class="headerlink" href="#image-management" title="Permanent link">&para;</a></h2>
+<h3 id="build-and-push-process">Build and Push Process<a class="headerlink" href="#build-and-push-process" title="Permanent link">&para;</a></h3>
+<p>The automated pipeline follows this sequence:</p>
+<ol>
+<li><strong>Change Detection</strong>: Identify modified Docker images</li>
+<li><strong>Parallel Building</strong>: Build changed images simultaneously  </li>
+<li><strong>Security Scanning</strong>: Scan for vulnerabilities</li>
+<li><strong>Registry Push</strong>: Upload with both tags</li>
+<li><strong>Cleanup</strong>: Remove temporary build artifacts</li>
+</ol>
+<pre class="mermaid"><code>sequenceDiagram
+    participant Dev as Developer
+    participant GH as GitHub
+    participant Actions as GitHub Actions
+    participant Registry as Docker Hub
+
+    Dev-&gt;&gt;GH: Push Dockerfile changes
+    GH-&gt;&gt;Actions: Trigger workflow
+    Actions-&gt;&gt;Actions: Build image
+    Actions-&gt;&gt;Actions: Security scan
+    Actions-&gt;&gt;Registry: docker login
+    Actions-&gt;&gt;Registry: docker push image:latest
+    Actions-&gt;&gt;Registry: docker push image:sha
+    Registry-&gt;&gt;Registry: Update repository</code></pre>
+<h3 id="image-size-optimization">Image Size Optimization<a class="headerlink" href="#image-size-optimization" title="Permanent link">&para;</a></h3>
+<p>We implement several strategies to keep images small:</p>
+<h4 id="multi-stage-builds">Multi-stage Builds<a class="headerlink" href="#multi-stage-builds" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c"># Example from rust-ci-runner</span>
+<span class="k">FROM</span><span class="w"> </span><span class="s">rust:1.87.0-slim-bookworm</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="s">build</span>
+<span class="c"># ... build tools and dependencies</span>
+
+<span class="k">FROM</span><span class="w"> </span><span class="s">debian:bookworm-slim</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="s">final</span>
+<span class="c"># ... copy only necessary artifacts</span>
+</code></pre></div>
+<h4 id="layer-optimization">Layer Optimization<a class="headerlink" href="#layer-optimization" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c"># Combine RUN commands to reduce layers</span>
+<span class="k">RUN</span><span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span>-qq<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--no-install-recommends<span class="w"> </span><span class="se">\</span>
+<span class="w">      </span>ca-certificates<span class="w"> </span>build-essential<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>rm<span class="w"> </span>-rf<span class="w"> </span>/var/lib/apt/lists/*
+</code></pre></div>
+<h4 id="base-image-selection">Base Image Selection<a class="headerlink" href="#base-image-selection" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Alpine Linux</strong>: For minimal footprint (<code>act-runner</code>, <code>helm-deploy</code>)</li>
+<li><strong>Debian Slim</strong>: For compatibility (<code>rust-ci-runner</code>)</li>
+<li><strong>Official Images</strong>: For feature completeness (<code>playwright-runner</code>)</li>
+</ul>
+<h3 id="registry-storage-management">Registry Storage Management<a class="headerlink" href="#registry-storage-management" title="Permanent link">&para;</a></h3>
+<h4 id="automated-cleanup">Automated Cleanup<a class="headerlink" href="#automated-cleanup" title="Permanent link">&para;</a></h4>
+<p><strong>Current State</strong>: Manual cleanup of old SHA tags<br />
+<strong>Planned</strong>: Automated retention policies</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Manual cleanup script (planned automation)</span>
+<span class="c1">#!/bin/bash</span>
+<span class="c1"># Keep last 50 SHA tags, remove older ones</span>
+<span class="nv">docker_tags</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;https://hub.docker.com/v2/repositories/webgrip/rust-ci-runner/tags/&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<span class="w">             </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">&#39;.results[].name&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<span class="w">             </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;^[a-f0-9]{40}$&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<span class="w">             </span>tail<span class="w"> </span>-n<span class="w"> </span>+51<span class="k">)</span>
+
+<span class="k">for</span><span class="w"> </span>tag<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="nv">$docker_tags</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">  </span><span class="c1"># Delete old SHA tags</span>
+<span class="w">  </span>curl<span class="w"> </span>-X<span class="w"> </span>DELETE<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$DOCKER_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="s2">&quot;https://hub.docker.com/v2/repositories/webgrip/rust-ci-runner/tags/</span><span class="nv">$tag</span><span class="s2">/&quot;</span>
+<span class="k">done</span>
+</code></pre></div>
+<h4 id="storage-monitoring">Storage Monitoring<a class="headerlink" href="#storage-monitoring" title="Permanent link">&para;</a></h4>
+<p>Track registry usage metrics:</p>
+<ul>
+<li><strong>Total storage</strong>: Sum of all image layers across repositories</li>
+<li><strong>Bandwidth usage</strong>: Download statistics for optimization</li>
+<li><strong>Tag proliferation</strong>: Number of tags per repository</li>
+</ul>
+<h2 id="security-and-compliance">Security and Compliance<a class="headerlink" href="#security-and-compliance" title="Permanent link">&para;</a></h2>
+<h3 id="image-security-scanning">Image Security Scanning<a class="headerlink" href="#image-security-scanning" title="Permanent link">&para;</a></h3>
+<p>Images are scanned for vulnerabilities during the build process:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Security scanning in CI pipeline</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Scan image for vulnerabilities</span>
+<span class="w">  </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker/scout-action@v1</span>
+<span class="w">  </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">command</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cves</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webgrip/rust-ci-runner:latest</span>
+</code></pre></div>
+<h3 id="vulnerability-management">Vulnerability Management<a class="headerlink" href="#vulnerability-management" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>flowchart TD
+    BUILD[Image Build] --&gt; SCAN[Security Scan]
+    SCAN --&gt; CRITICAL{Critical Vulns?}
+    CRITICAL --&gt;|Yes| BLOCK[Block Release]
+    CRITICAL --&gt;|No| HIGH{High Vulns?}
+    HIGH --&gt;|Yes| WARN[Warning + Release]
+    HIGH --&gt;|No| PASS[Pass + Release]
+
+    BLOCK --&gt; FIX[Fix Vulnerabilities]
+    FIX --&gt; BUILD
+
+    WARN --&gt; TRACK[Track for Next Release]
+    PASS --&gt; RELEASE[Release to Registry]</code></pre>
+<h3 id="supply-chain-security">Supply Chain Security<a class="headerlink" href="#supply-chain-security" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Base Image Verification</strong>: Use official, signed base images</li>
+<li><strong>Dependency Scanning</strong>: Scan package dependencies for vulnerabilities</li>
+<li><strong>SBOM Generation</strong>: Generate Software Bill of Materials</li>
+<li><strong>Image Signing</strong>: Plan to implement image signing with cosign</li>
+</ol>
+<h3 id="access-security">Access Security<a class="headerlink" href="#access-security" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>Token Rotation</strong>: Regular rotation of Docker Hub access tokens</li>
+<li><strong>Least Privilege</strong>: Minimal permissions for CI/CD access</li>
+<li><strong>Audit Logging</strong>: Track all registry access and modifications</li>
+</ul>
+<h2 id="performance-and-optimization">Performance and Optimization<a class="headerlink" href="#performance-and-optimization" title="Permanent link">&para;</a></h2>
+<h3 id="pull-performance">Pull Performance<a class="headerlink" href="#pull-performance" title="Permanent link">&para;</a></h3>
+<p>Optimize image pull times through:</p>
+<h4 id="layer-caching-strategy">Layer Caching Strategy<a class="headerlink" href="#layer-caching-strategy" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c"># Order layers by change frequency (least to most)</span>
+<span class="k">COPY</span><span class="w"> </span>requirements.txt<span class="w"> </span>.
+<span class="k">RUN</span><span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>-r<span class="w"> </span>requirements.txt<span class="w">  </span>#<span class="w"> </span>Changes<span class="w"> </span>infrequently
+
+<span class="k">COPY</span><span class="w"> </span>.<span class="w"> </span>.<span class="w">                             </span>#<span class="w"> </span>Changes<span class="w"> </span>frequently
+<span class="k">RUN</span><span class="w"> </span>python<span class="w"> </span>setup.py<span class="w"> </span>install<span class="w">         </span>#<span class="w"> </span>Changes<span class="w"> </span>frequently
+</code></pre></div>
+<h4 id="registry-proximity">Registry Proximity<a class="headerlink" href="#registry-proximity" title="Permanent link">&para;</a></h4>
+<ul>
+<li><strong>Global CDN</strong>: Docker Hub provides global edge locations</li>
+<li><strong>Regional Caching</strong>: Consider additional registry mirrors for high-usage regions</li>
+</ul>
+<h3 id="build-performance">Build Performance<a class="headerlink" href="#build-performance" title="Permanent link">&para;</a></h3>
+<h4 id="parallel-builds">Parallel Builds<a class="headerlink" href="#parallel-builds" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="nt">strategy</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">matrix</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">image</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">rust-ci-runner</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">playwright-runner</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">helm-deploy</span><span class="p p-Indicator">]</span>
+
+<span class="nt">jobs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">build</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Build ${{ matrix.image }}</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker build ops/docker/${{ matrix.image }}</span>
+</code></pre></div>
+<h4 id="build-cache-optimization">Build Cache Optimization<a class="headerlink" href="#build-cache-optimization" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Setup Docker Buildx</span>
+<span class="w">  </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker/setup-buildx-action@v2</span>
+<span class="w">  </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">driver-opts</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">      </span><span class="no">image=moby/buildkit:master</span>
+<span class="w">      </span><span class="no">network=host</span>
+
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Build with cache</span>
+<span class="w">  </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker/build-push-action@v4</span>
+<span class="w">  </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">cache-from</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">type=gha</span>
+<span class="w">    </span><span class="nt">cache-to</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">type=gha,mode=max</span>
+</code></pre></div>
+<h2 id="monitoring-and-alerting">Monitoring and Alerting<a class="headerlink" href="#monitoring-and-alerting" title="Permanent link">&para;</a></h2>
+<h3 id="registry-health-monitoring">Registry Health Monitoring<a class="headerlink" href="#registry-health-monitoring" title="Permanent link">&para;</a></h3>
+<p>Track key metrics for registry health:</p>
+<div class="highlight"><pre><span></span><code><span class="c1"># Example monitoring checks</span>
+<span class="nt">registry_metrics</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Image</span><span class="nv"> </span><span class="s">pull</span><span class="nv"> </span><span class="s">success</span><span class="nv"> </span><span class="s">rate&quot;</span>
+<span class="w">    </span><span class="nt">threshold</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&gt;</span><span class="nv"> </span><span class="s">99%&quot;</span>
+
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Average</span><span class="nv"> </span><span class="s">pull</span><span class="nv"> </span><span class="s">time&quot;</span>
+<span class="w">    </span><span class="nt">threshold</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;</span><span class="nv"> </span><span class="s">30s&quot;</span>
+
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Storage</span><span class="nv"> </span><span class="s">usage</span><span class="nv"> </span><span class="s">growth&quot;</span>
+<span class="w">    </span><span class="nt">threshold</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&lt;</span><span class="nv"> </span><span class="s">10%</span><span class="nv"> </span><span class="s">per</span><span class="nv"> </span><span class="s">month&quot;</span>
+
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;Security</span><span class="nv"> </span><span class="s">scan</span><span class="nv"> </span><span class="s">pass</span><span class="nv"> </span><span class="s">rate&quot;</span>
+<span class="w">    </span><span class="nt">threshold</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;&gt;</span><span class="nv"> </span><span class="s">95%&quot;</span>
+</code></pre></div>
+<h3 id="alerting-configuration">Alerting Configuration<a class="headerlink" href="#alerting-configuration" title="Permanent link">&para;</a></h3>
+<p><strong>Critical Alerts</strong>:
+- Registry authentication failures
+- Critical security vulnerabilities detected
+- Registry storage quota exceeded</p>
+<p><strong>Warning Alerts</strong>:
+- Slow image pull times
+- High vulnerability counts
+- Unusual download patterns</p>
+<h2 id="backup-and-disaster-recovery">Backup and Disaster Recovery<a class="headerlink" href="#backup-and-disaster-recovery" title="Permanent link">&para;</a></h2>
+<h3 id="backup-strategy">Backup Strategy<a class="headerlink" href="#backup-strategy" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>flowchart TD
+    REGISTRY[Docker Hub Registry] --&gt; MIRROR[Mirror Registry]
+    REGISTRY --&gt; LOCAL[Local Backup]
+    REGISTRY --&gt; REBUILD[Source-based Rebuild]
+
+    subgraph "Recovery Options"
+        MIRROR --&gt; RESTORE1[Quick Restore]
+        LOCAL --&gt; RESTORE2[Offline Restore]
+        REBUILD --&gt; RESTORE3[Clean Rebuild]
+    end</code></pre>
+<h3 id="recovery-procedures">Recovery Procedures<a class="headerlink" href="#recovery-procedures" title="Permanent link">&para;</a></h3>
+<h4 id="quick-recovery-mirror-registry">Quick Recovery (Mirror Registry)<a class="headerlink" href="#quick-recovery-mirror-registry" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># Pull from backup registry</span>
+docker<span class="w"> </span>pull<span class="w"> </span>backup-registry.com/webgrip/rust-ci-runner:latest
+docker<span class="w"> </span>tag<span class="w"> </span>backup-registry.com/webgrip/rust-ci-runner:latest<span class="w"> </span>webgrip/rust-ci-runner:latest
+docker<span class="w"> </span>push<span class="w"> </span>webgrip/rust-ci-runner:latest
+</code></pre></div>
+<h4 id="source-based-recovery">Source-based Recovery<a class="headerlink" href="#source-based-recovery" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># Rebuild from source</span>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/webgrip/infrastructure
+<span class="nb">cd</span><span class="w"> </span>infrastructure
+make<span class="w"> </span>rebuild-all-images
+</code></pre></div>
+<h4 id="local-backup-recovery">Local Backup Recovery<a class="headerlink" href="#local-backup-recovery" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="c1"># Restore from local backup</span>
+docker<span class="w"> </span>load<span class="w"> </span>&lt;<span class="w"> </span>backups/webgrip-rust-ci-runner-latest.tar
+docker<span class="w"> </span>push<span class="w"> </span>webgrip/rust-ci-runner:latest
+</code></pre></div>
+<h2 id="future-improvements">Future Improvements<a class="headerlink" href="#future-improvements" title="Permanent link">&para;</a></h2>
+<h3 id="planned-enhancements">Planned Enhancements<a class="headerlink" href="#planned-enhancements" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Multi-architecture Builds</strong>: Support ARM64 and other architectures</li>
+<li><strong>Private Registry</strong>: Consider private registry for sensitive images</li>
+<li><strong>Image Signing</strong>: Implement cosign for image verification</li>
+<li><strong>Automated Cleanup</strong>: Implement automated tag retention policies</li>
+<li><strong>Registry Mirrors</strong>: Deploy regional mirrors for faster access</li>
+</ol>
+<h3 id="migration-considerations">Migration Considerations<a class="headerlink" href="#migration-considerations" title="Permanent link">&para;</a></h3>
+<p><strong>To Private Registry</strong>:
+- Update authentication mechanisms
+- Modify CI/CD workflows
+- Update documentation and access patterns</p>
+<p><strong>To Multi-registry Strategy</strong>:
+- Implement registry selection logic
+- Add failover mechanisms
+- Update monitoring and alerting</p>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="common-issues">Common Issues<a class="headerlink" href="#common-issues" title="Permanent link">&para;</a></h3>
+<p><strong>"Authentication failed" errors</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Verify credentials</span>
+docker<span class="w"> </span>login<span class="w"> </span>--username<span class="w"> </span><span class="nv">$DOCKER_USERNAME</span>
+
+<span class="c1"># Test with docker command</span>
+<span class="nb">echo</span><span class="w"> </span><span class="nv">$DOCKER_TOKEN</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>docker<span class="w"> </span>login<span class="w"> </span>--username<span class="w"> </span><span class="nv">$DOCKER_USERNAME</span><span class="w"> </span>--password-stdin
+</code></pre></div></p>
+<p><strong>Image pull failures</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check image exists</span>
+docker<span class="w"> </span>manifest<span class="w"> </span>inspect<span class="w"> </span>webgrip/rust-ci-runner:latest
+
+<span class="c1"># Try different tag</span>
+docker<span class="w"> </span>pull<span class="w"> </span>webgrip/rust-ci-runner:latest
+docker<span class="w"> </span>pull<span class="w"> </span>webgrip/rust-ci-runner:<span class="k">$(</span>git<span class="w"> </span>rev-parse<span class="w"> </span>HEAD<span class="k">)</span>
+</code></pre></div></p>
+<p><strong>Large image sizes</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Analyze image layers</span>
+docker<span class="w"> </span><span class="nb">history</span><span class="w"> </span>webgrip/rust-ci-runner:latest
+
+<span class="c1"># Use dive for detailed analysis</span>
+dive<span class="w"> </span>webgrip/rust-ci-runner:latest
+</code></pre></div></p>
+<p><strong>Registry quota exceeded</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check registry usage</span>
+curl<span class="w"> </span>-s<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Bearer </span><span class="nv">$DOCKER_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="s2">&quot;https://hub.docker.com/v2/repositories/webgrip/?page_size=100&quot;</span>
+
+<span class="c1"># Clean up old images</span>
+<span class="c1"># (See automated cleanup script above)</span>
+</code></pre></div></p>
+<h2 id="related-documentation">Related Documentation<a class="headerlink" href="#related-documentation" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../automated-building/">Automated Building</a> - How images are built and pushed</li>
+<li><a href="../workflow-details/">Workflow Details</a> - Detailed CI/CD workflow information</li>
+<li><a href="../../overview/architecture/">Architecture Overview</a> - Registry role in infrastructure</li>
+<li><a href="../docker-images/">Docker Images</a> - Individual image documentation</li>
+</ul>
+<hr />
+<blockquote>
+<p><strong>Assumption</strong>: Docker Hub public repositories meet current needs. Future growth may require private registries or multi-cloud registry strategy. Validation needed: Confirm long-term registry strategy with infrastructure team.</p>
+</blockquote>
+<p><strong>Maintainer</strong>: <a href="https://github.com/orgs/webgrip/teams/ops">WebGrip Ops Team</a><br />
+<strong>Registry</strong>: <a href="https://hub.docker.com/u/webgrip">Docker Hub webgrip organization</a><br />
+<strong>Authentication</strong>: Organization-level GitHub secrets</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.top", "navigation.sections", "toc.integrate"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.92b07e13.min.js"></script>
+      
+    
+  </body>
+</html>

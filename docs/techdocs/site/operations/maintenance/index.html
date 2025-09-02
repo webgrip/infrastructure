@@ -1,0 +1,2260 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="CI/CD Infrastructure and Docker Images for WebGrip">
+      
+      
+      
+        <link rel="canonical" href="https://webgrip.github.io/infrastructure/operations/maintenance/">
+      
+      
+        <link rel="prev" href="../contributing-images/">
+      
+      
+        <link rel="next" href="../maintaining-techdocs/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
+    
+    
+      
+        <title>Maintenance - WebGrip Infrastructure</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#maintenance" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="WebGrip Infrastructure" class="md-header__button md-logo" aria-label="WebGrip Infrastructure" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            WebGrip Infrastructure
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Maintenance
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="blue"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../overview/purpose/" class="md-tabs__link">
+          
+  
+  
+  Overview
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../docker-images/rust-ci-runner/" class="md-tabs__link">
+          
+  
+  
+  Docker Images
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../cicd/automated-building/" class="md-tabs__link">
+          
+  
+  
+  CI/CD Pipeline
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../testing/playwright-setup/" class="md-tabs__link">
+          
+  
+  
+  Testing
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../building-locally/" class="md-tabs__link">
+          
+  
+  
+  Operations
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../adrs/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  ADRs
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="WebGrip Infrastructure" class="md-nav__button md-logo" aria-label="WebGrip Infrastructure" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    WebGrip Infrastructure
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Overview
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/purpose/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Purpose & Scope
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Quick Start
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Docker Images
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Docker Images
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/rust-ci-runner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Rust CI Runner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/github-runner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    GitHub Actions Runner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/helm-deploy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Helm Deploy
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/playwright-runner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Playwright Runner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/act-runner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ACT Runner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/rust-releaser/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Rust Releaser
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    CI/CD Pipeline
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            CI/CD Pipeline
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cicd/automated-building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Automated Building
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cicd/docker-registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Docker Registry
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cicd/workflow-details/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Workflow Details
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Testing
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Testing
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/playwright-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Playwright Setup
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/test-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Test Execution
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    Operations
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Operations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../building-locally/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Building Locally
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing-images/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing Images
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Maintenance
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Maintenance
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maintenance-schedule" class="md-nav__link">
+    <span class="md-ellipsis">
+      Maintenance Schedule
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Maintenance Schedule">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#weekly-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Weekly Tasks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#monthly-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Monthly Tasks
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#quarterly-tasks" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quarterly Tasks
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#image-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Image Maintenance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Image Maintenance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#base-image-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Base Image Updates
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Base Image Updates">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#monitoring-base-images" class="md-nav__link">
+    <span class="md-ellipsis">
+      Monitoring Base Images
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#update-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      Update Process
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#dependency-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Dependency Management
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Dependency Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#language-runtime-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Language Runtime Updates
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tool-updates" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tool Updates
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security Maintenance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Security Maintenance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vulnerability-scanning" class="md-nav__link">
+    <span class="md-ellipsis">
+      Vulnerability Scanning
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-patch-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security Patch Process
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Maintenance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance Maintenance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#build-time-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Build Time Optimization
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#image-size-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      Image Size Monitoring
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation-maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Documentation Maintenance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Documentation Maintenance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automated-link-checking" class="md-nav__link">
+    <span class="md-ellipsis">
+      Automated Link Checking
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#content-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Content Validation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#version-synchronization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Version Synchronization
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quality-assurance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quality Assurance
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quality Assurance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#automated-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Automated Testing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#continuous-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      Continuous Monitoring
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#incident-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      Incident Response
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Incident Response">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#image-failure-response" class="md-nav__link">
+    <span class="md-ellipsis">
+      Image Failure Response
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#emergency-rollback" class="md-nav__link">
+    <span class="md-ellipsis">
+      Emergency Rollback
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#documentation-lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      Documentation Lifecycle
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Documentation Lifecycle">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#quarterly-review-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quarterly Review Process
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#continuous-improvement" class="md-nav__link">
+    <span class="md-ellipsis">
+      Continuous Improvement
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related Documentation
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../maintaining-techdocs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Maintaining TechDocs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ADRs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="maintenance">Maintenance<a class="headerlink" href="#maintenance" title="Permanent link">&para;</a></h1>
+<p>Comprehensive guide for maintaining and updating the WebGrip infrastructure Docker images and documentation.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>Maintenance encompasses:</p>
+<ul>
+<li>✅ <strong>Regular updates</strong> to base images and dependencies</li>
+<li>✅ <strong>Security patch management</strong> and vulnerability remediation</li>
+<li>✅ <strong>Performance monitoring</strong> and optimization</li>
+<li>✅ <strong>Documentation maintenance</strong> to ensure accuracy and relevance</li>
+<li>✅ <strong>Quality assurance</strong> through automated testing and validation</li>
+</ul>
+<h2 id="maintenance-schedule">Maintenance Schedule<a class="headerlink" href="#maintenance-schedule" title="Permanent link">&para;</a></h2>
+<h3 id="weekly-tasks">Weekly Tasks<a class="headerlink" href="#weekly-tasks" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>gantt
+    title Weekly Maintenance Schedule
+    dateFormat  YYYY-MM-DD
+    section Security
+    Security Scans    :2024-01-01, 1d
+    Vulnerability Review :2024-01-02, 1d
+    section Performance
+    Build Time Analysis :2024-01-03, 1d
+    section Quality
+    Documentation Review :2024-01-04, 1d
+    Link Validation     :2024-01-05, 1d</code></pre>
+<p><strong>Every Monday</strong>: Security and vulnerability scanning
+<div class="highlight"><pre><span></span><code><span class="c1"># Automated security scan script</span>
+<span class="c1">#!/bin/bash</span>
+<span class="k">for</span><span class="w"> </span>image<span class="w"> </span><span class="k">in</span><span class="w"> </span>rust-ci-runner<span class="w"> </span>github-runner<span class="w"> </span>helm-deploy<span class="w"> </span>playwright-runner<span class="w"> </span>act-runner<span class="w"> </span>rust-releaser<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Scanning webgrip/</span><span class="nv">$image</span><span class="s2">:latest&quot;</span>
+<span class="w">    </span>trivy<span class="w"> </span>image<span class="w"> </span><span class="s2">&quot;webgrip/</span><span class="nv">$image</span><span class="s2">:latest&quot;</span><span class="w"> </span>--severity<span class="w"> </span>HIGH,CRITICAL
+<span class="k">done</span>
+</code></pre></div></p>
+<p><strong>Every Wednesday</strong>: Performance and build time monitoring
+<div class="highlight"><pre><span></span><code><span class="c1"># Performance monitoring script</span>
+<span class="c1">#!/bin/bash</span>
+<span class="k">for</span><span class="w"> </span>image<span class="w"> </span><span class="k">in</span><span class="w"> </span>rust-ci-runner<span class="w"> </span>github-runner<span class="w"> </span>helm-deploy<span class="w"> </span>playwright-runner<span class="w"> </span>act-runner<span class="w"> </span>rust-releaser<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Testing </span><span class="nv">$image</span><span class="s2"> performance...&quot;</span>
+<span class="w">    </span><span class="nb">time</span><span class="w"> </span>docker<span class="w"> </span>pull<span class="w"> </span><span class="s2">&quot;webgrip/</span><span class="nv">$image</span><span class="s2">:latest&quot;</span>
+<span class="w">    </span><span class="nb">time</span><span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="s2">&quot;webgrip/</span><span class="nv">$image</span><span class="s2">:latest&quot;</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Performance test&quot;</span>
+<span class="k">done</span>
+</code></pre></div></p>
+<p><strong>Every Friday</strong>: Documentation review and link validation
+<div class="highlight"><pre><span></span><code><span class="c1"># Documentation validation</span>
+<span class="nb">cd</span><span class="w"> </span>docs/techdocs/docs
+find<span class="w"> </span>.<span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;*.md&quot;</span><span class="w"> </span>-exec<span class="w"> </span>markdown-link-check<span class="w"> </span><span class="o">{}</span><span class="w"> </span><span class="se">\;</span>
+</code></pre></div></p>
+<h3 id="monthly-tasks">Monthly Tasks<a class="headerlink" href="#monthly-tasks" title="Permanent link">&para;</a></h3>
+<p><strong>First Monday of Month</strong>: Base image updates
+- Review base image security advisories
+- Test updated base images
+- Update Dockerfiles with new base image versions
+- Rebuild and test all images</p>
+<p><strong>Second Monday</strong>: Dependency updates
+- Update language runtimes (Rust, Node.js, PHP, Python)
+- Update CLI tools and utilities
+- Test compatibility with existing workflows</p>
+<p><strong>Third Monday</strong>: Performance optimization
+- Analyze image sizes and build times
+- Optimize Dockerfile layer caching
+- Review and update build arguments</p>
+<p><strong>Fourth Monday</strong>: Documentation review
+- Review and update all image documentation
+- Validate links and references
+- Update version information and compatibility matrices</p>
+<h3 id="quarterly-tasks">Quarterly Tasks<a class="headerlink" href="#quarterly-tasks" title="Permanent link">&para;</a></h3>
+<p><strong>Security Review</strong>:
+- Comprehensive security audit of all images
+- Review and update security practices
+- Update base images to latest stable versions
+- Implement new security features</p>
+<p><strong>Architecture Review</strong>:
+- Evaluate image architecture and dependencies
+- Consider consolidation or splitting of images
+- Review integration patterns and usage
+- Plan for new image requirements</p>
+<p><strong>Community Feedback</strong>:
+- Review GitHub issues and discussions
+- Analyze usage patterns from logs
+- Gather feedback from development teams
+- Plan improvements based on feedback</p>
+<h2 id="image-maintenance">Image Maintenance<a class="headerlink" href="#image-maintenance" title="Permanent link">&para;</a></h2>
+<h3 id="base-image-updates">Base Image Updates<a class="headerlink" href="#base-image-updates" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>flowchart TD
+    MONITOR[Monitor Base Images] --&gt; CHECK[Check for Updates]
+    CHECK --&gt; SECURITY[Security Advisory Review]
+    SECURITY --&gt; TEST[Test Updated Images]
+    TEST --&gt; COMPATIBLE{Compatible?}
+    COMPATIBLE --&gt;|Yes| UPDATE[Update Dockerfiles]
+    COMPATIBLE --&gt;|No| INVESTIGATE[Investigate Issues]
+    INVESTIGATE --&gt; FIX[Apply Fixes]
+    FIX --&gt; TEST
+    UPDATE --&gt; BUILD[Rebuild Images]
+    BUILD --&gt; DEPLOY[Deploy to Registry]
+    DEPLOY --&gt; VERIFY[Verify Deployment]</code></pre>
+<h4 id="monitoring-base-images">Monitoring Base Images<a class="headerlink" href="#monitoring-base-images" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="c1"># scripts/monitor-base-images.sh</span>
+
+<span class="nb">declare</span><span class="w"> </span>-A<span class="w"> </span><span class="nv">BASE_IMAGES</span><span class="o">=(</span>
+<span class="w">    </span><span class="o">[</span><span class="s2">&quot;rust-ci-runner&quot;</span><span class="o">]=</span><span class="s2">&quot;rust:1.87.0-slim-bookworm&quot;</span>
+<span class="w">    </span><span class="o">[</span><span class="s2">&quot;github-runner&quot;</span><span class="o">]=</span><span class="s2">&quot;ghcr.io/actions/actions-runner:2.328.0&quot;</span>
+<span class="w">    </span><span class="o">[</span><span class="s2">&quot;helm-deploy&quot;</span><span class="o">]=</span><span class="s2">&quot;alpine:3.21.3&quot;</span>
+<span class="w">    </span><span class="o">[</span><span class="s2">&quot;playwright-runner&quot;</span><span class="o">]=</span><span class="s2">&quot;mcr.microsoft.com/playwright:v1.51.0-noble&quot;</span>
+<span class="w">    </span><span class="o">[</span><span class="s2">&quot;act-runner&quot;</span><span class="o">]=</span><span class="s2">&quot;alpine:3.22.1&quot;</span>
+<span class="w">    </span><span class="o">[</span><span class="s2">&quot;rust-releaser&quot;</span><span class="o">]=</span><span class="s2">&quot;node:22-bookworm-slim&quot;</span>
+<span class="o">)</span>
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Checking base image updates...&quot;</span>
+
+<span class="k">for</span><span class="w"> </span>image<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="p">!BASE_IMAGES[@]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">    </span><span class="nv">base</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">BASE_IMAGES</span><span class="p">[</span><span class="nv">$image</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Checking </span><span class="nv">$image</span><span class="s2"> (base: </span><span class="nv">$base</span><span class="s2">)&quot;</span>
+
+<span class="w">    </span><span class="c1"># Check for newer versions</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span>docker<span class="w"> </span>pull<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$base</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">        </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;✅ </span><span class="nv">$base</span><span class="s2"> is current&quot;</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="w">        </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;❌ Failed to pull </span><span class="nv">$base</span><span class="s2">&quot;</span>
+<span class="w">    </span><span class="k">fi</span>
+
+<span class="w">    </span><span class="c1"># Check for security vulnerabilities</span>
+<span class="w">    </span>trivy<span class="w"> </span>image<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$base</span><span class="s2">&quot;</span><span class="w"> </span>--severity<span class="w"> </span>HIGH,CRITICAL<span class="w"> </span>--quiet
+<span class="k">done</span>
+</code></pre></div>
+<h4 id="update-process">Update Process<a class="headerlink" href="#update-process" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="c1"># scripts/update-base-image.sh</span>
+
+<span class="nv">IMAGE_NAME</span><span class="o">=</span><span class="nv">$1</span>
+<span class="nv">NEW_BASE_VERSION</span><span class="o">=</span><span class="nv">$2</span>
+
+<span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$IMAGE_NAME</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$NEW_BASE_VERSION</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Usage: </span><span class="nv">$0</span><span class="s2"> &lt;image-name&gt; &lt;new-base-version&gt;&quot;</span>
+<span class="w">    </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
+<span class="k">fi</span>
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Updating </span><span class="nv">$IMAGE_NAME</span><span class="s2"> to use base image </span><span class="nv">$NEW_BASE_VERSION</span><span class="s2">&quot;</span>
+
+<span class="c1"># Update Dockerfile</span>
+sed<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;s/FROM .*/FROM </span><span class="nv">$NEW_BASE_VERSION</span><span class="s2">/&quot;</span><span class="w"> </span><span class="s2">&quot;ops/docker/</span><span class="nv">$IMAGE_NAME</span><span class="s2">/Dockerfile&quot;</span>
+
+<span class="c1"># Build and test</span>
+docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span><span class="s2">&quot;webgrip/</span><span class="nv">$IMAGE_NAME</span><span class="s2">:test-update&quot;</span><span class="w"> </span><span class="s2">&quot;ops/docker/</span><span class="nv">$IMAGE_NAME</span><span class="s2">/&quot;</span>
+
+<span class="c1"># Run basic tests</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Running basic tests...&quot;</span>
+<span class="k">case</span><span class="w"> </span><span class="nv">$IMAGE_NAME</span><span class="w"> </span><span class="k">in</span>
+<span class="w">    </span><span class="s2">&quot;rust-ci-runner&quot;</span><span class="o">)</span>
+<span class="w">        </span>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="s2">&quot;webgrip/</span><span class="nv">$IMAGE_NAME</span><span class="s2">:test-update&quot;</span><span class="w"> </span>rustc<span class="w"> </span>--version
+<span class="w">        </span><span class="p">;;</span>
+<span class="w">    </span><span class="s2">&quot;github-runner&quot;</span><span class="o">)</span>
+<span class="w">        </span>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="s2">&quot;webgrip/</span><span class="nv">$IMAGE_NAME</span><span class="s2">:test-update&quot;</span><span class="w"> </span>php<span class="w"> </span>--version
+<span class="w">        </span><span class="p">;;</span>
+<span class="w">    </span><span class="s2">&quot;helm-deploy&quot;</span><span class="o">)</span>
+<span class="w">        </span>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="s2">&quot;webgrip/</span><span class="nv">$IMAGE_NAME</span><span class="s2">:test-update&quot;</span><span class="w"> </span>helm<span class="w"> </span>version
+<span class="w">        </span><span class="p">;;</span>
+<span class="w">    </span><span class="s2">&quot;playwright-runner&quot;</span><span class="o">)</span>
+<span class="w">        </span>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="s2">&quot;webgrip/</span><span class="nv">$IMAGE_NAME</span><span class="s2">:test-update&quot;</span><span class="w"> </span>npx<span class="w"> </span>playwright<span class="w"> </span>--version
+<span class="w">        </span><span class="p">;;</span>
+<span class="w">    </span><span class="s2">&quot;act-runner&quot;</span><span class="o">)</span>
+<span class="w">        </span>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="s2">&quot;webgrip/</span><span class="nv">$IMAGE_NAME</span><span class="s2">:test-update&quot;</span><span class="w"> </span>act<span class="w"> </span>--version
+<span class="w">        </span><span class="p">;;</span>
+<span class="w">    </span><span class="s2">&quot;rust-releaser&quot;</span><span class="o">)</span>
+<span class="w">        </span>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="s2">&quot;webgrip/</span><span class="nv">$IMAGE_NAME</span><span class="s2">:test-update&quot;</span><span class="w"> </span>node<span class="w"> </span>--version
+<span class="w">        </span><span class="p">;;</span>
+<span class="k">esac</span>
+
+<span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="nv">$?</span><span class="w"> </span>-eq<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;✅ Update successful for </span><span class="nv">$IMAGE_NAME</span><span class="s2">&quot;</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Ready to commit and push changes&quot;</span>
+<span class="k">else</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;❌ Update failed for </span><span class="nv">$IMAGE_NAME</span><span class="s2">&quot;</span>
+<span class="w">    </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
+<span class="k">fi</span>
+</code></pre></div>
+<h3 id="dependency-management">Dependency Management<a class="headerlink" href="#dependency-management" title="Permanent link">&para;</a></h3>
+<h4 id="language-runtime-updates">Language Runtime Updates<a class="headerlink" href="#language-runtime-updates" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="c1"># scripts/update-runtimes.sh</span>
+
+<span class="c1"># Rust updates</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Checking Rust versions...&quot;</span>
+<span class="nv">LATEST_RUST</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>https://forge.rust-lang.org/infra/channel-releases.html<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-o<span class="w"> </span><span class="s2">&quot;1\.[0-9]\+\.[0-9]\+&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-1<span class="k">)</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Latest Rust: </span><span class="nv">$LATEST_RUST</span><span class="s2">&quot;</span>
+
+<span class="c1"># Node.js updates</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Checking Node.js versions...&quot;</span>
+<span class="nv">LATEST_NODE</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>https://nodejs.org/dist/index.json<span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">&#39;.[0].version&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>sed<span class="w"> </span><span class="s1">&#39;s/v//&#39;</span><span class="k">)</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Latest Node.js: </span><span class="nv">$LATEST_NODE</span><span class="s2">&quot;</span>
+
+<span class="c1"># PHP updates</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Checking PHP versions...&quot;</span>
+<span class="nv">LATEST_PHP</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span>https://www.php.net/releases/index.php<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-o<span class="w"> </span><span class="s2">&quot;8\.[0-9]\+\.[0-9]\+&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-1<span class="k">)</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Latest PHP: </span><span class="nv">$LATEST_PHP</span><span class="s2">&quot;</span>
+
+<span class="c1"># Update Dockerfiles with new versions</span>
+<span class="c1"># This would typically involve careful testing and validation</span>
+</code></pre></div>
+<h4 id="tool-updates">Tool Updates<a class="headerlink" href="#tool-updates" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="c1"># scripts/update-tools.sh</span>
+
+<span class="nb">declare</span><span class="w"> </span>-A<span class="w"> </span><span class="nv">TOOLS</span><span class="o">=(</span>
+<span class="w">    </span><span class="o">[</span><span class="s2">&quot;helm&quot;</span><span class="o">]=</span><span class="s2">&quot;https://api.github.com/repos/helm/helm/releases/latest&quot;</span>
+<span class="w">    </span><span class="o">[</span><span class="s2">&quot;kubectl&quot;</span><span class="o">]=</span><span class="s2">&quot;https://storage.googleapis.com/kubernetes-release/release/stable.txt&quot;</span>
+<span class="w">    </span><span class="o">[</span><span class="s2">&quot;act&quot;</span><span class="o">]=</span><span class="s2">&quot;https://api.github.com/repos/nektos/act/releases/latest&quot;</span>
+<span class="w">    </span><span class="o">[</span><span class="s2">&quot;sops&quot;</span><span class="o">]=</span><span class="s2">&quot;https://api.github.com/repos/mozilla/sops/releases/latest&quot;</span>
+<span class="o">)</span>
+
+<span class="k">for</span><span class="w"> </span>tool<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="p">!TOOLS[@]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Checking </span><span class="nv">$tool</span><span class="s2"> updates...&quot;</span>
+
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="nv">$tool</span><span class="w"> </span><span class="k">in</span>
+<span class="w">        </span><span class="s2">&quot;kubectl&quot;</span><span class="o">)</span>
+<span class="w">            </span><span class="nv">latest</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">TOOLS</span><span class="p">[</span><span class="nv">$tool</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="k">)</span>
+<span class="w">            </span><span class="p">;;</span>
+<span class="w">        </span>*<span class="o">)</span>
+<span class="w">            </span><span class="nv">latest</span><span class="o">=</span><span class="k">$(</span>curl<span class="w"> </span>-s<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">TOOLS</span><span class="p">[</span><span class="nv">$tool</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span>-r<span class="w"> </span><span class="s1">&#39;.tag_name&#39;</span><span class="k">)</span>
+<span class="w">            </span><span class="p">;;</span>
+<span class="w">    </span><span class="k">esac</span>
+
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$tool</span><span class="s2"> latest version: </span><span class="nv">$latest</span><span class="s2">&quot;</span>
+<span class="k">done</span>
+</code></pre></div>
+<h3 id="security-maintenance">Security Maintenance<a class="headerlink" href="#security-maintenance" title="Permanent link">&para;</a></h3>
+<h4 id="vulnerability-scanning">Vulnerability Scanning<a class="headerlink" href="#vulnerability-scanning" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="c1"># scripts/security-scan.sh</span>
+
+<span class="nv">IMAGES</span><span class="o">=(</span>
+<span class="w">    </span><span class="s2">&quot;webgrip/rust-ci-runner:latest&quot;</span>
+<span class="w">    </span><span class="s2">&quot;webgrip/github-runner:latest&quot;</span>
+<span class="w">    </span><span class="s2">&quot;webgrip/helm-deploy:latest&quot;</span>
+<span class="w">    </span><span class="s2">&quot;webgrip/playwright-runner:latest&quot;</span>
+<span class="w">    </span><span class="s2">&quot;webgrip/act-runner:latest&quot;</span>
+<span class="w">    </span><span class="s2">&quot;webgrip/rust-releaser:latest&quot;</span>
+<span class="o">)</span>
+
+<span class="nv">REPORT_DIR</span><span class="o">=</span><span class="s2">&quot;security-reports/</span><span class="k">$(</span>date<span class="w"> </span>+%Y-%m-%d<span class="k">)</span><span class="s2">&quot;</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$REPORT_DIR</span><span class="s2">&quot;</span>
+
+<span class="k">for</span><span class="w"> </span>image<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">IMAGES</span><span class="p">[@]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Scanning </span><span class="nv">$image</span><span class="s2">...&quot;</span>
+
+<span class="w">    </span><span class="c1"># Trivy scan</span>
+<span class="w">    </span>trivy<span class="w"> </span>image<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$image</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">        </span>--format<span class="w"> </span>json<span class="w"> </span><span class="se">\</span>
+<span class="w">        </span>--output<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$REPORT_DIR</span><span class="s2">/</span><span class="k">$(</span>basename<span class="w"> </span><span class="nv">$image</span><span class="k">)</span><span class="s2">-trivy.json&quot;</span>
+
+<span class="w">    </span><span class="c1"># Summary report</span>
+<span class="w">    </span>trivy<span class="w"> </span>image<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$image</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">        </span>--severity<span class="w"> </span>HIGH,CRITICAL<span class="w"> </span><span class="se">\</span>
+<span class="w">        </span>--format<span class="w"> </span>table<span class="w"> </span><span class="se">\</span>
+<span class="w">        </span>&gt;<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$REPORT_DIR</span><span class="s2">/</span><span class="k">$(</span>basename<span class="w"> </span><span class="nv">$image</span><span class="k">)</span><span class="s2">-summary.txt&quot;</span>
+<span class="k">done</span>
+
+<span class="c1"># Generate overall report</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;# Security Scan Report - </span><span class="k">$(</span>date<span class="k">)</span><span class="s2">&quot;</span><span class="w"> </span>&gt;<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$REPORT_DIR</span><span class="s2">/README.md&quot;</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$REPORT_DIR</span><span class="s2">/README.md&quot;</span>
+
+<span class="k">for</span><span class="w"> </span>image<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">IMAGES</span><span class="p">[@]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;## </span><span class="k">$(</span>basename<span class="w"> </span><span class="nv">$image</span><span class="k">)</span><span class="s2">&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$REPORT_DIR</span><span class="s2">/README.md&quot;</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;```&#39;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$REPORT_DIR</span><span class="s2">/README.md&quot;</span>
+<span class="w">    </span>cat<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$REPORT_DIR</span><span class="s2">/</span><span class="k">$(</span>basename<span class="w"> </span><span class="nv">$image</span><span class="k">)</span><span class="s2">-summary.txt&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$REPORT_DIR</span><span class="s2">/README.md&quot;</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s1">&#39;```&#39;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$REPORT_DIR</span><span class="s2">/README.md&quot;</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$REPORT_DIR</span><span class="s2">/README.md&quot;</span>
+<span class="k">done</span>
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Security scan complete. Report saved to </span><span class="nv">$REPORT_DIR</span><span class="s2">/&quot;</span>
+</code></pre></div>
+<h4 id="security-patch-process">Security Patch Process<a class="headerlink" href="#security-patch-process" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="c1"># scripts/apply-security-patches.sh</span>
+
+<span class="nv">IMAGE_NAME</span><span class="o">=</span><span class="nv">$1</span>
+<span class="nv">CVE_ID</span><span class="o">=</span><span class="nv">$2</span>
+
+<span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$IMAGE_NAME</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$CVE_ID</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Usage: </span><span class="nv">$0</span><span class="s2"> &lt;image-name&gt; &lt;cve-id&gt;&quot;</span>
+<span class="w">    </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
+<span class="k">fi</span>
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Applying security patch for </span><span class="nv">$CVE_ID</span><span class="s2"> in </span><span class="nv">$IMAGE_NAME</span><span class="s2">&quot;</span>
+
+<span class="c1"># Create branch for security fix</span>
+git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span><span class="s2">&quot;security-fix-</span><span class="nv">$CVE_ID</span><span class="s2">-</span><span class="nv">$IMAGE_NAME</span><span class="s2">&quot;</span>
+
+<span class="c1"># Update image with security fixes</span>
+<span class="k">case</span><span class="w"> </span><span class="nv">$IMAGE_NAME</span><span class="w"> </span><span class="k">in</span>
+<span class="w">    </span><span class="s2">&quot;rust-ci-runner&quot;</span><span class="p">|</span><span class="s2">&quot;rust-releaser&quot;</span><span class="o">)</span>
+<span class="w">        </span><span class="c1"># Update Rust packages</span>
+<span class="w">        </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Updating Rust packages...&quot;</span>
+<span class="w">        </span><span class="c1"># Add specific package updates to Dockerfile</span>
+<span class="w">        </span><span class="p">;;</span>
+<span class="w">    </span><span class="s2">&quot;github-runner&quot;</span><span class="p">|</span><span class="s2">&quot;playwright-runner&quot;</span><span class="o">)</span>
+<span class="w">        </span><span class="c1"># Update system packages</span>
+<span class="w">        </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Updating system packages...&quot;</span>
+<span class="w">        </span><span class="c1"># Update package versions in Dockerfile</span>
+<span class="w">        </span><span class="p">;;</span>
+<span class="w">    </span><span class="s2">&quot;helm-deploy&quot;</span><span class="p">|</span><span class="s2">&quot;act-runner&quot;</span><span class="o">)</span>
+<span class="w">        </span><span class="c1"># Update Alpine packages</span>
+<span class="w">        </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Updating Alpine packages...&quot;</span>
+<span class="w">        </span><span class="c1"># Update apk packages in Dockerfile</span>
+<span class="w">        </span><span class="p">;;</span>
+<span class="k">esac</span>
+
+<span class="c1"># Build and test</span>
+docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span><span class="s2">&quot;webgrip/</span><span class="nv">$IMAGE_NAME</span><span class="s2">:security-fix&quot;</span><span class="w"> </span><span class="s2">&quot;ops/docker/</span><span class="nv">$IMAGE_NAME</span><span class="s2">/&quot;</span>
+
+<span class="c1"># Run security scan to verify fix</span>
+trivy<span class="w"> </span>image<span class="w"> </span><span class="s2">&quot;webgrip/</span><span class="nv">$IMAGE_NAME</span><span class="s2">:security-fix&quot;</span><span class="w"> </span>--severity<span class="w"> </span>HIGH,CRITICAL
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Security patch applied. Please review and test before merging.&quot;</span>
+</code></pre></div>
+<h3 id="performance-maintenance">Performance Maintenance<a class="headerlink" href="#performance-maintenance" title="Permanent link">&para;</a></h3>
+<h4 id="build-time-optimization">Build Time Optimization<a class="headerlink" href="#build-time-optimization" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="c1"># scripts/optimize-build-times.sh</span>
+
+<span class="nv">IMAGES</span><span class="o">=(</span>rust-ci-runner<span class="w"> </span>github-runner<span class="w"> </span>helm-deploy<span class="w"> </span>playwright-runner<span class="w"> </span>act-runner<span class="w"> </span>rust-releaser<span class="o">)</span>
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Analyzing build performance...&quot;</span>
+
+<span class="k">for</span><span class="w"> </span>image<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">IMAGES</span><span class="p">[@]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Testing </span><span class="nv">$image</span><span class="s2"> build time...&quot;</span>
+
+<span class="w">    </span><span class="c1"># Clean build</span>
+<span class="w">    </span><span class="nv">start_time</span><span class="o">=</span><span class="k">$(</span>date<span class="w"> </span>+%s<span class="k">)</span>
+<span class="w">    </span>docker<span class="w"> </span>build<span class="w"> </span>--no-cache<span class="w"> </span>-t<span class="w"> </span><span class="s2">&quot;webgrip/</span><span class="nv">$image</span><span class="s2">:perf-test&quot;</span><span class="w"> </span><span class="s2">&quot;ops/docker/</span><span class="nv">$image</span><span class="s2">/&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span>
+<span class="w">    </span><span class="nv">end_time</span><span class="o">=</span><span class="k">$(</span>date<span class="w"> </span>+%s<span class="k">)</span>
+<span class="w">    </span><span class="nv">clean_build_time</span><span class="o">=</span><span class="k">$((</span><span class="nv">end_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nv">start_time</span><span class="k">))</span>
+
+<span class="w">    </span><span class="c1"># Cached build</span>
+<span class="w">    </span><span class="nv">start_time</span><span class="o">=</span><span class="k">$(</span>date<span class="w"> </span>+%s<span class="k">)</span>
+<span class="w">    </span>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span><span class="s2">&quot;webgrip/</span><span class="nv">$image</span><span class="s2">:perf-test-cached&quot;</span><span class="w"> </span><span class="s2">&quot;ops/docker/</span><span class="nv">$image</span><span class="s2">/&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span>
+<span class="w">    </span><span class="nv">end_time</span><span class="o">=</span><span class="k">$(</span>date<span class="w"> </span>+%s<span class="k">)</span>
+<span class="w">    </span><span class="nv">cached_build_time</span><span class="o">=</span><span class="k">$((</span><span class="nv">end_time</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nv">start_time</span><span class="k">))</span>
+
+<span class="w">    </span><span class="c1"># Image size</span>
+<span class="w">    </span><span class="nv">size</span><span class="o">=</span><span class="k">$(</span>docker<span class="w"> </span>images<span class="w"> </span><span class="s2">&quot;webgrip/</span><span class="nv">$image</span><span class="s2">:perf-test&quot;</span><span class="w"> </span>--format<span class="w"> </span><span class="s2">&quot;table {{.Size}}&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-1<span class="k">)</span>
+
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$image</span><span class="s2">: Clean=</span><span class="si">${</span><span class="nv">clean_build_time</span><span class="si">}</span><span class="s2">s, Cached=</span><span class="si">${</span><span class="nv">cached_build_time</span><span class="si">}</span><span class="s2">s, Size=</span><span class="nv">$size</span><span class="s2">&quot;</span>
+
+<span class="w">    </span><span class="c1"># Cleanup</span>
+<span class="w">    </span>docker<span class="w"> </span>rmi<span class="w"> </span><span class="s2">&quot;webgrip/</span><span class="nv">$image</span><span class="s2">:perf-test&quot;</span><span class="w"> </span><span class="s2">&quot;webgrip/</span><span class="nv">$image</span><span class="s2">:perf-test-cached&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span>
+<span class="k">done</span>
+</code></pre></div>
+<h4 id="image-size-monitoring">Image Size Monitoring<a class="headerlink" href="#image-size-monitoring" title="Permanent link">&para;</a></h4>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="c1"># scripts/monitor-image-sizes.sh</span>
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Image Size Report - </span><span class="k">$(</span>date<span class="k">)</span><span class="s2">&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>image-sizes.md
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;==========================&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>image-sizes.md
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>image-sizes.md
+
+docker<span class="w"> </span>images<span class="w"> </span>webgrip/*<span class="w"> </span>--format<span class="w"> </span><span class="s2">&quot;table {{.Repository}}:{{.Tag}}\t{{.Size}}\t{{.CreatedAt}}&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>grep<span class="w"> </span>-v<span class="w"> </span><span class="s2">&quot;REPOSITORY&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>sort<span class="w"> </span>-k1<span class="w"> </span>&gt;&gt;<span class="w"> </span>image-sizes.md
+
+<span class="c1"># Check for images over size threshold</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>image-sizes.md
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Large Images (&gt;1GB):&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>image-sizes.md
+docker<span class="w"> </span>images<span class="w"> </span>webgrip/*<span class="w"> </span>--format<span class="w"> </span><span class="s2">&quot;table {{.Repository}}:{{.Tag}}\t{{.Size}}&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s2">&quot;[0-9\.]+GB&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>image-sizes.md<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;None&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>image-sizes.md
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Image size report generated: image-sizes.md&quot;</span>
+</code></pre></div>
+<h2 id="documentation-maintenance">Documentation Maintenance<a class="headerlink" href="#documentation-maintenance" title="Permanent link">&para;</a></h2>
+<h3 id="automated-link-checking">Automated Link Checking<a class="headerlink" href="#automated-link-checking" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="c1"># scripts/check-documentation-links.sh</span>
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Checking documentation links...&quot;</span>
+
+<span class="nb">cd</span><span class="w"> </span>docs/techdocs/docs
+
+<span class="c1"># Install markdown-link-check if not present</span>
+<span class="k">if</span><span class="w"> </span>!<span class="w"> </span><span class="nb">command</span><span class="w"> </span>-v<span class="w"> </span>markdown-link-check<span class="w"> </span><span class="p">&amp;</span>&gt;<span class="w"> </span>/dev/null<span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span>npm<span class="w"> </span>install<span class="w"> </span>-g<span class="w"> </span>markdown-link-check
+<span class="k">fi</span>
+
+<span class="c1"># Create config file for link checking</span>
+cat<span class="w"> </span>&gt;<span class="w"> </span>/tmp/link-check-config.json<span class="w"> </span><span class="s">&lt;&lt; EOF</span>
+<span class="s">{</span>
+<span class="s">  &quot;ignorePatterns&quot;: [</span>
+<span class="s">    {</span>
+<span class="s">      &quot;pattern&quot;: &quot;^http://localhost&quot;</span>
+<span class="s">    },</span>
+<span class="s">    {</span>
+<span class="s">      &quot;pattern&quot;: &quot;^https://localhost&quot;</span>
+<span class="s">    }</span>
+<span class="s">  ],</span>
+<span class="s">  &quot;timeout&quot;: &quot;20s&quot;,</span>
+<span class="s">  &quot;retryOn429&quot;: true,</span>
+<span class="s">  &quot;retryCount&quot;: 3,</span>
+<span class="s">  &quot;fallbackRetryDelay&quot;: &quot;30s&quot;</span>
+<span class="s">}</span>
+<span class="s">EOF</span>
+
+<span class="c1"># Check all markdown files</span>
+find<span class="w"> </span>.<span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;*.md&quot;</span><span class="w"> </span>-print0<span class="w"> </span><span class="p">|</span><span class="w"> </span>xargs<span class="w"> </span>-0<span class="w"> </span>-I<span class="w"> </span><span class="o">{}</span><span class="w"> </span>markdown-link-check<span class="w"> </span><span class="o">{}</span><span class="w"> </span>-c<span class="w"> </span>/tmp/link-check-config.json
+
+<span class="c1"># Cleanup</span>
+rm<span class="w"> </span>/tmp/link-check-config.json
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Link checking complete&quot;</span>
+</code></pre></div>
+<h3 id="content-validation">Content Validation<a class="headerlink" href="#content-validation" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="c1"># scripts/validate-documentation.sh</span>
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Validating documentation content...&quot;</span>
+
+<span class="c1"># Check for broken internal references</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Checking internal references...&quot;</span>
+find<span class="w"> </span>docs/techdocs/docs<span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;*.md&quot;</span><span class="w"> </span>-exec<span class="w"> </span>grep<span class="w"> </span>-H<span class="w"> </span><span class="s2">&quot;\(\.\./\|docs/\)&quot;</span><span class="w"> </span><span class="o">{}</span><span class="w"> </span><span class="se">\;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="nb">read</span><span class="w"> </span>-r<span class="w"> </span>line<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">        </span><span class="nv">file</span><span class="o">=</span><span class="k">$(</span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$line</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>cut<span class="w"> </span>-d:<span class="w"> </span>-f1<span class="k">)</span>
+<span class="w">        </span><span class="nv">ref</span><span class="o">=</span><span class="k">$(</span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$line</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>cut<span class="w"> </span>-d:<span class="w"> </span>-f2-<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-o<span class="w"> </span><span class="s1">&#39;\(docs/[^)]*\|\.\./[^)]*\)&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-1<span class="k">)</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>-n<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$ref</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">            </span><span class="c1"># Convert relative path to absolute</span>
+<span class="w">            </span><span class="nv">abs_path</span><span class="o">=</span><span class="k">$(</span>realpath<span class="w"> </span>--relative-to<span class="o">=</span><span class="s2">&quot;</span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span>dirname<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$file</span><span class="s2">&quot;</span><span class="k">)</span><span class="s2">/</span><span class="nv">$ref</span><span class="s2">&quot;</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="k">)</span>
+
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>!<span class="w"> </span>-f<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$abs_path</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">                </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;❌ Broken reference in </span><span class="nv">$file</span><span class="s2">: </span><span class="nv">$ref</span><span class="s2">&quot;</span>
+<span class="w">            </span><span class="k">fi</span>
+<span class="w">        </span><span class="k">fi</span>
+<span class="w">    </span><span class="k">done</span>
+
+<span class="c1"># Check for outdated version references</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Checking for outdated version references...&quot;</span>
+grep<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;v1\.[0-9]\+\.[0-9]\+&quot;</span><span class="w"> </span>docs/techdocs/docs<span class="w"> </span>--include<span class="o">=</span><span class="s2">&quot;*.md&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>grep<span class="w"> </span>-v<span class="w"> </span><span class="s2">&quot;example\|placeholder&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="nb">read</span><span class="w"> </span>-r<span class="w"> </span>line<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">        </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;⚠️  Version reference found: </span><span class="nv">$line</span><span class="s2">&quot;</span>
+<span class="w">    </span><span class="k">done</span>
+
+<span class="c1"># Check for TODO/FIXME comments</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Checking for TODO/FIXME items...&quot;</span>
+grep<span class="w"> </span>-r<span class="w"> </span><span class="s2">&quot;TODO\|FIXME\|XXX&quot;</span><span class="w"> </span>docs/techdocs/docs<span class="w"> </span>--include<span class="o">=</span><span class="s2">&quot;*.md&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="nb">read</span><span class="w"> </span>-r<span class="w"> </span>line<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">        </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;📝 Action item: </span><span class="nv">$line</span><span class="s2">&quot;</span>
+<span class="w">    </span><span class="k">done</span>
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Documentation validation complete&quot;</span>
+</code></pre></div>
+<h3 id="version-synchronization">Version Synchronization<a class="headerlink" href="#version-synchronization" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="c1"># scripts/sync-versions.sh</span>
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Synchronizing version information...&quot;</span>
+
+<span class="c1"># Get current image versions from registry</span>
+<span class="nb">declare</span><span class="w"> </span>-A<span class="w"> </span>CURRENT_VERSIONS
+
+<span class="nv">IMAGES</span><span class="o">=(</span>rust-ci-runner<span class="w"> </span>github-runner<span class="w"> </span>helm-deploy<span class="w"> </span>playwright-runner<span class="w"> </span>act-runner<span class="w"> </span>rust-releaser<span class="o">)</span>
+
+<span class="k">for</span><span class="w"> </span>image<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">IMAGES</span><span class="p">[@]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">    </span><span class="c1"># Get image creation date and size</span>
+<span class="w">    </span><span class="nv">info</span><span class="o">=</span><span class="k">$(</span>docker<span class="w"> </span>inspect<span class="w"> </span><span class="s2">&quot;webgrip/</span><span class="nv">$image</span><span class="s2">:latest&quot;</span><span class="w"> </span>--format<span class="w"> </span><span class="s2">&quot;{{.Created}} {{.Size}}&quot;</span><span class="w"> </span><span class="m">2</span>&gt;/dev/null<span class="k">)</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="nv">$?</span><span class="w"> </span>-eq<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">        </span>CURRENT_VERSIONS<span class="o">[</span><span class="nv">$image</span><span class="o">]=</span><span class="nv">$info</span>
+<span class="w">        </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Found </span><span class="nv">$image</span><span class="s2">: </span><span class="nv">$info</span><span class="s2">&quot;</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="w">        </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;⚠️  Could not fetch info for </span><span class="nv">$image</span><span class="s2">&quot;</span>
+<span class="w">    </span><span class="k">fi</span>
+<span class="k">done</span>
+
+<span class="c1"># Update documentation with current versions</span>
+<span class="k">for</span><span class="w"> </span>image<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">IMAGES</span><span class="p">[@]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">    </span><span class="nv">doc_file</span><span class="o">=</span><span class="s2">&quot;docs/techdocs/docs/docker-images/</span><span class="nv">$image</span><span class="s2">.md&quot;</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>-f<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$doc_file</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">        </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Updating version info in </span><span class="nv">$doc_file</span><span class="s2">&quot;</span>
+<span class="w">        </span><span class="c1"># This would involve updating the version tables in documentation</span>
+<span class="w">        </span><span class="c1"># Implementation depends on specific format used</span>
+<span class="w">    </span><span class="k">fi</span>
+<span class="k">done</span>
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Version synchronization complete&quot;</span>
+</code></pre></div>
+<h2 id="quality-assurance">Quality Assurance<a class="headerlink" href="#quality-assurance" title="Permanent link">&para;</a></h2>
+<h3 id="automated-testing">Automated Testing<a class="headerlink" href="#automated-testing" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="c1"># scripts/qa-check.sh</span>
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Running quality assurance checks...&quot;</span>
+
+<span class="c1"># 1. Docker image builds</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Testing image builds...&quot;</span>
+<span class="k">for</span><span class="w"> </span>image<span class="w"> </span><span class="k">in</span><span class="w"> </span>rust-ci-runner<span class="w"> </span>github-runner<span class="w"> </span>helm-deploy<span class="w"> </span>playwright-runner<span class="w"> </span>act-runner<span class="w"> </span>rust-releaser<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Building </span><span class="nv">$image</span><span class="s2">...&quot;</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span>docker<span class="w"> </span>build<span class="w"> </span>-q<span class="w"> </span>-t<span class="w"> </span><span class="s2">&quot;qa-test-</span><span class="nv">$image</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;ops/docker/</span><span class="nv">$image</span><span class="s2">/&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">        </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;✅ </span><span class="nv">$image</span><span class="s2"> builds successfully&quot;</span>
+<span class="w">        </span>docker<span class="w"> </span>rmi<span class="w"> </span><span class="s2">&quot;qa-test-</span><span class="nv">$image</span><span class="s2">&quot;</span><span class="w"> </span>&gt;<span class="w"> </span>/dev/null
+<span class="w">    </span><span class="k">else</span>
+<span class="w">        </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;❌ </span><span class="nv">$image</span><span class="s2"> build failed&quot;</span>
+<span class="w">    </span><span class="k">fi</span>
+<span class="k">done</span>
+
+<span class="c1"># 2. Documentation build</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Testing documentation build...&quot;</span>
+<span class="nb">cd</span><span class="w"> </span>docs/techdocs
+<span class="k">if</span><span class="w"> </span>mkdocs<span class="w"> </span>build<span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;✅ Documentation builds successfully&quot;</span>
+<span class="w">    </span>rm<span class="w"> </span>-rf<span class="w"> </span>site/
+<span class="k">else</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;❌ Documentation build failed&quot;</span>
+<span class="k">fi</span>
+<span class="nb">cd</span><span class="w"> </span>../..
+
+<span class="c1"># 3. Link validation</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Validating links...&quot;</span>
+./scripts/check-documentation-links.sh<span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span>
+<span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="nv">$?</span><span class="w"> </span>-eq<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;✅ All links are valid&quot;</span>
+<span class="k">else</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;❌ Some links are broken&quot;</span>
+<span class="k">fi</span>
+
+<span class="c1"># 4. Security scan</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Running security scans...&quot;</span>
+./scripts/security-scan.sh<span class="w"> </span>&gt;<span class="w"> </span>/dev/null<span class="w"> </span><span class="m">2</span>&gt;<span class="p">&amp;</span><span class="m">1</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;✅ Security scans completed&quot;</span>
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Quality assurance checks complete&quot;</span>
+</code></pre></div>
+<h3 id="continuous-monitoring">Continuous Monitoring<a class="headerlink" href="#continuous-monitoring" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># .github/workflows/maintenance.yml</span>
+<span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Maintenance Tasks</span>
+<span class="nt">on</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">schedule</span><span class="p">:</span>
+<span class="w">    </span><span class="c1"># Weekly security scans (Mondays at 2 AM UTC)</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">cron</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;0</span><span class="nv"> </span><span class="s">2</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">1&#39;</span>
+<span class="w">    </span><span class="c1"># Monthly full maintenance (First Monday of month at 4 AM UTC)</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">cron</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;0</span><span class="nv"> </span><span class="s">4</span><span class="nv"> </span><span class="s">1-7</span><span class="nv"> </span><span class="s">*</span><span class="nv"> </span><span class="s">1&#39;</span>
+
+<span class="nt">jobs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">security-scan</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">github.event.schedule == &#39;0 2 * * 1&#39;</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Run security scans</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./scripts/security-scan.sh</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Upload security reports</span>
+<span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/upload-artifact@v3</span>
+<span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">security-reports</span>
+<span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">security-reports/</span>
+
+<span class="w">  </span><span class="nt">full-maintenance</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">github.event.schedule == &#39;0 4 1-7 * 1&#39;</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Check base image updates</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./scripts/monitor-base-images.sh</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Validate documentation</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./scripts/validate-documentation.sh</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Performance analysis</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./scripts/optimize-build-times.sh</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Create maintenance report</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">echo &quot;# Monthly Maintenance Report - $(date)&quot; &gt; maintenance-report.md</span>
+<span class="w">          </span><span class="no">echo &quot;Generated on $(date)&quot; &gt;&gt; maintenance-report.md</span>
+<span class="w">          </span><span class="no"># Add report sections</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Upload maintenance report</span>
+<span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/upload-artifact@v3</span>
+<span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maintenance-report</span>
+<span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">maintenance-report.md</span>
+</code></pre></div>
+<h2 id="incident-response">Incident Response<a class="headerlink" href="#incident-response" title="Permanent link">&para;</a></h2>
+<h3 id="image-failure-response">Image Failure Response<a class="headerlink" href="#image-failure-response" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="c1"># scripts/incident-response.sh</span>
+
+<span class="nv">INCIDENT_TYPE</span><span class="o">=</span><span class="nv">$1</span>
+<span class="nv">AFFECTED_IMAGE</span><span class="o">=</span><span class="nv">$2</span>
+
+<span class="k">case</span><span class="w"> </span><span class="nv">$INCIDENT_TYPE</span><span class="w"> </span><span class="k">in</span>
+<span class="w">    </span><span class="s2">&quot;build-failure&quot;</span><span class="o">)</span>
+<span class="w">        </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Responding to build failure for </span><span class="nv">$AFFECTED_IMAGE</span><span class="s2">&quot;</span>
+
+<span class="w">        </span><span class="c1"># Check recent changes</span>
+<span class="w">        </span>git<span class="w"> </span>log<span class="w"> </span>--oneline<span class="w"> </span>-10<span class="w"> </span><span class="s2">&quot;ops/docker/</span><span class="nv">$AFFECTED_IMAGE</span><span class="s2">/&quot;</span>
+
+<span class="w">        </span><span class="c1"># Attempt to build with previous version</span>
+<span class="w">        </span><span class="nv">previous_commit</span><span class="o">=</span><span class="k">$(</span>git<span class="w"> </span>log<span class="w"> </span>--format<span class="o">=</span><span class="s2">&quot;%H&quot;</span><span class="w"> </span>-n<span class="w"> </span><span class="m">2</span><span class="w"> </span><span class="s2">&quot;ops/docker/</span><span class="nv">$AFFECTED_IMAGE</span><span class="s2">/&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>tail<span class="w"> </span>-1<span class="k">)</span>
+<span class="w">        </span>git<span class="w"> </span>checkout<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$previous_commit</span><span class="s2">&quot;</span><span class="w"> </span>--<span class="w"> </span><span class="s2">&quot;ops/docker/</span><span class="nv">$AFFECTED_IMAGE</span><span class="s2">/&quot;</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span><span class="s2">&quot;webgrip/</span><span class="nv">$AFFECTED_IMAGE</span><span class="s2">:rollback&quot;</span><span class="w"> </span><span class="s2">&quot;ops/docker/</span><span class="nv">$AFFECTED_IMAGE</span><span class="s2">/&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">            </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;✅ Previous version builds successfully&quot;</span>
+<span class="w">            </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Consider rolling back recent changes&quot;</span>
+<span class="w">        </span><span class="k">else</span>
+<span class="w">            </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;❌ Previous version also fails to build&quot;</span>
+<span class="w">            </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Deeper investigation required&quot;</span>
+<span class="w">        </span><span class="k">fi</span>
+<span class="w">        </span><span class="p">;;</span>
+
+<span class="w">    </span><span class="s2">&quot;security-vulnerability&quot;</span><span class="o">)</span>
+<span class="w">        </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Responding to security vulnerability in </span><span class="nv">$AFFECTED_IMAGE</span><span class="s2">&quot;</span>
+
+<span class="w">        </span><span class="c1"># Pull latest base image</span>
+<span class="w">        </span><span class="nv">base_image</span><span class="o">=</span><span class="k">$(</span>grep<span class="w"> </span><span class="s2">&quot;FROM&quot;</span><span class="w"> </span><span class="s2">&quot;ops/docker/</span><span class="nv">$AFFECTED_IMAGE</span><span class="s2">/Dockerfile&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-1<span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">&#39;{print $2}&#39;</span><span class="k">)</span>
+<span class="w">        </span>docker<span class="w"> </span>pull<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$base_image</span><span class="s2">&quot;</span>
+
+<span class="w">        </span><span class="c1"># Rebuild with latest base</span>
+<span class="w">        </span>docker<span class="w"> </span>build<span class="w"> </span>--no-cache<span class="w"> </span>-t<span class="w"> </span><span class="s2">&quot;webgrip/</span><span class="nv">$AFFECTED_IMAGE</span><span class="s2">:security-fix&quot;</span><span class="w"> </span><span class="s2">&quot;ops/docker/</span><span class="nv">$AFFECTED_IMAGE</span><span class="s2">/&quot;</span>
+
+<span class="w">        </span><span class="c1"># Run security scan</span>
+<span class="w">        </span>trivy<span class="w"> </span>image<span class="w"> </span><span class="s2">&quot;webgrip/</span><span class="nv">$AFFECTED_IMAGE</span><span class="s2">:security-fix&quot;</span><span class="w"> </span>--severity<span class="w"> </span>HIGH,CRITICAL
+<span class="w">        </span><span class="p">;;</span>
+
+<span class="w">    </span><span class="s2">&quot;performance-degradation&quot;</span><span class="o">)</span>
+<span class="w">        </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Responding to performance issues in </span><span class="nv">$AFFECTED_IMAGE</span><span class="s2">&quot;</span>
+
+<span class="w">        </span><span class="c1"># Analyze recent build times</span>
+<span class="w">        </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Recent build performance analysis needed&quot;</span>
+<span class="w">        </span>./scripts/optimize-build-times.sh
+<span class="w">        </span><span class="p">;;</span>
+<span class="k">esac</span>
+</code></pre></div>
+<h3 id="emergency-rollback">Emergency Rollback<a class="headerlink" href="#emergency-rollback" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="c1"># scripts/emergency-rollback.sh</span>
+
+<span class="nv">IMAGE_NAME</span><span class="o">=</span><span class="nv">$1</span>
+<span class="nv">TARGET_SHA</span><span class="o">=</span><span class="si">${</span><span class="nv">2</span><span class="k">:-</span><span class="nv">HEAD</span><span class="p">~1</span><span class="si">}</span>
+
+<span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>-z<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$IMAGE_NAME</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Usage: </span><span class="nv">$0</span><span class="s2"> &lt;image-name&gt; [target-sha]&quot;</span>
+<span class="w">    </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
+<span class="k">fi</span>
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Emergency rollback for </span><span class="nv">$IMAGE_NAME</span><span class="s2"> to </span><span class="nv">$TARGET_SHA</span><span class="s2">&quot;</span>
+
+<span class="c1"># Create emergency branch</span>
+git<span class="w"> </span>checkout<span class="w"> </span>-b<span class="w"> </span><span class="s2">&quot;emergency-rollback-</span><span class="nv">$IMAGE_NAME</span><span class="s2">-</span><span class="k">$(</span>date<span class="w"> </span>+%s<span class="k">)</span><span class="s2">&quot;</span>
+
+<span class="c1"># Rollback to target commit</span>
+git<span class="w"> </span>checkout<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$TARGET_SHA</span><span class="s2">&quot;</span><span class="w"> </span>--<span class="w"> </span><span class="s2">&quot;ops/docker/</span><span class="nv">$IMAGE_NAME</span><span class="s2">/&quot;</span>
+
+<span class="c1"># Build and test</span>
+docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span><span class="s2">&quot;webgrip/</span><span class="nv">$IMAGE_NAME</span><span class="s2">:emergency-rollback&quot;</span><span class="w"> </span><span class="s2">&quot;ops/docker/</span><span class="nv">$IMAGE_NAME</span><span class="s2">/&quot;</span>
+
+<span class="c1"># Basic smoke test</span>
+<span class="k">case</span><span class="w"> </span><span class="nv">$IMAGE_NAME</span><span class="w"> </span><span class="k">in</span>
+<span class="w">    </span><span class="s2">&quot;rust-ci-runner&quot;</span><span class="o">)</span>
+<span class="w">        </span>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="s2">&quot;webgrip/</span><span class="nv">$IMAGE_NAME</span><span class="s2">:emergency-rollback&quot;</span><span class="w"> </span>rustc<span class="w"> </span>--version
+<span class="w">        </span><span class="p">;;</span>
+<span class="w">    </span><span class="c1"># Add other image tests as needed</span>
+<span class="k">esac</span>
+
+<span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="nv">$?</span><span class="w"> </span>-eq<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;✅ Emergency rollback successful&quot;</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Create PR to merge emergency rollback&quot;</span>
+<span class="k">else</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;❌ Emergency rollback failed&quot;</span>
+<span class="w">    </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
+<span class="k">fi</span>
+</code></pre></div>
+<h2 id="documentation-lifecycle">Documentation Lifecycle<a class="headerlink" href="#documentation-lifecycle" title="Permanent link">&para;</a></h2>
+<h3 id="quarterly-review-process">Quarterly Review Process<a class="headerlink" href="#quarterly-review-process" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Content Audit</strong>: Review all documentation for accuracy and completeness</li>
+<li><strong>Link Validation</strong>: Verify all internal and external links</li>
+<li><strong>Version Updates</strong>: Synchronize version information across all docs</li>
+<li><strong>Usage Analytics</strong>: Review most-accessed content and optimize accordingly</li>
+<li><strong>Community Feedback</strong>: Incorporate feedback from GitHub issues and discussions</li>
+</ol>
+<h3 id="continuous-improvement">Continuous Improvement<a class="headerlink" href="#continuous-improvement" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="c1"># scripts/doc-improvement.sh</span>
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Analyzing documentation for improvement opportunities...&quot;</span>
+
+<span class="c1"># Find pages with outdated information</span>
+find<span class="w"> </span>docs/techdocs/docs<span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;*.md&quot;</span><span class="w"> </span>-exec<span class="w"> </span>grep<span class="w"> </span>-l<span class="w"> </span><span class="s2">&quot;TODO\|FIXME\|XXX&quot;</span><span class="w"> </span><span class="o">{}</span><span class="w"> </span><span class="se">\;</span>
+
+<span class="c1"># Find pages that haven&#39;t been updated recently</span>
+find<span class="w"> </span>docs/techdocs/docs<span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;*.md&quot;</span><span class="w"> </span>-not<span class="w"> </span>-newer<span class="w"> </span>/tmp/30-days-ago
+
+<span class="c1"># Analyze link density (pages with few links might need more cross-references)</span>
+find<span class="w"> </span>docs/techdocs/docs<span class="w"> </span>-name<span class="w"> </span><span class="s2">&quot;*.md&quot;</span><span class="w"> </span>-exec<span class="w"> </span>sh<span class="w"> </span>-c<span class="w"> </span><span class="s1">&#39;echo &quot;$(grep -o &quot;\[.*\](.*)&quot; &quot;$1&quot; | wc -l) links in $1&quot;&#39;</span><span class="w"> </span>_<span class="w"> </span><span class="o">{}</span><span class="w"> </span><span class="se">\;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>sort<span class="w"> </span>-n<span class="w"> </span><span class="p">|</span><span class="w"> </span>head<span class="w"> </span>-10
+
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Documentation improvement analysis complete&quot;</span>
+</code></pre></div>
+<h2 id="related-documentation">Related Documentation<a class="headerlink" href="#related-documentation" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../building-locally/">Building Locally</a> - Local development and testing procedures</li>
+<li><a href="../contributing-images/">Contributing Images</a> - Guidelines for contributing new images</li>
+<li><a href="../../cicd/automated-building/">CI/CD Pipeline</a> - Automated building and deployment</li>
+<li><a href="../../overview/architecture/">Architecture Overview</a> - Overall system architecture</li>
+</ul>
+<hr />
+<blockquote>
+<p><strong>Assumption</strong>: Maintenance tasks can be automated through scripts and CI/CD pipelines. Manual intervention may be required for complex issues or major version updates. Validation needed: Confirm automation capabilities and manual oversight requirements with operations team.</p>
+</blockquote>
+<p><strong>Maintainer</strong>: <a href="https://github.com/orgs/webgrip/teams/ops">WebGrip Ops Team</a><br />
+<strong>Scripts</strong>: Available in repository <code>scripts/</code> directory<br />
+<strong>Monitoring</strong>: GitHub Actions workflows for automated maintenance tasks</p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.top", "navigation.sections", "toc.integrate"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.92b07e13.min.js"></script>
+      
+    
+  </body>
+</html>

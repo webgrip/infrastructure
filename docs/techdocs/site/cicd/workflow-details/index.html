@@ -1,0 +1,1991 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="CI/CD Infrastructure and Docker Images for WebGrip">
+      
+      
+      
+        <link rel="canonical" href="https://webgrip.github.io/infrastructure/cicd/workflow-details/">
+      
+      
+        <link rel="prev" href="../docker-registry/">
+      
+      
+        <link rel="next" href="../../testing/playwright-setup/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.18">
+    
+    
+      
+        <title>Workflow Details - WebGrip Infrastructure</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.7e37652d.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.06af60db.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="blue">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#workflow-details" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="WebGrip Infrastructure" class="md-header__button md-logo" aria-label="WebGrip Infrastructure" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            WebGrip Infrastructure
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Workflow Details
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="blue" data-md-color-accent="blue"  aria-hidden="true"  type="radio" name="__palette" id="__palette_0">
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../overview/purpose/" class="md-tabs__link">
+          
+  
+  
+  Overview
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../docker-images/rust-ci-runner/" class="md-tabs__link">
+          
+  
+  
+  Docker Images
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../automated-building/" class="md-tabs__link">
+          
+  
+  
+  CI/CD Pipeline
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../testing/playwright-setup/" class="md-tabs__link">
+          
+  
+  
+  Testing
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../operations/building-locally/" class="md-tabs__link">
+          
+  
+  
+  Operations
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../adrs/" class="md-tabs__link">
+        
+  
+  
+    
+  
+  ADRs
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="WebGrip Infrastructure" class="md-nav__button md-logo" aria-label="WebGrip Infrastructure" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    WebGrip Infrastructure
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Overview
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/purpose/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Purpose & Scope
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/architecture/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/quick-start/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Quick Start
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Docker Images
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Docker Images
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/rust-ci-runner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Rust CI Runner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/github-runner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    GitHub Actions Runner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/helm-deploy/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Helm Deploy
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/playwright-runner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Playwright Runner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/act-runner/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ACT Runner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/rust-releaser/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Rust Releaser
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    CI/CD Pipeline
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            CI/CD Pipeline
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../automated-building/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Automated Building
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docker-registry/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Docker Registry
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    Workflow Details
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    Workflow Details
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#workflow-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Workflow Architecture
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Workflow Architecture">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#primary-workflow-dockerfile-change-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Primary Workflow: Dockerfile Change Detection
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#workflow-dependencies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Workflow Dependencies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#workflow-breakdown" class="md-nav__link">
+    <span class="md-ellipsis">
+      Workflow Breakdown
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Workflow Breakdown">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-trigger-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      1. Trigger Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-change-detection-job" class="md-nav__link">
+    <span class="md-ellipsis">
+      2. Change Detection Job
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-build-and-push-job" class="md-nav__link">
+    <span class="md-ellipsis">
+      3. Build and Push Job
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reusable-workflow-details" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reusable Workflow Details
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Reusable Workflow Details">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#determine-changed-directoriesyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      determine-changed-directories.yml
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-build-and-pushyml" class="md-nav__link">
+    <span class="md-ellipsis">
+      docker-build-and-push.yml
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-workflow-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Workflow Features
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Workflow Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multi-platform-builds" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-Platform Builds
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-arguments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Build Arguments
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#registry-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Registry Configuration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#workflow-security" class="md-nav__link">
+    <span class="md-ellipsis">
+      Workflow Security
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Workflow Security">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#secret-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Secret Management
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#permission-model" class="md-nav__link">
+    <span class="md-ellipsis">
+      Permission Model
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security Best Practices
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#workflow-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      Workflow Monitoring
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Workflow Monitoring">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#execution-tracking" class="md-nav__link">
+    <span class="md-ellipsis">
+      Execution Tracking
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-metrics" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Metrics
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alerting-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Alerting Configuration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting-workflows" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting Workflows
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting Workflows">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Issues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debugging-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Debugging Strategies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#workflow-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Workflow Optimization
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Workflow Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#performance-improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Improvements
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resource-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resource Optimization
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#future-enhancements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Future Enhancements
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Future Enhancements">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#planned-improvements" class="md-nav__link">
+    <span class="md-ellipsis">
+      Planned Improvements
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#workflow-evolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Workflow Evolution
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related Documentation
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Testing
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Testing
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/playwright-setup/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Playwright Setup
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/test-execution/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Test Execution
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  
+  <span class="md-ellipsis">
+    Operations
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Operations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operations/building-locally/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Building Locally
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operations/contributing-images/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Contributing Images
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operations/maintenance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Maintenance
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operations/maintaining-techdocs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    Maintaining TechDocs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    ADRs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="workflow-details">Workflow Details<a class="headerlink" href="#workflow-details" title="Permanent link">&para;</a></h1>
+<p>Detailed breakdown of our GitHub Actions workflows, their dependencies, and integration patterns.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>Our CI/CD workflows are built on a foundation of <strong>reusable workflows</strong> from the <a href="https://github.com/webgrip/workflows"><code>webgrip/workflows</code></a> repository, providing:</p>
+<ul>
+<li>✅ <strong>Standardized patterns</strong> across all WebGrip repositories</li>
+<li>✅ <strong>Centralized maintenance</strong> of common workflow logic</li>
+<li>✅ <strong>Consistent behavior</strong> for builds, tests, and deployments</li>
+<li>✅ <strong>Reduced duplication</strong> through reusable components</li>
+<li>✅ <strong>Version management</strong> of workflow dependencies</li>
+</ul>
+<h2 id="workflow-architecture">Workflow Architecture<a class="headerlink" href="#workflow-architecture" title="Permanent link">&para;</a></h2>
+<h3 id="primary-workflow-dockerfile-change-detection">Primary Workflow: Dockerfile Change Detection<a class="headerlink" href="#primary-workflow-dockerfile-change-detection" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>flowchart TD
+    subgraph "Main Repository"
+        TRIGGER[Push to main&lt;br/&gt;ops/docker/** changes]
+        MAIN_WF[on_dockerfile_change.yml]
+    end
+
+    subgraph "webgrip/workflows Repository"
+        DETECT_WF[determine-changed-directories.yml]
+        BUILD_WF[docker-build-and-push.yml]
+    end
+
+    subgraph "Execution Flow"
+        MATRIX[Build Matrix Generation]
+        PARALLEL[Parallel Build Jobs]
+        REGISTRY[Docker Registry Push]
+    end
+
+    TRIGGER --&gt; MAIN_WF
+    MAIN_WF --&gt; DETECT_WF
+    DETECT_WF --&gt; MATRIX
+    MATRIX --&gt; BUILD_WF
+    BUILD_WF --&gt; PARALLEL
+    PARALLEL --&gt; REGISTRY</code></pre>
+<h3 id="workflow-dependencies">Workflow Dependencies<a class="headerlink" href="#workflow-dependencies" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>flowchart LR
+    subgraph "Infrastructure Repo"
+        ON_CHANGE[on_dockerfile_change.yml]
+    end
+
+    subgraph "webgrip/workflows Repo"
+        DETECT[determine-changed-directories]
+        BUILD[docker-build-and-push]
+        COMMON[common-actions]
+    end
+
+    subgraph "External Dependencies"
+        DOCKER_HUB[Docker Hub Registry]
+        GITHUB_API[GitHub API]
+        ACTION_MARKETPLACE[GitHub Actions Marketplace]
+    end
+
+    ON_CHANGE --&gt; DETECT
+    ON_CHANGE --&gt; BUILD
+    DETECT --&gt; COMMON
+    BUILD --&gt; COMMON
+
+    BUILD --&gt; DOCKER_HUB
+    DETECT --&gt; GITHUB_API
+    COMMON --&gt; ACTION_MARKETPLACE</code></pre>
+<h2 id="workflow-breakdown">Workflow Breakdown<a class="headerlink" href="#workflow-breakdown" title="Permanent link">&para;</a></h2>
+<h3 id="1-trigger-configuration">1. Trigger Configuration<a class="headerlink" href="#1-trigger-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># .github/workflows/on_dockerfile_change.yml</span>
+<span class="nt">on</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">push</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">branches</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">main</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">paths</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="s">&#39;ops/docker/**&#39;</span><span class="p p-Indicator">]</span>
+</code></pre></div>
+<p><strong>Trigger Logic</strong>:
+- <strong>Branch Filter</strong>: Only <code>main</code> branch pushes
+- <strong>Path Filter</strong>: Only changes to <code>ops/docker/**</code> 
+- <strong>File Types</strong>: Any file changes in Docker image directories</p>
+<p><strong>Concurrency Control</strong>:
+<div class="highlight"><pre><span></span><code><span class="nt">concurrency</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">push-${{ github.branch }}</span>
+<span class="w">  </span><span class="nt">cancel-in-progress</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div></p>
+<h3 id="2-change-detection-job">2. Change Detection Job<a class="headerlink" href="#2-change-detection-job" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nt">determine-changed-directories</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webgrip/workflows/.github/workflows/determine-changed-directories.yml@ubuntu-latest</span>
+<span class="w">  </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">inside-dir</span><span class="p">:</span><span class="w"> </span><span class="s">&#39;ops/docker&#39;</span>
+</code></pre></div>
+<p><strong>Purpose</strong>: Identify which Docker image directories contain changes</p>
+<p><strong>Inputs</strong>:
+- <code>inside-dir</code>: Directory to scan for changes (<code>ops/docker</code>)</p>
+<p><strong>Outputs</strong>:
+- <code>matrix</code>: JSON array of changed directories for parallel building</p>
+<p><strong>Algorithm</strong>:
+1. Compare current commit with previous commit
+2. Filter changes to specified directory
+3. Group changes by subdirectory
+4. Generate matrix for parallel execution</p>
+<h3 id="3-build-and-push-job">3. Build and Push Job<a class="headerlink" href="#3-build-and-push-job" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="nt">build-and-push-changed-dirs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">needs</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">determine-changed-directories</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">needs.determine-changed-directories.outputs.matrix != &#39;[]&#39;</span>
+<span class="w">  </span><span class="nt">strategy</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">fail-fast</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">    </span><span class="nt">matrix</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">include</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ fromJson(needs.determine-changed-directories.outputs.matrix) }}</span>
+<span class="w">  </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webgrip/workflows/.github/workflows/docker-build-and-push.yml@ubuntu-latest</span>
+</code></pre></div>
+<p><strong>Conditional Execution</strong>: Only runs if changes detected</p>
+<p><strong>Parallel Strategy</strong>:
+- <code>fail-fast: false</code>: Continue building other images if one fails
+- Dynamic matrix from change detection output</p>
+<p><strong>Per-Image Inputs</strong>:
+<div class="highlight"><pre><span></span><code><span class="nt">with</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">docker-context</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ matrix.path }}</span>
+<span class="w">  </span><span class="nt">docker-file</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Dockerfile</span>
+<span class="w">  </span><span class="nt">docker-tags</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">    </span><span class="no">${{ github.repository_owner }}/${{ matrix.basename }}:latest</span>
+<span class="w">    </span><span class="no">${{ github.repository_owner }}/${{ matrix.basename }}:${{ github.sha }}</span>
+</code></pre></div></p>
+<h2 id="reusable-workflow-details">Reusable Workflow Details<a class="headerlink" href="#reusable-workflow-details" title="Permanent link">&para;</a></h2>
+<h3 id="determine-changed-directoriesyml">determine-changed-directories.yml<a class="headerlink" href="#determine-changed-directoriesyml" title="Permanent link">&para;</a></h3>
+<p><strong>Location</strong>: <code>webgrip/workflows/.github/workflows/determine-changed-directories.yml</code></p>
+<p><strong>Purpose</strong>: Detect which directories have changes and create build matrix</p>
+<p><strong>Inputs</strong>:
+| Input | Required | Description | Default |
+|-------|----------|-------------|---------|
+| <code>inside-dir</code> | Yes | Directory to scan for changes | N/A |
+| <code>exclude-dirs</code> | No | Directories to exclude | <code>""</code> |</p>
+<p><strong>Outputs</strong>:
+| Output | Description | Example |
+|--------|-------------|---------|
+| <code>matrix</code> | JSON build matrix | <code>[{"path": "ops/docker/rust-ci", "basename": "rust-ci"}]</code> |
+| <code>changed-count</code> | Number of changed directories | <code>2</code> |</p>
+<p><strong>Implementation Logic</strong>:
+<div class="highlight"><pre><span></span><code><span class="c1"># Simplified logic</span>
+git<span class="w"> </span>diff<span class="w"> </span>--name-only<span class="w"> </span>HEAD~1<span class="w"> </span>HEAD<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>grep<span class="w"> </span><span class="s2">&quot;^</span><span class="si">${</span><span class="nv">inside_dir</span><span class="si">}</span><span class="s2">/&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>cut<span class="w"> </span>-d<span class="s1">&#39;/&#39;</span><span class="w"> </span>-f1-3<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>sort<span class="w"> </span>-u<span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>jq<span class="w"> </span>-R<span class="w"> </span>-s<span class="w"> </span><span class="s1">&#39;split(&quot;\n&quot;) | map(select(length &gt; 0)) | map({&quot;path&quot;: ., &quot;basename&quot;: split(&quot;/&quot;)[-1]})&#39;</span>
+</code></pre></div></p>
+<h3 id="docker-build-and-pushyml">docker-build-and-push.yml<a class="headerlink" href="#docker-build-and-pushyml" title="Permanent link">&para;</a></h3>
+<p><strong>Location</strong>: <code>webgrip/workflows/.github/workflows/docker-build-and-push.yml</code></p>
+<p><strong>Purpose</strong>: Build and push individual Docker images</p>
+<p><strong>Inputs</strong>:
+| Input | Required | Description | Default |
+|-------|----------|-------------|---------|
+| <code>docker-context</code> | Yes | Build context directory | N/A |
+| <code>docker-file</code> | No | Dockerfile name | <code>Dockerfile</code> |
+| <code>docker-tags</code> | Yes | Newline-separated tags | N/A |
+| <code>platforms</code> | No | Target platforms | <code>linux/amd64</code> |
+| <code>build-args</code> | No | Build arguments | <code>""</code> |</p>
+<p><strong>Secrets</strong>:
+| Secret | Required | Description |
+|--------|----------|-------------|
+| <code>DOCKER_USERNAME</code> | Yes | Docker Hub username |
+| <code>DOCKER_TOKEN</code> | Yes | Docker Hub access token |</p>
+<p><strong>Workflow Steps</strong>:
+1. <strong>Checkout</strong>: Source code checkout
+2. <strong>Setup</strong>: Docker Buildx setup for advanced features
+3. <strong>Login</strong>: Authenticate with Docker registry
+4. <strong>Build</strong>: Build image with specified context and tags
+5. <strong>Push</strong>: Push to registry with all specified tags
+6. <strong>Cleanup</strong>: Clean up build artifacts</p>
+<h2 id="advanced-workflow-features">Advanced Workflow Features<a class="headerlink" href="#advanced-workflow-features" title="Permanent link">&para;</a></h2>
+<h3 id="multi-platform-builds">Multi-Platform Builds<a class="headerlink" href="#multi-platform-builds" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Example multi-platform configuration</span>
+<span class="nt">with</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">docker-context</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ops/docker/rust-ci-runner</span>
+<span class="w">  </span><span class="nt">platforms</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">    </span><span class="no">linux/amd64</span>
+<span class="w">    </span><span class="no">linux/arm64</span>
+<span class="w">  </span><span class="nt">docker-tags</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">    </span><span class="no">webgrip/rust-ci-runner:latest</span>
+<span class="w">    </span><span class="no">webgrip/rust-ci-runner:${{ github.sha }}</span>
+</code></pre></div>
+<p><strong>Supported Platforms</strong>:
+- <code>linux/amd64</code> - Intel/AMD 64-bit (primary)
+- <code>linux/arm64</code> - ARM 64-bit (experimental)
+- <code>linux/arm/v7</code> - ARM 32-bit (on request)</p>
+<h3 id="build-arguments">Build Arguments<a class="headerlink" href="#build-arguments" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Pass build-time arguments</span>
+<span class="nt">with</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">build-args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">    </span><span class="no">RUST_VERSION=1.87.0</span>
+<span class="w">    </span><span class="no">NODE_VERSION=20</span>
+<span class="w">    </span><span class="no">BUILD_DATE=${{ github.event.head_commit.timestamp }}</span>
+</code></pre></div>
+<h3 id="registry-configuration">Registry Configuration<a class="headerlink" href="#registry-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Alternative registry configuration</span>
+<span class="nt">with</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">registry</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ghcr.io</span>
+<span class="w">  </span><span class="nt">docker-tags</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">    </span><span class="no">ghcr.io/webgrip/rust-ci-runner:latest</span>
+<span class="w">    </span><span class="no">ghcr.io/webgrip/rust-ci-runner:${{ github.sha }}</span>
+<span class="nt">secrets</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">DOCKER_USERNAME</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ github.actor }}</span>
+<span class="w">  </span><span class="nt">DOCKER_TOKEN</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ secrets.GITHUB_TOKEN }}</span>
+</code></pre></div>
+<h2 id="workflow-security">Workflow Security<a class="headerlink" href="#workflow-security" title="Permanent link">&para;</a></h2>
+<h3 id="secret-management">Secret Management<a class="headerlink" href="#secret-management" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>flowchart TD
+    subgraph "GitHub Organization"
+        ORG_SECRETS[Organization Secrets]
+        REPO_SECRETS[Repository Secrets]
+    end
+
+    subgraph "Workflow Execution"
+        WF_CONTEXT[Workflow Context]
+        JOB_CONTEXT[Job Context]
+    end
+
+    subgraph "External Services"
+        DOCKER_HUB[Docker Hub]
+        REGISTRIES[Other Registries]
+    end
+
+    ORG_SECRETS --&gt; WF_CONTEXT
+    REPO_SECRETS --&gt; WF_CONTEXT
+    WF_CONTEXT --&gt; JOB_CONTEXT
+    JOB_CONTEXT --&gt; DOCKER_HUB
+    JOB_CONTEXT --&gt; REGISTRIES</code></pre>
+<h3 id="permission-model">Permission Model<a class="headerlink" href="#permission-model" title="Permanent link">&para;</a></h3>
+<p><strong>Workflow Permissions</strong>:
+<div class="highlight"><pre><span></span><code><span class="nt">permissions</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">contents</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">read</span><span class="w">    </span><span class="c1"># Read repository contents</span>
+<span class="w">  </span><span class="nt">packages</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">write</span><span class="w">   </span><span class="c1"># Push to GitHub Packages (if needed)</span>
+<span class="w">  </span><span class="nt">actions</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">read</span><span class="w">     </span><span class="c1"># Read workflow status</span>
+</code></pre></div></p>
+<p><strong>Secret Access</strong>:
+- <strong>Organization Level</strong>: <code>DOCKER_USERNAME</code>, <code>DOCKER_TOKEN</code>
+- <strong>Repository Level</strong>: Project-specific secrets
+- <strong>Environment Level</strong>: Environment-specific overrides</p>
+<h3 id="security-best-practices">Security Best Practices<a class="headerlink" href="#security-best-practices" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Minimal Permissions</strong>: Workflows use least-privilege access</li>
+<li><strong>Secret Rotation</strong>: Regular rotation of access tokens</li>
+<li><strong>Audit Logging</strong>: All workflow executions logged and auditable</li>
+<li><strong>Branch Protection</strong>: Only protected branches can trigger builds</li>
+</ol>
+<h2 id="workflow-monitoring">Workflow Monitoring<a class="headerlink" href="#workflow-monitoring" title="Permanent link">&para;</a></h2>
+<h3 id="execution-tracking">Execution Tracking<a class="headerlink" href="#execution-tracking" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Built-in monitoring via GitHub Actions</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Report build status</span>
+<span class="w">  </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">always()</span>
+<span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">    </span><span class="no">echo &quot;Workflow: ${{ github.workflow }}&quot;</span>
+<span class="w">    </span><span class="no">echo &quot;Run ID: ${{ github.run_id }}&quot;</span>
+<span class="w">    </span><span class="no">echo &quot;Status: ${{ job.status }}&quot;</span>
+</code></pre></div>
+<h3 id="performance-metrics">Performance Metrics<a class="headerlink" href="#performance-metrics" title="Permanent link">&para;</a></h3>
+<p>Track key workflow performance indicators:</p>
+<table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Target</th>
+<th>Current</th>
+<th>Monitoring</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Build Time</strong></td>
+<td>&lt; 10 minutes</td>
+<td>~5 minutes</td>
+<td>GitHub Actions UI</td>
+</tr>
+<tr>
+<td><strong>Success Rate</strong></td>
+<td>&gt; 95%</td>
+<td>~98%</td>
+<td>Workflow status API</td>
+</tr>
+<tr>
+<td><strong>Parallel Efficiency</strong></td>
+<td>&gt; 80%</td>
+<td>~85%</td>
+<td>Job duration analysis</td>
+</tr>
+<tr>
+<td><strong>Cache Hit Rate</strong></td>
+<td>&gt; 70%</td>
+<td>~75%</td>
+<td>Build logs analysis</td>
+</tr>
+</tbody>
+</table>
+<h3 id="alerting-configuration">Alerting Configuration<a class="headerlink" href="#alerting-configuration" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Example workflow notification</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Notify on failure</span>
+<span class="w">  </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">failure()</span>
+<span class="w">  </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">8398a7/action-slack@v3</span>
+<span class="w">  </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">status</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">failure</span>
+<span class="w">    </span><span class="nt">webhook_url</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ secrets.SLACK_WEBHOOK }}</span>
+<span class="w">    </span><span class="nt">message</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">      </span><span class="no">Docker build failed for ${{ matrix.basename }}</span>
+<span class="w">      </span><span class="no">Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}</span>
+</code></pre></div>
+<h2 id="troubleshooting-workflows">Troubleshooting Workflows<a class="headerlink" href="#troubleshooting-workflows" title="Permanent link">&para;</a></h2>
+<h3 id="common-issues">Common Issues<a class="headerlink" href="#common-issues" title="Permanent link">&para;</a></h3>
+<p><strong>Matrix generation empty</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Debug matrix output</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Debug Matrix</span>
+<span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">    </span><span class="no">echo &quot;Matrix: ${{ needs.determine-changed-directories.outputs.matrix }}&quot;</span>
+<span class="w">    </span><span class="no">echo &quot;Changed count: ${{ needs.determine-changed-directories.outputs.changed-count }}&quot;</span>
+</code></pre></div></p>
+<p><strong>Build context errors</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Verify build context</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">List build context</span>
+<span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">    </span><span class="no">echo &quot;Context: ${{ matrix.path }}&quot;</span>
+<span class="w">    </span><span class="no">ls -la ${{ matrix.path }}/</span>
+<span class="w">    </span><span class="no">cat ${{ matrix.path }}/Dockerfile</span>
+</code></pre></div></p>
+<p><strong>Registry authentication failures</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Test registry access</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Test Docker login</span>
+<span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">    </span><span class="no">echo &quot;Testing Docker Hub connection...&quot;</span>
+<span class="w">    </span><span class="no">docker info</span>
+<span class="w">    </span><span class="no">echo &quot;${{ secrets.DOCKER_TOKEN }}&quot; | docker login --username &quot;${{ secrets.DOCKER_USERNAME }}&quot; --password-stdin</span>
+</code></pre></div></p>
+<p><strong>Workflow dependency issues</strong>
+<div class="highlight"><pre><span></span><code><span class="c1"># Check reusable workflow versions</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Check workflow versions</span>
+<span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">    </span><span class="no">echo &quot;Using workflows from: webgrip/workflows@ubuntu-latest&quot;</span>
+<span class="w">    </span><span class="no"># Consider pinning to specific versions for stability</span>
+</code></pre></div></p>
+<h3 id="debugging-strategies">Debugging Strategies<a class="headerlink" href="#debugging-strategies" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p><strong>Enable Debug Logging</strong>:
+   <div class="highlight"><pre><span></span><code><span class="nt">env</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">ACTIONS_STEP_DEBUG</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">  </span><span class="nt">ACTIONS_RUNNER_DEBUG</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Add Debug Steps</strong>:
+   <div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Debug Environment</span>
+<span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">    </span><span class="no">echo &quot;GitHub Context:&quot;</span>
+<span class="w">    </span><span class="no">echo &quot;${{ toJson(github) }}&quot;</span>
+<span class="w">    </span><span class="no">echo &quot;Matrix Context:&quot;</span>
+<span class="w">    </span><span class="no">echo &quot;${{ toJson(matrix) }}&quot;</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Local Testing</strong>:
+   <div class="highlight"><pre><span></span><code><span class="c1"># Use ACT for local workflow testing</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/workspace<span class="w"> </span>-w<span class="w"> </span>/workspace<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>webgrip/act-runner:latest<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-W<span class="w"> </span>.github/workflows/on_dockerfile_change.yml
+</code></pre></div></p>
+</li>
+</ol>
+<h2 id="workflow-optimization">Workflow Optimization<a class="headerlink" href="#workflow-optimization" title="Permanent link">&para;</a></h2>
+<h3 id="performance-improvements">Performance Improvements<a class="headerlink" href="#performance-improvements" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p><strong>Build Caching</strong>:
+   <div class="highlight"><pre><span></span><code><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Setup Docker Buildx</span>
+<span class="w">  </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker/setup-buildx-action@v2</span>
+<span class="w">  </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">driver-opts</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">network=host</span>
+
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Build with cache</span>
+<span class="w">  </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">docker/build-push-action@v4</span>
+<span class="w">  </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">cache-from</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">type=gha</span>
+<span class="w">    </span><span class="nt">cache-to</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">type=gha,mode=max</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Parallel Execution</strong>:
+   <div class="highlight"><pre><span></span><code><span class="nt">strategy</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">fail-fast</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">  </span><span class="nt">max-parallel</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">4</span><span class="w">  </span><span class="c1"># Limit concurrent jobs</span>
+</code></pre></div></p>
+</li>
+<li>
+<p><strong>Conditional Execution</strong>:
+   <div class="highlight"><pre><span></span><code><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">  </span><span class="no">needs.determine-changed-directories.outputs.matrix != &#39;[]&#39; &amp;&amp;</span>
+<span class="w">  </span><span class="no">!contains(github.event.head_commit.message, &#39;[skip ci]&#39;)</span>
+</code></pre></div></p>
+</li>
+</ol>
+<h3 id="resource-optimization">Resource Optimization<a class="headerlink" href="#resource-optimization" title="Permanent link">&para;</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># Optimize runner resources</span>
+<span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span><span class="w">  </span><span class="c1"># Use GitHub-hosted runners</span>
+<span class="c1"># Consider self-hosted for heavy builds:</span>
+<span class="c1"># runs-on: [self-hosted, linux, x64]</span>
+</code></pre></div>
+<h2 id="future-enhancements">Future Enhancements<a class="headerlink" href="#future-enhancements" title="Permanent link">&para;</a></h2>
+<h3 id="planned-improvements">Planned Improvements<a class="headerlink" href="#planned-improvements" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Workflow Versioning</strong>: Pin reusable workflows to specific versions</li>
+<li><strong>Advanced Caching</strong>: Implement cross-workflow caching strategies</li>
+<li><strong>Multi-Registry</strong>: Support multiple Docker registries</li>
+<li><strong>Security Scanning</strong>: Integrate security scanning into workflows</li>
+<li><strong>Notification Integration</strong>: Enhanced Slack/email notifications</li>
+</ol>
+<h3 id="workflow-evolution">Workflow Evolution<a class="headerlink" href="#workflow-evolution" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>flowchart TD
+    CURRENT[Current Workflow] --&gt; VERSIONED[Versioned Workflows]
+    VERSIONED --&gt; CACHED[Advanced Caching]
+    CACHED --&gt; SECURITY[Security Integration]
+    SECURITY --&gt; MULTI_REG[Multi-Registry]
+    MULTI_REG --&gt; NOTIFICATIONS[Enhanced Notifications]
+
+    subgraph "Version 1.0"
+        CURRENT
+    end
+
+    subgraph "Version 2.0"
+        VERSIONED
+        CACHED
+    end
+
+    subgraph "Version 3.0"
+        SECURITY
+        MULTI_REG
+        NOTIFICATIONS
+    end</code></pre>
+<h2 id="related-documentation">Related Documentation<a class="headerlink" href="#related-documentation" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../automated-building/">Automated Building</a> - High-level build process overview</li>
+<li><a href="../docker-registry/">Docker Registry</a> - Registry configuration and management</li>
+<li><a href="../../docker-images/act-runner/">ACT Runner</a> - Local workflow testing</li>
+<li><a href="../../overview/architecture/">Architecture Overview</a> - CI/CD in our infrastructure</li>
+</ul>
+<hr />
+<blockquote>
+<p><strong>Assumption</strong>: Reusable workflows from webgrip/workflows repository remain stable and backward-compatible. Major changes should be coordinated across all consuming repositories. Validation needed: Establish workflow versioning and compatibility policies.</p>
+</blockquote>
+<p><strong>Maintainer</strong>: <a href="https://github.com/orgs/webgrip/teams/ops">WebGrip Ops Team</a><br />
+<strong>Source</strong>: <a href="../../../.github/workflows/on_dockerfile_change.yml"><code>.github/workflows/on_dockerfile_change.yml</code></a><br />
+<strong>Dependencies</strong>: <a href="https://github.com/webgrip/workflows"><code>webgrip/workflows</code></a></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.top", "navigation.sections", "toc.integrate"], "search": "../../assets/javascripts/workers/search.973d3a69.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.92b07e13.min.js"></script>
+      
+    
+  </body>
+</html>
