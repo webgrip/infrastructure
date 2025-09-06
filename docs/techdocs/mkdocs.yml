@@ -1,0 +1,61 @@
+site_name: 'WebGrip Infrastructure'
+site_description: 'CI/CD Infrastructure and Docker Images for WebGrip'
+site_url: 'https://webgrip.github.io/infrastructure'
+
+nav:
+  - Home: index.md
+  - Overview:
+    - Purpose & Scope: overview/purpose.md
+    - Architecture: overview/architecture.md
+    - Quick Start: overview/quick-start.md
+  - Docker Images:
+    - Rust CI Runner: docker-images/rust-ci-runner.md
+    - GitHub Actions Runner: docker-images/github-runner.md
+    - Helm Deploy: docker-images/helm-deploy.md
+    - Playwright Runner: docker-images/playwright-runner.md
+    - ACT Runner: docker-images/act-runner.md
+    - Rust Releaser: docker-images/rust-releaser.md
+  - CI/CD Pipeline:
+    - Automated Building: cicd/automated-building.md
+    - Docker Registry: cicd/docker-registry.md
+    - Workflow Details: cicd/workflow-details.md
+  - Testing:
+    - Playwright Setup: testing/playwright-setup.md
+    - Test Execution: testing/test-execution.md
+  - Operations:
+    - Building Locally: operations/building-locally.md
+    - Contributing Images: operations/contributing-images.md
+    - Maintenance: operations/maintenance.md
+    - Maintaining TechDocs: operations/maintaining-techdocs.md
+  - ADRs: adrs/index.md
+
+plugins:
+  - techdocs-core
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: blue
+      accent: blue
+  features:
+    - navigation.tabs
+    - navigation.top
+    - navigation.sections
+    - toc.integrate
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.details
+  - toc:
+      permalink: true
+  - tables
+  - footnotes
