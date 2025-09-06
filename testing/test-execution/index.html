@@ -1,0 +1,2663 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="CI/CD Infrastructure and Docker Images for WebGrip">
+      
+      
+      
+        <link rel="canonical" href="https://webgrip.github.io/infrastructure/testing/test-execution/">
+      
+      
+        <link rel="prev" href="../playwright-setup/">
+      
+      
+        <link rel="next" href="../../operations/building-locally/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.5">
+    
+    
+      
+        <title>Test Execution - WebGrip Infrastructure</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.8608ea7d.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#test-execution" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="WebGrip Infrastructure" class="md-header__button md-logo" aria-label="WebGrip Infrastructure" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            WebGrip Infrastructure
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Test Execution
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../overview/purpose/" class="md-tabs__link">
+          
+  
+  Overview
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../docker-images/rust-ci-runner/" class="md-tabs__link">
+          
+  
+  Docker Images
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../cicd/automated-building/" class="md-tabs__link">
+          
+  
+  CI/CD Pipeline
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../playwright-setup/" class="md-tabs__link">
+          
+  
+  Testing
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../operations/building-locally/" class="md-tabs__link">
+          
+  
+  Operations
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../adrs/" class="md-tabs__link">
+        
+  
+    
+  
+  ADRs
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="WebGrip Infrastructure" class="md-nav__button md-logo" aria-label="WebGrip Infrastructure" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    WebGrip Infrastructure
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Overview
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/purpose/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Purpose & Scope
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/quick-start/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quick Start
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Docker Images
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Docker Images
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/rust-ci-runner/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rust CI Runner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/github-runner/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    GitHub Actions Runner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/helm-deploy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Helm Deploy
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/playwright-runner/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Playwright Runner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/act-runner/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ACT Runner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/rust-releaser/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rust Releaser
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    CI/CD Pipeline
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            CI/CD Pipeline
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cicd/automated-building/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Automated Building
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cicd/docker-registry/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Docker Registry
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cicd/workflow-details/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Workflow Details
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Testing
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Testing
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../playwright-setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Playwright Setup
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Test Execution
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Test Execution
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#execution-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Execution Strategies
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Execution Strategies">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#local-development-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Local Development Execution
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cicd-execution-pipeline" class="md-nav__link">
+    <span class="md-ellipsis">
+      CI/CD Execution Pipeline
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#production-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      Production Monitoring
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#execution-environments" class="md-nav__link">
+    <span class="md-ellipsis">
+      Execution Environments
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Execution Environments">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#local-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      Local Development
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#docker-based-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Docker-based Execution
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#github-actions-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      GitHub Actions Integration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#parallel-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Parallel Execution
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Parallel Execution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#browser-parallelization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Browser Parallelization
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#test-sharding" class="md-nav__link">
+    <span class="md-ellipsis">
+      Test Sharding
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#worker-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Worker Configuration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test-selection-and-filtering" class="md-nav__link">
+    <span class="md-ellipsis">
+      Test Selection and Filtering
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Test Selection and Filtering">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#tag-based-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tag-based Execution
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-specific-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environment-specific Selection
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-based-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      File-based Selection
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#cross-environment-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cross-Environment Testing
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Cross-Environment Testing">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#environment-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environment Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-specific-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environment-specific Execution
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cross-browser-testing-matrix" class="md-nav__link">
+    <span class="md-ellipsis">
+      Cross-browser Testing Matrix
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Optimization
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Performance Optimization">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#test-execution-performance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Test Execution Performance
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resource-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resource Management
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#caching-strategies" class="md-nav__link">
+    <span class="md-ellipsis">
+      Caching Strategies
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#test-result-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Test Result Management
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Test Result Management">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#report-generation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Report Generation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#artifact-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Artifact Management
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#cicd-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      CI/CD Integration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#monitoring-and-alerting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Monitoring and Alerting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Monitoring and Alerting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#synthetic-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      Synthetic Monitoring
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#alert-configuration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Alert Configuration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Monitoring
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting-test-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting Test Execution
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting Test Execution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-execution-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Execution Issues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#debug-execution" class="md-nav__link">
+    <span class="md-ellipsis">
+      Debug Execution
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related Documentation
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Operations
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Operations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operations/building-locally/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Building Locally
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operations/contributing-images/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing Images
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operations/maintenance/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Maintenance
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operations/maintaining-techdocs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Maintaining TechDocs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADRs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="test-execution">Test Execution<a class="headerlink" href="#test-execution" title="Permanent link">&para;</a></h1>
+<p>Advanced strategies and patterns for executing Playwright tests across different environments and scenarios.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>Test execution encompasses:</p>
+<ul>
+<li>✅ <strong>Environment-specific execution</strong> across development, staging, and production</li>
+<li>✅ <strong>Parallel and distributed testing</strong> for optimal performance</li>
+<li>✅ <strong>Cross-browser and cross-device testing</strong> for comprehensive coverage</li>
+<li>✅ <strong>CI/CD integration patterns</strong> for automated testing workflows</li>
+<li>✅ <strong>Test result management</strong> and reporting strategies</li>
+</ul>
+<h2 id="execution-strategies">Execution Strategies<a class="headerlink" href="#execution-strategies" title="Permanent link">&para;</a></h2>
+<h3 id="local-development-execution">Local Development Execution<a class="headerlink" href="#local-development-execution" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>flowchart TD
+    DEV[Developer Machine] --&gt; LOCAL_ENV[Local Environment]
+    LOCAL_ENV --&gt; QUICK[Quick Feedback Loop]
+    QUICK --&gt; INDIVIDUAL[Individual Test Files]
+    QUICK --&gt; BROWSER[Single Browser]
+    QUICK --&gt; DEBUG[Debug Mode]
+
+    subgraph "Development Workflow"
+        WRITE[Write Test] --&gt; RUN[Run Test]
+        RUN --&gt; DEBUG_ISSUE[Debug Issues]
+        DEBUG_ISSUE --&gt; FIX[Fix Code]
+        FIX --&gt; WRITE
+    end
+
+    DEBUG --&gt; WRITE</code></pre>
+<h3 id="cicd-execution-pipeline">CI/CD Execution Pipeline<a class="headerlink" href="#cicd-execution-pipeline" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>flowchart LR
+    subgraph "Commit Stage"
+        COMMIT[Code Commit] --&gt; SMOKE[Smoke Tests]
+        SMOKE --&gt; FAST_FEEDBACK[&lt; 5 minutes]
+    end
+
+    subgraph "Integration Stage"
+        FAST_FEEDBACK --&gt; FULL_SUITE[Full Test Suite]
+        FULL_SUITE --&gt; PARALLEL[Parallel Execution]
+        PARALLEL --&gt; MULTI_BROWSER[Multi-Browser]
+    end
+
+    subgraph "Deployment Stage"
+        MULTI_BROWSER --&gt; E2E[E2E Tests]
+        E2E --&gt; ACCEPTANCE[Acceptance Tests]
+        ACCEPTANCE --&gt; DEPLOY[Deploy]
+    end</code></pre>
+<h3 id="production-monitoring">Production Monitoring<a class="headerlink" href="#production-monitoring" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>flowchart TD
+    PROD[Production Environment] --&gt; SYNTHETIC[Synthetic Tests]
+    SYNTHETIC --&gt; CRITICAL_PATHS[Critical User Paths]
+    CRITICAL_PATHS --&gt; ALERTS[Failure Alerts]
+    ALERTS --&gt; INCIDENT[Incident Response]
+
+    subgraph "Monitoring Schedule"
+        HOURLY[Hourly Checks]
+        DAILY[Daily Full Suite]
+        WEEKLY[Weekly Regression]
+    end
+
+    SYNTHETIC --&gt; HOURLY
+    SYNTHETIC --&gt; DAILY
+    SYNTHETIC --&gt; WEEKLY</code></pre>
+<h2 id="execution-environments">Execution Environments<a class="headerlink" href="#execution-environments" title="Permanent link">&para;</a></h2>
+<h3 id="local-development">Local Development<a class="headerlink" href="#local-development" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Quick development cycle</span>
+<span class="nb">cd</span><span class="w"> </span>tests/playwright-runner
+
+<span class="c1"># Run single test file</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>tests/auth/login.spec.ts
+
+<span class="c1"># Run with headed browser for debugging</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>tests/auth/login.spec.ts<span class="w"> </span>--headed
+
+<span class="c1"># Run with debug mode</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>tests/auth/login.spec.ts<span class="w"> </span>--debug
+
+<span class="c1"># Watch mode for continuous testing</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--watch
+</code></pre></div></td></tr></table></div>
+<h3 id="docker-based-execution">Docker-based Execution<a class="headerlink" href="#docker-based-execution" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Standard container execution</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/app<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-w<span class="w"> </span>/app/tests/playwright-runner<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>webgrip/playwright-runner:latest<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span>
+
+<span class="c1"># With environment variables</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/app<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-w<span class="w"> </span>/app/tests/playwright-runner<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">BASE_URL</span><span class="o">=</span>http://staging.example.com<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">TEST_USER_EMAIL</span><span class="o">=</span>test@example.com<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">TEST_USER_PASSWORD</span><span class="o">=</span>password123<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>webgrip/playwright-runner:latest<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--project<span class="o">=</span>chromium
+
+<span class="c1"># With volume for reports</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/app<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span>playwright-reports:/app/tests/playwright-runner/playwright-report<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-w<span class="w"> </span>/app/tests/playwright-runner<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>webgrip/playwright-runner:latest<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--reporter<span class="o">=</span>html
+</code></pre></div></td></tr></table></div>
+<h3 id="github-actions-integration">GitHub Actions Integration<a class="headerlink" href="#github-actions-integration" title="Permanent link">&para;</a></h3>
+<div class="language-yaml highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span>
+<span class="normal">61</span>
+<span class="normal">62</span>
+<span class="normal">63</span>
+<span class="normal">64</span>
+<span class="normal">65</span>
+<span class="normal">66</span>
+<span class="normal">67</span>
+<span class="normal">68</span>
+<span class="normal">69</span>
+<span class="normal">70</span>
+<span class="normal">71</span>
+<span class="normal">72</span>
+<span class="normal">73</span>
+<span class="normal">74</span>
+<span class="normal">75</span>
+<span class="normal">76</span>
+<span class="normal">77</span>
+<span class="normal">78</span>
+<span class="normal">79</span>
+<span class="normal">80</span>
+<span class="normal">81</span>
+<span class="normal">82</span>
+<span class="normal">83</span>
+<span class="normal">84</span>
+<span class="normal">85</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># .github/workflows/playwright-tests.yml</span>
+<span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Playwright Tests</span>
+<span class="nt">on</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">push</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">branches</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">main</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">develop</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">pull_request</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">branches</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">main</span><span class="p p-Indicator">]</span>
+
+<span class="nt">jobs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">test</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">    </span><span class="nt">container</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webgrip/playwright-runner:latest</span>
+
+<span class="w">    </span><span class="nt">strategy</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">fail-fast</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">false</span>
+<span class="w">      </span><span class="nt">matrix</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">browser</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">chromium</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">firefox</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">webkit</span><span class="p p-Indicator">]</span>
+<span class="w">        </span><span class="nt">shard</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">1</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">2</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">3</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">4</span><span class="p p-Indicator">]</span>
+
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Setup application</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">composer install --no-dev --optimize-autoloader</span>
+<span class="w">          </span><span class="no">php artisan config:cache</span>
+<span class="w">          </span><span class="no">php artisan route:cache</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Setup database</span>
+<span class="w">        </span><span class="nt">env</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">DB_CONNECTION</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">sqlite</span>
+<span class="w">          </span><span class="nt">DB_DATABASE</span><span class="p">:</span><span class="w"> </span><span class="s">&quot;:memory:&quot;</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">php artisan migrate --force</span>
+<span class="w">          </span><span class="no">php artisan db:seed --force</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Start application server</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">php artisan serve --port=8000 &amp;</span>
+<span class="w">          </span><span class="no">sleep 10</span>
+<span class="w">          </span><span class="no">curl http://localhost:8000/health || exit 1</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Run Playwright tests</span>
+<span class="w">        </span><span class="nt">env</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">BASE_URL</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">http://localhost:8000</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">cd tests/playwright-runner</span>
+<span class="w">          </span><span class="no">npm ci</span>
+<span class="w">          </span><span class="no">npx playwright test \</span>
+<span class="w">            </span><span class="no">--project=${{ matrix.browser }} \</span>
+<span class="w">            </span><span class="no">--shard=${{ matrix.shard }}/4 \</span>
+<span class="w">            </span><span class="no">--reporter=blob</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Upload test results</span>
+<span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/upload-artifact@v3</span>
+<span class="w">        </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">always()</span>
+<span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">playwright-results-${{ matrix.browser }}-${{ matrix.shard }}</span>
+<span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tests/playwright-runner/test-results/</span>
+
+<span class="w">  </span><span class="nt">merge-reports</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">always()</span>
+<span class="w">    </span><span class="nt">needs</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">    </span><span class="nt">container</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webgrip/playwright-runner:latest</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Download all test results</span>
+<span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/download-artifact@v3</span>
+<span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">pattern</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">playwright-results-*</span>
+<span class="w">          </span><span class="nt">merge-multiple</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">true</span>
+<span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">test-results/</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Merge test reports</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">cd tests/playwright-runner</span>
+<span class="w">          </span><span class="no">npx playwright merge-reports --reporter=html test-results/</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Upload merged report</span>
+<span class="w">        </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/upload-artifact@v3</span>
+<span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">          </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">playwright-report</span>
+<span class="w">          </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">tests/playwright-runner/playwright-report/</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="parallel-execution">Parallel Execution<a class="headerlink" href="#parallel-execution" title="Permanent link">&para;</a></h2>
+<h3 id="browser-parallelization">Browser Parallelization<a class="headerlink" href="#browser-parallelization" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">// playwright.config.ts - Browser parallelization</span>
+<span class="k">export</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="nx">defineConfig</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">projects</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;chromium&#39;</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">use</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="nx">devices</span><span class="p">[</span><span class="s1">&#39;Desktop Chrome&#39;</span><span class="p">]</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;firefox&#39;</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">use</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="nx">devices</span><span class="p">[</span><span class="s1">&#39;Desktop Firefox&#39;</span><span class="p">]</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">name</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;webkit&#39;</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">use</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="p">...</span><span class="nx">devices</span><span class="p">[</span><span class="s1">&#39;Desktop Safari&#39;</span><span class="p">]</span><span class="w"> </span><span class="p">},</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="p">});</span>
+</code></pre></div></td></tr></table></div>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Run all browsers in parallel</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span>
+
+<span class="c1"># Run specific browser</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--project<span class="o">=</span>chromium
+
+<span class="c1"># Run multiple specific browsers</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--project<span class="o">=</span>chromium<span class="w"> </span>--project<span class="o">=</span>firefox
+</code></pre></div></td></tr></table></div>
+<h3 id="test-sharding">Test Sharding<a class="headerlink" href="#test-sharding" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Split tests across multiple runners</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--shard<span class="o">=</span><span class="m">1</span>/4<span class="w">  </span><span class="c1"># Run 1st quarter</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--shard<span class="o">=</span><span class="m">2</span>/4<span class="w">  </span><span class="c1"># Run 2nd quarter</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--shard<span class="o">=</span><span class="m">3</span>/4<span class="w">  </span><span class="c1"># Run 3rd quarter</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--shard<span class="o">=</span><span class="m">4</span>/4<span class="w">  </span><span class="c1"># Run 4th quarter</span>
+
+<span class="c1"># In CI with matrix</span>
+strategy:
+<span class="w">  </span>matrix:
+<span class="w">    </span>shard:<span class="w"> </span><span class="o">[</span><span class="m">1</span>,<span class="w"> </span><span class="m">2</span>,<span class="w"> </span><span class="m">3</span>,<span class="w"> </span><span class="m">4</span><span class="o">]</span>
+steps:
+<span class="w">  </span>-<span class="w"> </span>name:<span class="w"> </span>Run<span class="w"> </span>tests<span class="w"> </span><span class="o">(</span>Shard<span class="w"> </span><span class="si">${</span><span class="p">{ matrix.shard </span><span class="si">}</span><span class="o">})</span>
+<span class="w">    </span>run:<span class="w"> </span>npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--shard<span class="o">=</span><span class="si">${</span><span class="p">{ matrix.shard </span><span class="si">}</span><span class="o">}</span>/4
+</code></pre></div></td></tr></table></div>
+<h3 id="worker-configuration">Worker Configuration<a class="headerlink" href="#worker-configuration" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">// playwright.config.ts - Worker optimization</span>
+<span class="k">export</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="nx">defineConfig</span><span class="p">({</span>
+<span class="w">  </span><span class="c1">// Local development - use all cores</span>
+<span class="w">  </span><span class="nx">workers</span><span class="o">:</span><span class="w"> </span><span class="kt">process.env.CI</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="nx">2</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">undefined</span><span class="p">,</span>
+
+<span class="w">  </span><span class="c1">// Or specify exact number</span>
+<span class="w">  </span><span class="nx">workers</span><span class="o">:</span><span class="w"> </span><span class="kt">4</span><span class="p">,</span>
+
+<span class="w">  </span><span class="c1">// Full parallelization</span>
+<span class="w">  </span><span class="nx">fullyParallel</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span>
+
+<span class="w">  </span><span class="c1">// Global timeout</span>
+<span class="w">  </span><span class="nx">globalTimeout</span><span class="o">:</span><span class="w"> </span><span class="kt">60</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">60</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">1000</span><span class="p">,</span><span class="w"> </span><span class="c1">// 1 hour</span>
+
+<span class="w">  </span><span class="c1">// Per-test timeout</span>
+<span class="w">  </span><span class="nx">timeout</span><span class="o">:</span><span class="w"> </span><span class="kt">30</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">1000</span><span class="p">,</span><span class="w"> </span><span class="c1">// 30 seconds</span>
+<span class="p">});</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="test-selection-and-filtering">Test Selection and Filtering<a class="headerlink" href="#test-selection-and-filtering" title="Permanent link">&para;</a></h2>
+<h3 id="tag-based-execution">Tag-based Execution<a class="headerlink" href="#tag-based-execution" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">// tests/auth.spec.ts</span>
+<span class="nx">test</span><span class="p">.</span><span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;Authentication @smoke @auth&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">test</span><span class="p">(</span><span class="s1">&#39;should login successfully @critical&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Test implementation</span>
+<span class="w">  </span><span class="p">});</span>
+
+<span class="w">  </span><span class="nx">test</span><span class="p">(</span><span class="s1">&#39;should handle invalid credentials @error-handling&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Test implementation</span>
+<span class="w">  </span><span class="p">});</span>
+<span class="p">});</span>
+
+<span class="nx">test</span><span class="p">.</span><span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;User Management @integration @users&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">test</span><span class="p">(</span><span class="s1">&#39;should create new user @crud&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Test implementation</span>
+<span class="w">  </span><span class="p">});</span>
+<span class="p">});</span>
+</code></pre></div></td></tr></table></div>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Run tests by tags</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--grep<span class="w"> </span><span class="s2">&quot;@smoke&quot;</span><span class="w">              </span><span class="c1"># Smoke tests only</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--grep<span class="w"> </span><span class="s2">&quot;@critical&quot;</span><span class="w">          </span><span class="c1"># Critical tests only</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--grep<span class="w"> </span><span class="s2">&quot;@smoke|@critical&quot;</span><span class="w">   </span><span class="c1"># Smoke OR critical</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--grep-invert<span class="w"> </span><span class="s2">&quot;@slow&quot;</span><span class="w">       </span><span class="c1"># Everything except slow tests</span>
+
+<span class="c1"># Run by test suite</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--grep<span class="w"> </span><span class="s2">&quot;@auth&quot;</span><span class="w">              </span><span class="c1"># All auth tests</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>tests/auth/<span class="w">                 </span><span class="c1"># All files in auth directory</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="environment-specific-selection">Environment-specific Selection<a class="headerlink" href="#environment-specific-selection" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Development environment - fast feedback</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--grep<span class="w"> </span><span class="s2">&quot;@smoke&quot;</span><span class="w"> </span>--project<span class="o">=</span>chromium
+
+<span class="c1"># Staging environment - comprehensive testing</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--grep<span class="w"> </span><span class="s2">&quot;@smoke|@integration&quot;</span>
+
+<span class="c1"># Production monitoring - critical paths only</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--grep<span class="w"> </span><span class="s2">&quot;@critical|@monitoring&quot;</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="file-based-selection">File-based Selection<a class="headerlink" href="#file-based-selection" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Run specific test files</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>tests/auth/login.spec.ts
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>tests/auth/
+
+<span class="c1"># Run multiple specific files</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>tests/auth/login.spec.ts<span class="w"> </span>tests/users/profile.spec.ts
+
+<span class="c1"># Run tests matching pattern</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span><span class="s2">&quot;**/*auth*.spec.ts&quot;</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="cross-environment-testing">Cross-Environment Testing<a class="headerlink" href="#cross-environment-testing" title="Permanent link">&para;</a></h2>
+<h3 id="environment-configuration">Environment Configuration<a class="headerlink" href="#environment-configuration" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">// config/environments.ts</span>
+<span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">environments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">development</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">baseURL</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;http://localhost:8000&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">timeout</span><span class="o">:</span><span class="w"> </span><span class="kt">10000</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">retries</span><span class="o">:</span><span class="w"> </span><span class="kt">0</span><span class="p">,</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">staging</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">baseURL</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;https://staging.webgrip.nl&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">timeout</span><span class="o">:</span><span class="w"> </span><span class="kt">30000</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">retries</span><span class="o">:</span><span class="w"> </span><span class="kt">2</span><span class="p">,</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">production</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">baseURL</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;https://app.webgrip.nl&#39;</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">timeout</span><span class="o">:</span><span class="w"> </span><span class="kt">15000</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">retries</span><span class="o">:</span><span class="w"> </span><span class="kt">1</span><span class="p">,</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="p">};</span>
+
+<span class="c1">// playwright.config.ts</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">env</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">TEST_ENV</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="s1">&#39;development&#39;</span><span class="p">;</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">config</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">environments</span><span class="p">[</span><span class="nx">env</span><span class="p">];</span>
+
+<span class="k">export</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="nx">defineConfig</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">use</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">baseURL</span><span class="o">:</span><span class="w"> </span><span class="kt">config.baseURL</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">actionTimeout</span><span class="o">:</span><span class="w"> </span><span class="kt">config.timeout</span><span class="p">,</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">retries</span><span class="o">:</span><span class="w"> </span><span class="kt">config.retries</span><span class="p">,</span>
+<span class="p">});</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="environment-specific-execution">Environment-specific Execution<a class="headerlink" href="#environment-specific-execution" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Test against different environments</span>
+<span class="nv">TEST_ENV</span><span class="o">=</span>development<span class="w"> </span>npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span>
+<span class="nv">TEST_ENV</span><span class="o">=</span>staging<span class="w"> </span>npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--grep<span class="w"> </span><span class="s2">&quot;@smoke&quot;</span>
+<span class="nv">TEST_ENV</span><span class="o">=</span>production<span class="w"> </span>npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--grep<span class="w"> </span><span class="s2">&quot;@monitoring&quot;</span>
+
+<span class="c1"># With Docker</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/app<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-w<span class="w"> </span>/app/tests/playwright-runner<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">TEST_ENV</span><span class="o">=</span>staging<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">BASE_URL</span><span class="o">=</span>https://staging.webgrip.nl<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>webgrip/playwright-runner:latest<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--grep<span class="w"> </span><span class="s2">&quot;@smoke&quot;</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="cross-browser-testing-matrix">Cross-browser Testing Matrix<a class="headerlink" href="#cross-browser-testing-matrix" title="Permanent link">&para;</a></h3>
+<div class="language-yaml highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Complete cross-browser testing</span>
+<span class="nt">strategy</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">matrix</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">browser</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">chromium</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">firefox</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">webkit</span><span class="p p-Indicator">]</span>
+<span class="w">    </span><span class="nt">environment</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">staging</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">production</span><span class="p p-Indicator">]</span>
+
+<span class="nt">steps</span><span class="p">:</span>
+<span class="w">  </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Test ${{ matrix.browser }} on ${{ matrix.environment }}</span>
+<span class="w">    </span><span class="nt">env</span><span class="p">:</span>
+<span class="w">      </span><span class="nt">TEST_ENV</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">${{ matrix.environment }}</span>
+<span class="w">    </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">npx playwright test --project=${{ matrix.browser }}</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="performance-optimization">Performance Optimization<a class="headerlink" href="#performance-optimization" title="Permanent link">&para;</a></h2>
+<h3 id="test-execution-performance">Test Execution Performance<a class="headerlink" href="#test-execution-performance" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">// playwright.config.ts - Performance optimizations</span>
+<span class="k">export</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="nx">defineConfig</span><span class="p">({</span>
+<span class="w">  </span><span class="c1">// Faster test execution</span>
+<span class="w">  </span><span class="nx">fullyParallel</span><span class="o">:</span><span class="w"> </span><span class="kt">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">workers</span><span class="o">:</span><span class="w"> </span><span class="kt">process.env.CI</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="nx">4</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="kt">undefined</span><span class="p">,</span>
+
+<span class="w">  </span><span class="c1">// Reasonable timeouts</span>
+<span class="w">  </span><span class="nx">timeout</span><span class="o">:</span><span class="w"> </span><span class="kt">30000</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">actionTimeout</span><span class="o">:</span><span class="w"> </span><span class="kt">10000</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">navigationTimeout</span><span class="o">:</span><span class="w"> </span><span class="kt">15000</span><span class="p">,</span>
+
+<span class="w">  </span><span class="c1">// Optimize for CI</span>
+<span class="w">  </span><span class="nx">use</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Disable animations for faster execution</span>
+<span class="w">    </span><span class="nx">reducedMotion</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;reduce&#39;</span><span class="p">,</span>
+
+<span class="w">    </span><span class="c1">// Optimize screenshots</span>
+<span class="w">    </span><span class="nx">screenshot</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;only-on-failure&#39;</span><span class="p">,</span>
+
+<span class="w">    </span><span class="c1">// Minimal trace collection</span>
+<span class="w">    </span><span class="nx">trace</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;retain-on-failure&#39;</span><span class="p">,</span>
+
+<span class="w">    </span><span class="c1">// Disable video in CI</span>
+<span class="w">    </span><span class="nx">video</span><span class="o">:</span><span class="w"> </span><span class="kt">process.env.CI</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s1">&#39;off&#39;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;retain-on-failure&#39;</span><span class="p">,</span>
+<span class="w">  </span><span class="p">},</span>
+
+<span class="w">  </span><span class="c1">// Global setup for shared state</span>
+<span class="w">  </span><span class="nx">globalSetup</span><span class="o">:</span><span class="w"> </span><span class="kt">require.resolve</span><span class="p">(</span><span class="s1">&#39;./global-setup&#39;</span><span class="p">),</span>
+<span class="w">  </span><span class="nx">globalTeardown</span><span class="o">:</span><span class="w"> </span><span class="kt">require.resolve</span><span class="p">(</span><span class="s1">&#39;./global-teardown&#39;</span><span class="p">),</span>
+<span class="p">});</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="resource-management">Resource Management<a class="headerlink" href="#resource-management" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">// global-setup.ts - Shared setup</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">chromium</span><span class="p">,</span><span class="w"> </span><span class="nx">FullConfig</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">&#39;@playwright/test&#39;</span><span class="p">;</span>
+
+<span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">globalSetup</span><span class="p">(</span><span class="nx">config</span><span class="o">:</span><span class="w"> </span><span class="kt">FullConfig</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Setup shared database state</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">setupTestDatabase</span><span class="p">();</span>
+
+<span class="w">  </span><span class="c1">// Warm up application</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">browser</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">chromium</span><span class="p">.</span><span class="nx">launch</span><span class="p">();</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">browser</span><span class="p">.</span><span class="nx">newPage</span><span class="p">();</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="kr">goto</span><span class="p">(</span><span class="nx">config</span><span class="p">.</span><span class="nx">projects</span><span class="p">[</span><span class="mf">0</span><span class="p">].</span><span class="nx">use</span><span class="p">.</span><span class="nx">baseURL</span><span class="p">);</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">browser</span><span class="p">.</span><span class="nx">close</span><span class="p">();</span>
+
+<span class="w">  </span><span class="c1">// Cache authentication state</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">setupAuthenticationState</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="k">export</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="nx">globalSetup</span><span class="p">;</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="caching-strategies">Caching Strategies<a class="headerlink" href="#caching-strategies" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">// fixtures/auth-cache.ts</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">test</span><span class="w"> </span><span class="kr">as</span><span class="w"> </span><span class="nx">base</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">&#39;@playwright/test&#39;</span><span class="p">;</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">STORAGE_STATE</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">&#39;auth-state.json&#39;</span><span class="p">;</span>
+
+<span class="k">export</span><span class="w"> </span><span class="kd">const</span><span class="w"> </span><span class="nx">test</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">base</span><span class="p">.</span><span class="nx">extend</span><span class="p">({</span>
+<span class="w">  </span><span class="c1">// Reuse authentication state</span>
+<span class="w">  </span><span class="nx">storageState</span><span class="o">:</span><span class="w"> </span><span class="kt">STORAGE_STATE</span><span class="p">,</span>
+
+<span class="w">  </span><span class="nx">authenticatedPage</span><span class="o">:</span><span class="w"> </span><span class="kt">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">},</span><span class="w"> </span><span class="nx">use</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Use cached authentication if available</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">use</span><span class="p">(</span><span class="nx">page</span><span class="p">);</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="p">});</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="test-result-management">Test Result Management<a class="headerlink" href="#test-result-management" title="Permanent link">&para;</a></h2>
+<h3 id="report-generation">Report Generation<a class="headerlink" href="#report-generation" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">// playwright.config.ts - Multiple reporters</span>
+<span class="k">export</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="nx">defineConfig</span><span class="p">({</span>
+<span class="w">  </span><span class="nx">reporter</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="c1">// HTML report for local development</span>
+<span class="w">    </span><span class="p">[</span><span class="s1">&#39;html&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span>
+<span class="w">      </span><span class="nx">outputFolder</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;playwright-report&#39;</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">open</span><span class="o">:</span><span class="w"> </span><span class="kt">process.env.CI</span><span class="w"> </span><span class="o">?</span><span class="w"> </span><span class="s1">&#39;never&#39;</span><span class="w"> </span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;on-failure&#39;</span>
+<span class="w">    </span><span class="p">}],</span>
+
+<span class="w">    </span><span class="c1">// JSON for CI integration</span>
+<span class="w">    </span><span class="p">[</span><span class="s1">&#39;json&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">outputFile</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;test-results.json&#39;</span><span class="w"> </span><span class="p">}],</span>
+
+<span class="w">    </span><span class="c1">// JUnit for test management systems</span>
+<span class="w">    </span><span class="p">[</span><span class="s1">&#39;junit&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">outputFile</span><span class="o">:</span><span class="w"> </span><span class="s1">&#39;test-results.xml&#39;</span><span class="w"> </span><span class="p">}],</span>
+
+<span class="w">    </span><span class="c1">// Line reporter for CI logs</span>
+<span class="w">    </span><span class="p">[</span><span class="s1">&#39;line&#39;</span><span class="p">],</span>
+
+<span class="w">    </span><span class="c1">// Custom reporter for notifications</span>
+<span class="w">    </span><span class="p">[</span><span class="s1">&#39;./reporters/slack-reporter.js&#39;</span><span class="p">],</span>
+<span class="w">  </span><span class="p">],</span>
+<span class="p">});</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="artifact-management">Artifact Management<a class="headerlink" href="#artifact-management" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Generate and collect artifacts</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--reporter<span class="o">=</span>html<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--output-dir<span class="o">=</span>test-results<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--screenshot<span class="o">=</span>on<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--video<span class="o">=</span>on<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--trace<span class="o">=</span>on
+
+<span class="c1"># Archive results</span>
+tar<span class="w"> </span>-czf<span class="w"> </span><span class="s2">&quot;test-results-</span><span class="k">$(</span>date<span class="w"> </span>+%Y%m%d-%H%M%S<span class="k">)</span><span class="s2">.tar.gz&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>test-results/<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>playwright-report/<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>test-results.json
+</code></pre></div></td></tr></table></div>
+<h3 id="cicd-integration">CI/CD Integration<a class="headerlink" href="#cicd-integration" title="Permanent link">&para;</a></h3>
+<div class="language-yaml highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Complete artifact handling</span>
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Run Playwright tests</span>
+<span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">npx playwright test --reporter=blob</span>
+
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Generate HTML report</span>
+<span class="w">  </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">always()</span>
+<span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">npx playwright merge-reports --reporter=html blob-report/</span>
+
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Upload test report</span>
+<span class="w">  </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/upload-artifact@v3</span>
+<span class="w">  </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">always()</span>
+<span class="w">  </span><span class="nt">with</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">playwright-report-${{ github.run_id }}</span>
+<span class="w">    </span><span class="nt">path</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">      </span><span class="no">playwright-report/</span>
+<span class="w">      </span><span class="no">test-results/</span>
+<span class="w">    </span><span class="nt">retention-days</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">30</span>
+
+<span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Upload to test management</span>
+<span class="w">  </span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">always()</span>
+<span class="w">  </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">    </span><span class="no">curl -X POST \</span>
+<span class="w">      </span><span class="no">-H &quot;Content-Type: application/json&quot; \</span>
+<span class="w">      </span><span class="no">-d @test-results.json \</span>
+<span class="w">      </span><span class="no">https://test-management.webgrip.nl/api/results</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="monitoring-and-alerting">Monitoring and Alerting<a class="headerlink" href="#monitoring-and-alerting" title="Permanent link">&para;</a></h2>
+<h3 id="synthetic-monitoring">Synthetic Monitoring<a class="headerlink" href="#synthetic-monitoring" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">// tests/monitoring/critical-paths.spec.ts</span>
+<span class="k">import</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">test</span><span class="p">,</span><span class="w"> </span><span class="nx">expect</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="kr">from</span><span class="w"> </span><span class="s1">&#39;@playwright/test&#39;</span><span class="p">;</span>
+
+<span class="nx">test</span><span class="p">.</span><span class="nx">describe</span><span class="p">(</span><span class="s1">&#39;Critical Path Monitoring @monitoring @critical&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">test</span><span class="p">(</span><span class="s1">&#39;user login flow&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">startTime</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">();</span>
+
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="kr">goto</span><span class="p">(</span><span class="s1">&#39;/login&#39;</span><span class="p">);</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">fill</span><span class="p">(</span><span class="s1">&#39;[name=&quot;email&quot;]&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">MONITOR_USER_EMAIL</span><span class="o">!</span><span class="p">);</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">fill</span><span class="p">(</span><span class="s1">&#39;[name=&quot;password&quot;]&#39;</span><span class="p">,</span><span class="w"> </span><span class="nx">process</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">MONITOR_USER_PASSWORD</span><span class="o">!</span><span class="p">);</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">click</span><span class="p">(</span><span class="s1">&#39;button[type=&quot;submit&quot;]&#39;</span><span class="p">);</span>
+
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">page</span><span class="p">).</span><span class="nx">toHaveURL</span><span class="p">(</span><span class="s1">&#39;/dashboard&#39;</span><span class="p">);</span>
+
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">loadTime</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">()</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">startTime</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">expect</span><span class="p">(</span><span class="nx">loadTime</span><span class="p">).</span><span class="nx">toBeLessThan</span><span class="p">(</span><span class="mf">5000</span><span class="p">);</span><span class="w"> </span><span class="c1">// 5 second SLA</span>
+<span class="w">  </span><span class="p">});</span>
+
+<span class="w">  </span><span class="nx">test</span><span class="p">(</span><span class="s1">&#39;checkout process&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Simulate critical business process</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="kr">goto</span><span class="p">(</span><span class="s1">&#39;/products/1&#39;</span><span class="p">);</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">click</span><span class="p">(</span><span class="s1">&#39;button:has-text(&quot;Add to Cart&quot;)&#39;</span><span class="p">);</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="kr">goto</span><span class="p">(</span><span class="s1">&#39;/checkout&#39;</span><span class="p">);</span>
+
+<span class="w">    </span><span class="c1">// Verify checkout loads within SLA</span>
+<span class="w">    </span><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s1">&#39;h1&#39;</span><span class="p">)).</span><span class="nx">toContainText</span><span class="p">(</span><span class="s1">&#39;Checkout&#39;</span><span class="p">);</span>
+<span class="w">  </span><span class="p">});</span>
+<span class="p">});</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="alert-configuration">Alert Configuration<a class="headerlink" href="#alert-configuration" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="c1"># monitoring/run-synthetic-tests.sh</span>
+
+<span class="c1"># Run critical path tests</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--grep<span class="w"> </span><span class="s2">&quot;@monitoring&quot;</span><span class="w"> </span>--reporter<span class="o">=</span>json<span class="w"> </span>&gt;<span class="w"> </span>monitoring-results.json
+
+<span class="c1"># Check for failures</span>
+<span class="nv">FAILURES</span><span class="o">=</span><span class="k">$(</span>jq<span class="w"> </span><span class="s1">&#39;.stats.failed&#39;</span><span class="w"> </span>monitoring-results.json<span class="k">)</span>
+
+<span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$FAILURES</span><span class="s2">&quot;</span><span class="w"> </span>-gt<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">  </span><span class="c1"># Send alert to Slack</span>
+<span class="w">  </span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span>-H<span class="w"> </span><span class="s1">&#39;Content-type: application/json&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>--data<span class="w"> </span><span class="s1">&#39;{&quot;text&quot;:&quot;🚨 Synthetic monitoring tests failed: &#39;</span><span class="s2">&quot;</span><span class="nv">$FAILURES</span><span class="s2">&quot;</span><span class="s1">&#39; failures detected&quot;}&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span><span class="nv">$SLACK_WEBHOOK_URL</span>
+
+<span class="w">  </span><span class="c1"># Page on-call team</span>
+<span class="w">  </span>curl<span class="w"> </span>-X<span class="w"> </span>POST<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-H<span class="w"> </span><span class="s2">&quot;Authorization: Token </span><span class="nv">$PAGERDUTY_TOKEN</span><span class="s2">&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-H<span class="w"> </span><span class="s2">&quot;Content-Type: application/json&quot;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>-d<span class="w"> </span><span class="s1">&#39;{</span>
+<span class="s1">      &quot;incident&quot;: {</span>
+<span class="s1">        &quot;type&quot;: &quot;incident&quot;,</span>
+<span class="s1">        &quot;title&quot;: &quot;Synthetic Test Failures&quot;,</span>
+<span class="s1">        &quot;service&quot;: {&quot;id&quot;: &quot;&#39;</span><span class="s2">&quot;</span><span class="nv">$PAGERDUTY_SERVICE_ID</span><span class="s2">&quot;</span><span class="s1">&#39;&quot;, &quot;type&quot;: &quot;service_reference&quot;}</span>
+<span class="s1">      }</span>
+<span class="s1">    }&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>https://api.pagerduty.com/incidents
+<span class="k">fi</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="performance-monitoring">Performance Monitoring<a class="headerlink" href="#performance-monitoring" title="Permanent link">&para;</a></h3>
+<div class="language-typescript highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">// tests/performance/load-times.spec.ts</span>
+<span class="nx">test</span><span class="p">(</span><span class="s1">&#39;performance metrics&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="kr">goto</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">);</span>
+
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">metrics</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">evaluate</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">perfData</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">performance</span><span class="p">.</span><span class="nx">getEntriesByType</span><span class="p">(</span><span class="s1">&#39;navigation&#39;</span><span class="p">)[</span><span class="mf">0</span><span class="p">];</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">domContentLoaded</span><span class="o">:</span><span class="w"> </span><span class="kt">perfData.domContentLoadedEventEnd</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">perfData</span><span class="p">.</span><span class="nx">fetchStart</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">loadComplete</span><span class="o">:</span><span class="w"> </span><span class="kt">perfData.loadEventEnd</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">perfData</span><span class="p">.</span><span class="nx">fetchStart</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">firstPaint</span><span class="o">:</span><span class="w"> </span><span class="kt">performance.getEntriesByType</span><span class="p">(</span><span class="s1">&#39;paint&#39;</span><span class="p">)[</span><span class="mf">0</span><span class="p">]</span><span class="o">?</span><span class="p">.</span><span class="nx">startTime</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="mf">0</span><span class="p">,</span>
+<span class="w">    </span><span class="p">};</span>
+<span class="w">  </span><span class="p">});</span>
+
+<span class="w">  </span><span class="c1">// Assert performance SLAs</span>
+<span class="w">  </span><span class="nx">expect</span><span class="p">(</span><span class="nx">metrics</span><span class="p">.</span><span class="nx">domContentLoaded</span><span class="p">).</span><span class="nx">toBeLessThan</span><span class="p">(</span><span class="mf">2000</span><span class="p">);</span>
+<span class="w">  </span><span class="nx">expect</span><span class="p">(</span><span class="nx">metrics</span><span class="p">.</span><span class="nx">loadComplete</span><span class="p">).</span><span class="nx">toBeLessThan</span><span class="p">(</span><span class="mf">5000</span><span class="p">);</span>
+<span class="w">  </span><span class="nx">expect</span><span class="p">(</span><span class="nx">metrics</span><span class="p">.</span><span class="nx">firstPaint</span><span class="p">).</span><span class="nx">toBeLessThan</span><span class="p">(</span><span class="mf">1500</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// Log metrics for monitoring</span>
+<span class="w">  </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">&#39;Performance Metrics:&#39;</span><span class="p">,</span><span class="w"> </span><span class="nb">JSON</span><span class="p">.</span><span class="nx">stringify</span><span class="p">(</span><span class="nx">metrics</span><span class="p">));</span>
+<span class="p">});</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="troubleshooting-test-execution">Troubleshooting Test Execution<a class="headerlink" href="#troubleshooting-test-execution" title="Permanent link">&para;</a></h2>
+<h3 id="common-execution-issues">Common Execution Issues<a class="headerlink" href="#common-execution-issues" title="Permanent link">&para;</a></h3>
+<p><strong>Tests timing out</strong>
+<div class="language-typescript highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">// Increase timeouts for specific tests</span>
+<span class="nx">test</span><span class="p">(</span><span class="s1">&#39;slow operation&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">test</span><span class="p">.</span><span class="nx">setTimeout</span><span class="p">(</span><span class="mf">60000</span><span class="p">);</span><span class="w"> </span><span class="c1">// 60 seconds for this test</span>
+
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="kr">goto</span><span class="p">(</span><span class="s1">&#39;/slow-page&#39;</span><span class="p">);</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForSelector</span><span class="p">(</span><span class="s1">&#39;.slow-component&#39;</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">timeout</span><span class="o">:</span><span class="w"> </span><span class="kt">30000</span><span class="w"> </span><span class="p">});</span>
+<span class="p">});</span>
+</code></pre></div></td></tr></table></div></p>
+<p><strong>Flaky tests</strong>
+<div class="language-typescript highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">// Add proper waits and retries</span>
+<span class="nx">test</span><span class="p">(</span><span class="s1">&#39;potentially flaky test&#39;</span><span class="p">,</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">page</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Retry this test up to 3 times</span>
+<span class="w">  </span><span class="nx">test</span><span class="p">.</span><span class="nx">fixme</span><span class="p">(({</span><span class="w"> </span><span class="nx">browserName</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">browserName</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s1">&#39;webkit&#39;</span><span class="p">,</span><span class="w"> </span><span class="s1">&#39;Flaky on WebKit&#39;</span><span class="p">);</span>
+
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="kr">goto</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// Wait for network to be idle</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">page</span><span class="p">.</span><span class="nx">waitForLoadState</span><span class="p">(</span><span class="s1">&#39;networkidle&#39;</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// Use auto-waiting assertions</span>
+<span class="w">  </span><span class="k">await</span><span class="w"> </span><span class="nx">expect</span><span class="p">(</span><span class="nx">page</span><span class="p">.</span><span class="nx">locator</span><span class="p">(</span><span class="s1">&#39;.dynamic-content&#39;</span><span class="p">)).</span><span class="nx">toBeVisible</span><span class="p">();</span>
+<span class="p">});</span>
+</code></pre></div></td></tr></table></div></p>
+<p><strong>Resource exhaustion</strong>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Reduce parallel workers</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--workers<span class="o">=</span><span class="m">1</span>
+
+<span class="c1"># Run tests sequentially</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--workers<span class="o">=</span><span class="m">1</span><span class="w"> </span>--fullyParallel<span class="o">=</span><span class="nb">false</span>
+
+<span class="c1"># Increase system resources</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--memory<span class="o">=</span>4g<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--cpus<span class="o">=</span><span class="m">2</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/app<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>webgrip/playwright-runner:latest<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span>
+</code></pre></div></td></tr></table></div></p>
+<h3 id="debug-execution">Debug Execution<a class="headerlink" href="#debug-execution" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Debug with verbose output</span>
+<span class="nv">DEBUG</span><span class="o">=</span>pw:*<span class="w"> </span>npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span>
+
+<span class="c1"># Debug specific test</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--debug<span class="w"> </span>tests/auth/login.spec.ts
+
+<span class="c1"># Debug in headed mode</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--headed<span class="w"> </span>--slowMo<span class="o">=</span><span class="m">1000</span>
+
+<span class="c1"># Generate trace for debugging</span>
+npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span><span class="w"> </span>--trace<span class="o">=</span>on
+npx<span class="w"> </span>playwright<span class="w"> </span>show-trace<span class="w"> </span>test-results/example-test/trace.zip
+</code></pre></div></td></tr></table></div>
+<h2 id="related-documentation">Related Documentation<a class="headerlink" href="#related-documentation" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../playwright-setup/">Playwright Setup</a> - Initial configuration and test writing</li>
+<li><a href="../../docker-images/playwright-runner/">Playwright Runner Image</a> - Container environment</li>
+<li><a href="../../cicd/automated-building/">CI/CD Pipeline</a> - Automated test execution</li>
+<li><a href="../../overview/architecture/">Architecture Overview</a> - Testing architecture</li>
+</ul>
+<hr />
+<blockquote>
+<p><strong>Assumption</strong>: Test execution primarily occurs in containerized environments with reliable network connectivity. High-latency or unreliable network conditions may require additional timeout and retry configuration. Validation needed: Confirm network and infrastructure requirements for test execution environments.</p>
+</blockquote>
+<p><strong>Maintainer</strong>: <a href="https://github.com/orgs/webgrip/teams/ops">WebGrip Ops Team</a><br />
+<strong>Configuration</strong>: <a href="../../../tests/playwright-runner/playwright.config.ts"><code>tests/playwright-runner/playwright.config.ts</code></a><br />
+<strong>Container</strong>: <a href="../../docker-images/playwright-runner/">webgrip/playwright-runner</a></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../playwright-setup/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Playwright Setup">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Playwright Setup
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../../operations/building-locally/" class="md-footer__link md-footer__link--next" aria-label="Next: Building Locally">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Building Locally
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.top", "navigation.sections", "toc.integrate", "navigation.footer", "content.action.edit"], "search": "../../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f1b6f286.min.js"></script>
+      
+        <script src="../../search/main.js"></script>
+      
+    
+  </body>
+</html>

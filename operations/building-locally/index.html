@@ -1,0 +1,2683 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="CI/CD Infrastructure and Docker Images for WebGrip">
+      
+      
+      
+        <link rel="canonical" href="https://webgrip.github.io/infrastructure/operations/building-locally/">
+      
+      
+        <link rel="prev" href="../../testing/test-execution/">
+      
+      
+        <link rel="next" href="../contributing-images/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.5">
+    
+    
+      
+        <title>Building Locally - WebGrip Infrastructure</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.8608ea7d.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#building-locally" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="WebGrip Infrastructure" class="md-header__button md-logo" aria-label="WebGrip Infrastructure" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            WebGrip Infrastructure
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Building Locally
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../overview/purpose/" class="md-tabs__link">
+          
+  
+  Overview
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../docker-images/rust-ci-runner/" class="md-tabs__link">
+          
+  
+  Docker Images
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../cicd/automated-building/" class="md-tabs__link">
+          
+  
+  CI/CD Pipeline
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../testing/playwright-setup/" class="md-tabs__link">
+          
+  
+  Testing
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
+          
+  
+  Operations
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../adrs/" class="md-tabs__link">
+        
+  
+    
+  
+  ADRs
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="WebGrip Infrastructure" class="md-nav__button md-logo" aria-label="WebGrip Infrastructure" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    WebGrip Infrastructure
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Overview
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/purpose/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Purpose & Scope
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../overview/quick-start/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quick Start
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Docker Images
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Docker Images
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/rust-ci-runner/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rust CI Runner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/github-runner/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    GitHub Actions Runner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/helm-deploy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Helm Deploy
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/playwright-runner/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Playwright Runner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/act-runner/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ACT Runner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/rust-releaser/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rust Releaser
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    CI/CD Pipeline
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            CI/CD Pipeline
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cicd/automated-building/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Automated Building
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cicd/docker-registry/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Docker Registry
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cicd/workflow-details/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Workflow Details
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Testing
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Testing
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/playwright-setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Playwright Setup
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/test-execution/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Test Execution
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Operations
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Operations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Building Locally
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Building Locally
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Prerequisites">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#required-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      Required Tools
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#system-requirements" class="md-nav__link">
+    <span class="md-ellipsis">
+      System Requirements
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#repository-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Repository Setup
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Repository Setup">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#clone-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      Clone Repository
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#environment-setup" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environment Setup
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#basic-building" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Building
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Basic Building">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single-image-build" class="md-nav__link">
+    <span class="md-ellipsis">
+      Single Image Build
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#using-docker-compose" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using Docker Compose
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-context-verification" class="md-nav__link">
+    <span class="md-ellipsis">
+      Build Context Verification
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-building" class="md-nav__link">
+    <span class="md-ellipsis">
+      Advanced Building
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Building">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multi-stage-build-optimization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multi-stage Build Optimization
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-arguments-and-customization" class="md-nav__link">
+    <span class="md-ellipsis">
+      Build Arguments and Customization
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-cache-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Build Cache Management
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#build-automation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Build Automation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Build Automation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#makefile-for-build-automation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Makefile for Build Automation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-script-automation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Build Script Automation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-built-images" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing Built Images
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Testing Built Images">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-functionality-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Basic Functionality Testing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integration-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Integration Testing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#performance-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      Performance Testing
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#build-failures" class="md-nav__link">
+    <span class="md-ellipsis">
+      Build Failures
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#runtime-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Runtime Issues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-performance-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Build Performance Issues
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#development-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      Development Workflow
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#security-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security Considerations
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resource-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resource Management
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#integration-with-development-tools" class="md-nav__link">
+    <span class="md-ellipsis">
+      Integration with Development Tools
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Integration with Development Tools">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#vs-code-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      VS Code Integration
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ide-docker-plugin" class="md-nav__link">
+    <span class="md-ellipsis">
+      IDE Docker Plugin
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related Documentation
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contributing-images/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing Images
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../maintenance/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Maintenance
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../maintaining-techdocs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Maintaining TechDocs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADRs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="building-locally">Building Locally<a class="headerlink" href="#building-locally" title="Permanent link">&para;</a></h1>
+<p>Guide for building and testing Docker images locally during development and maintenance.</p>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>Local building capabilities enable:</p>
+<ul>
+<li>✅ <strong>Development iteration</strong> without pushing to GitHub</li>
+<li>✅ <strong>Testing changes</strong> before committing to version control</li>
+<li>✅ <strong>Debugging build issues</strong> with full access to build context</li>
+<li>✅ <strong>Custom image variants</strong> for specific use cases</li>
+<li>✅ <strong>Offline development</strong> when internet connectivity is limited</li>
+</ul>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<h3 id="required-tools">Required Tools<a class="headerlink" href="#required-tools" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Purpose</th>
+<th>Installation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Docker</strong></td>
+<td>Container building and runtime</td>
+<td><a href="https://docs.docker.com/get-docker/">Install Docker</a></td>
+</tr>
+<tr>
+<td><strong>Docker Compose</strong></td>
+<td>Multi-container orchestration</td>
+<td>Included with Docker Desktop</td>
+</tr>
+<tr>
+<td><strong>Git</strong></td>
+<td>Source code management</td>
+<td><a href="https://git-scm.com/downloads">Install Git</a></td>
+</tr>
+<tr>
+<td><strong>Make</strong> (optional)</td>
+<td>Build automation</td>
+<td><code>sudo apt install make</code> (Linux)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="system-requirements">System Requirements<a class="headerlink" href="#system-requirements" title="Permanent link">&para;</a></h3>
+<ul>
+<li><strong>CPU</strong>: 2+ cores recommended for parallel builds</li>
+<li><strong>RAM</strong>: 4GB minimum, 8GB recommended</li>
+<li><strong>Storage</strong>: 20GB free space for Docker images and build cache</li>
+<li><strong>Network</strong>: Reliable internet for base image downloads</li>
+</ul>
+<h2 id="repository-setup">Repository Setup<a class="headerlink" href="#repository-setup" title="Permanent link">&para;</a></h2>
+<h3 id="clone-repository">Clone Repository<a class="headerlink" href="#clone-repository" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Clone the infrastructure repository</span>
+git<span class="w"> </span>clone<span class="w"> </span>https://github.com/webgrip/infrastructure.git
+<span class="nb">cd</span><span class="w"> </span>infrastructure
+
+<span class="c1"># Verify directory structure</span>
+ls<span class="w"> </span>-la<span class="w"> </span>ops/docker/
+</code></pre></div></td></tr></table></div>
+<h3 id="environment-setup">Environment Setup<a class="headerlink" href="#environment-setup" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create local environment file (optional)</span>
+cat<span class="w"> </span>&gt;<span class="w"> </span>.env.local<span class="w"> </span><span class="s">&lt;&lt; EOF</span>
+<span class="s">DOCKER_REGISTRY=localhost:5000</span>
+<span class="s">BUILD_ARGS=&quot;--no-cache&quot;</span>
+<span class="s">PARALLEL_BUILDS=4</span>
+<span class="s">EOF</span>
+
+<span class="c1"># Source environment</span>
+<span class="nb">source</span><span class="w"> </span>.env.local
+</code></pre></div></td></tr></table></div>
+<h2 id="basic-building">Basic Building<a class="headerlink" href="#basic-building" title="Permanent link">&para;</a></h2>
+<h3 id="single-image-build">Single Image Build<a class="headerlink" href="#single-image-build" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Build specific image</span>
+docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>webgrip/rust-ci-runner:local<span class="w"> </span>ops/docker/rust-ci-runner/
+
+<span class="c1"># Build with specific tag</span>
+docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>my-rust-ci:test<span class="w"> </span>ops/docker/rust-ci-runner/
+
+<span class="c1"># Build with build arguments</span>
+docker<span class="w"> </span>build<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--build-arg<span class="w"> </span><span class="nv">RUST_VERSION</span><span class="o">=</span><span class="m">1</span>.86.0<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-t<span class="w"> </span>webgrip/rust-ci-runner:1.86<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>ops/docker/rust-ci-runner/
+</code></pre></div></td></tr></table></div>
+<h3 id="using-docker-compose">Using Docker Compose<a class="headerlink" href="#using-docker-compose" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Build all images defined in docker-compose.yml</span>
+docker-compose<span class="w"> </span>build
+
+<span class="c1"># Build specific service</span>
+docker-compose<span class="w"> </span>build<span class="w"> </span>rust-ci-runner
+
+<span class="c1"># Build with no cache</span>
+docker-compose<span class="w"> </span>build<span class="w"> </span>--no-cache
+
+<span class="c1"># Build in parallel</span>
+docker-compose<span class="w"> </span>build<span class="w"> </span>--parallel
+</code></pre></div></td></tr></table></div>
+<h3 id="build-context-verification">Build Context Verification<a class="headerlink" href="#build-context-verification" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Check build context size</span>
+du<span class="w"> </span>-sh<span class="w"> </span>ops/docker/rust-ci-runner/
+
+<span class="c1"># List files in build context</span>
+find<span class="w"> </span>ops/docker/rust-ci-runner/<span class="w"> </span>-type<span class="w"> </span>f
+
+<span class="c1"># Verify Dockerfile syntax</span>
+docker<span class="w"> </span>build<span class="w"> </span>--dry-run<span class="w"> </span>ops/docker/rust-ci-runner/
+</code></pre></div></td></tr></table></div>
+<h2 id="advanced-building">Advanced Building<a class="headerlink" href="#advanced-building" title="Permanent link">&para;</a></h2>
+<h3 id="multi-stage-build-optimization">Multi-stage Build Optimization<a class="headerlink" href="#multi-stage-build-optimization" title="Permanent link">&para;</a></h3>
+<div class="language-dockerfile highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c"># Example optimization for development</span>
+<span class="k">FROM</span><span class="w"> </span><span class="s">rust:1.87.0-slim-bookworm</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="s">development</span>
+<span class="c"># Add development-specific tools</span>
+<span class="k">RUN</span><span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>gdb<span class="w"> </span>lldb<span class="w"> </span>strace<span class="w"> </span>valgrind
+
+<span class="k">FROM</span><span class="w"> </span><span class="s">rust:1.87.0-slim-bookworm</span><span class="w"> </span><span class="k">AS</span><span class="w"> </span><span class="s">production</span>
+<span class="c"># Production optimizations</span>
+<span class="k">RUN</span><span class="w"> </span>apt-get<span class="w"> </span>update<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span>apt-get<span class="w"> </span>install<span class="w"> </span>-y<span class="w"> </span>--no-install-recommends<span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>ca-certificates<span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">    </span>rm<span class="w"> </span>-rf<span class="w"> </span>/var/lib/apt/lists/*
+</code></pre></div></td></tr></table></div>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Build specific stage</span>
+docker<span class="w"> </span>build<span class="w"> </span>--target<span class="w"> </span>development<span class="w"> </span>-t<span class="w"> </span>rust-ci:dev<span class="w"> </span>ops/docker/rust-ci-runner/
+docker<span class="w"> </span>build<span class="w"> </span>--target<span class="w"> </span>production<span class="w"> </span>-t<span class="w"> </span>rust-ci:prod<span class="w"> </span>ops/docker/rust-ci-runner/
+</code></pre></div></td></tr></table></div>
+<h3 id="build-arguments-and-customization">Build Arguments and Customization<a class="headerlink" href="#build-arguments-and-customization" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Common build arguments</span>
+docker<span class="w"> </span>build<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--build-arg<span class="w"> </span><span class="nv">RUST_VERSION</span><span class="o">=</span><span class="m">1</span>.87.0<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--build-arg<span class="w"> </span><span class="nv">NODE_VERSION</span><span class="o">=</span><span class="m">20</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--build-arg<span class="w"> </span><span class="nv">DEBIAN_FRONTEND</span><span class="o">=</span>noninteractive<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-t<span class="w"> </span>webgrip/rust-ci-runner:custom<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>ops/docker/rust-ci-runner/
+
+<span class="c1"># Development build with debug symbols</span>
+docker<span class="w"> </span>build<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--build-arg<span class="w"> </span><span class="nv">BUILD_TYPE</span><span class="o">=</span>debug<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--build-arg<span class="w"> </span><span class="nv">OPTIMIZATION_LEVEL</span><span class="o">=</span><span class="m">0</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-t<span class="w"> </span>webgrip/rust-ci-runner:debug<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>ops/docker/rust-ci-runner/
+</code></pre></div></td></tr></table></div>
+<h3 id="build-cache-management">Build Cache Management<a class="headerlink" href="#build-cache-management" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Build with cache from registry</span>
+docker<span class="w"> </span>build<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--cache-from<span class="w"> </span>webgrip/rust-ci-runner:latest<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-t<span class="w"> </span>webgrip/rust-ci-runner:local<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>ops/docker/rust-ci-runner/
+
+<span class="c1"># Use BuildKit for advanced caching</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">DOCKER_BUILDKIT</span><span class="o">=</span><span class="m">1</span>
+docker<span class="w"> </span>build<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--build-arg<span class="w"> </span><span class="nv">BUILDKIT_INLINE_CACHE</span><span class="o">=</span><span class="m">1</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-t<span class="w"> </span>webgrip/rust-ci-runner:cached<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>ops/docker/rust-ci-runner/
+
+<span class="c1"># Clean build cache</span>
+docker<span class="w"> </span>builder<span class="w"> </span>prune
+docker<span class="w"> </span>system<span class="w"> </span>prune<span class="w"> </span>-a
+</code></pre></div></td></tr></table></div>
+<h2 id="build-automation">Build Automation<a class="headerlink" href="#build-automation" title="Permanent link">&para;</a></h2>
+<h3 id="makefile-for-build-automation">Makefile for Build Automation<a class="headerlink" href="#makefile-for-build-automation" title="Permanent link">&para;</a></h3>
+<div class="language-makefile highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c"># Makefile for local building</span>
+<span class="nv">IMAGES</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span>rust-ci-runner<span class="w"> </span>github-runner<span class="w"> </span>helm-deploy<span class="w"> </span>playwright-runner<span class="w"> </span>act-runner<span class="w"> </span>rust-releaser
+<span class="nv">REGISTRY</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span>webgrip
+<span class="nv">TAG</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nb">local</span>
+
+<span class="nf">.PHONY</span><span class="o">:</span><span class="w"> </span><span class="n">all</span> <span class="n">build</span>-% <span class="n">clean</span> <span class="n">test</span>-% <span class="n">push</span>-% <span class="n">help</span>
+
+<span class="c"># Build all images</span>
+<span class="nf">all</span><span class="o">:</span><span class="w"> </span><span class="k">$(</span><span class="nv">addprefix</span> <span class="nv">build-</span>,<span class="k">$(</span><span class="nv">IMAGES</span><span class="k">))</span>
+
+<span class="c"># Build specific image</span>
+<span class="nf">build-%</span><span class="o">:</span>
+<span class="w">    </span>@echo<span class="w"> </span><span class="s2">&quot;Building </span><span class="nv">$*</span><span class="s2"> image...&quot;</span>
+<span class="w">    </span>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span><span class="k">$(</span>REGISTRY<span class="k">)</span>/<span class="nv">$*</span>:<span class="k">$(</span>TAG<span class="k">)</span><span class="w"> </span>ops/docker/<span class="nv">$*</span>/
+<span class="w">    </span>@echo<span class="w"> </span><span class="s2">&quot;✅ Built </span><span class="k">$(</span>REGISTRY<span class="k">)</span><span class="s2">/</span><span class="nv">$*</span><span class="s2">:</span><span class="k">$(</span>TAG<span class="k">)</span><span class="s2">&quot;</span>
+
+<span class="c"># Test specific image</span>
+<span class="nf">test-%</span><span class="o">:</span><span class="w"> </span><span class="n">build</span>-%
+<span class="w">    </span>@echo<span class="w"> </span><span class="s2">&quot;Testing </span><span class="nv">$*</span><span class="s2"> image...&quot;</span>
+<span class="w">    </span>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="k">$(</span>REGISTRY<span class="k">)</span>/<span class="nv">$*</span>:<span class="k">$(</span>TAG<span class="k">)</span><span class="w"> </span>--version<span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;✅ </span><span class="nv">$*</span><span class="s2"> image works&quot;</span>
+
+<span class="c"># Push to local registry</span>
+<span class="nf">push-%</span><span class="o">:</span><span class="w"> </span><span class="n">build</span>-%
+<span class="w">    </span>docker<span class="w"> </span>push<span class="w"> </span><span class="k">$(</span>REGISTRY<span class="k">)</span>/<span class="nv">$*</span>:<span class="k">$(</span>TAG<span class="k">)</span>
+
+<span class="c"># Clean up local images</span>
+<span class="nf">clean</span><span class="o">:</span>
+<span class="w">    </span>docker<span class="w"> </span>images<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span>REGISTRY<span class="k">)</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span><span class="s2">&quot;</span><span class="k">$(</span>TAG<span class="k">)</span><span class="s2">&quot;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>awk<span class="w"> </span><span class="s1">&#39;{print $$3}&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>xargs<span class="w"> </span>-r<span class="w"> </span>docker<span class="w"> </span>rmi
+
+<span class="c"># Build with custom tag</span>
+<span class="nf">tag</span><span class="o">:</span>
+<span class="w">    </span><span class="k">$(</span><span class="nb">eval</span><span class="w"> </span>TAG<span class="w"> </span>:<span class="o">=</span><span class="w"> </span><span class="k">$(</span>shell<span class="w"> </span>git<span class="w"> </span>rev-parse<span class="w"> </span>--short<span class="w"> </span>HEAD<span class="k">))</span>
+<span class="w">    </span>@echo<span class="w"> </span><span class="s2">&quot;Building with tag: </span><span class="k">$(</span>TAG<span class="k">)</span><span class="s2">&quot;</span>
+
+<span class="c"># Help target</span>
+<span class="nf">help</span><span class="o">:</span>
+<span class="w">    </span>@echo<span class="w"> </span><span class="s2">&quot;Available targets:&quot;</span>
+<span class="w">    </span>@echo<span class="w"> </span><span class="s2">&quot;  all              - Build all images&quot;</span>
+<span class="w">    </span>@echo<span class="w"> </span><span class="s2">&quot;  build-&lt;image&gt;    - Build specific image&quot;</span>
+<span class="w">    </span>@echo<span class="w"> </span><span class="s2">&quot;  test-&lt;image&gt;     - Test specific image&quot;</span>
+<span class="w">    </span>@echo<span class="w"> </span><span class="s2">&quot;  push-&lt;image&gt;     - Push to registry&quot;</span>
+<span class="w">    </span>@echo<span class="w"> </span><span class="s2">&quot;  clean            - Clean up local images&quot;</span>
+<span class="w">    </span>@echo<span class="w"> </span><span class="s2">&quot;  tag              - Build with git SHA tag&quot;</span>
+<span class="w">    </span>@echo<span class="w"> </span><span class="s2">&quot;&quot;</span>
+<span class="w">    </span>@echo<span class="w"> </span><span class="s2">&quot;Available images: </span><span class="k">$(</span>IMAGES<span class="k">)</span><span class="s2">&quot;</span>
+<span class="w">    </span>@echo<span class="w"> </span><span class="s2">&quot;&quot;</span>
+<span class="w">    </span>@echo<span class="w"> </span><span class="s2">&quot;Examples:&quot;</span>
+<span class="w">    </span>@echo<span class="w"> </span><span class="s2">&quot;  make build-rust-ci-runner&quot;</span>
+<span class="w">    </span>@echo<span class="w"> </span><span class="s2">&quot;  make test-playwright-runner&quot;</span>
+<span class="w">    </span>@echo<span class="w"> </span><span class="s2">&quot;  make TAG=dev build-helm-deploy&quot;</span>
+
+<span class="c"># Usage examples</span>
+<span class="nf">build-dev</span><span class="o">:</span><span class="w"> </span><span class="n">TAG</span>=<span class="n">dev</span>
+<span class="nf">build-dev</span><span class="o">:</span><span class="w"> </span><span class="n">all</span>
+
+<span class="nf">build-test</span><span class="o">:</span><span class="w"> </span><span class="n">TAG</span>=<span class="n">test</span>
+<span class="nf">build-test</span><span class="o">:</span><span class="w"> </span><span class="n">all</span>
+</code></pre></div></td></tr></table></div>
+<p>Usage:
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Build all images</span>
+make<span class="w"> </span>all
+
+<span class="c1"># Build specific image</span>
+make<span class="w"> </span>build-rust-ci-runner
+
+<span class="c1"># Build and test</span>
+make<span class="w"> </span>test-playwright-runner
+
+<span class="c1"># Build with custom tag</span>
+make<span class="w"> </span><span class="nv">TAG</span><span class="o">=</span>dev<span class="w"> </span>build-helm-deploy
+
+<span class="c1"># Clean up</span>
+make<span class="w"> </span>clean
+</code></pre></div></td></tr></table></div></p>
+<h3 id="build-script-automation">Build Script Automation<a class="headerlink" href="#build-script-automation" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">  1</span>
+<span class="normal">  2</span>
+<span class="normal">  3</span>
+<span class="normal">  4</span>
+<span class="normal">  5</span>
+<span class="normal">  6</span>
+<span class="normal">  7</span>
+<span class="normal">  8</span>
+<span class="normal">  9</span>
+<span class="normal"> 10</span>
+<span class="normal"> 11</span>
+<span class="normal"> 12</span>
+<span class="normal"> 13</span>
+<span class="normal"> 14</span>
+<span class="normal"> 15</span>
+<span class="normal"> 16</span>
+<span class="normal"> 17</span>
+<span class="normal"> 18</span>
+<span class="normal"> 19</span>
+<span class="normal"> 20</span>
+<span class="normal"> 21</span>
+<span class="normal"> 22</span>
+<span class="normal"> 23</span>
+<span class="normal"> 24</span>
+<span class="normal"> 25</span>
+<span class="normal"> 26</span>
+<span class="normal"> 27</span>
+<span class="normal"> 28</span>
+<span class="normal"> 29</span>
+<span class="normal"> 30</span>
+<span class="normal"> 31</span>
+<span class="normal"> 32</span>
+<span class="normal"> 33</span>
+<span class="normal"> 34</span>
+<span class="normal"> 35</span>
+<span class="normal"> 36</span>
+<span class="normal"> 37</span>
+<span class="normal"> 38</span>
+<span class="normal"> 39</span>
+<span class="normal"> 40</span>
+<span class="normal"> 41</span>
+<span class="normal"> 42</span>
+<span class="normal"> 43</span>
+<span class="normal"> 44</span>
+<span class="normal"> 45</span>
+<span class="normal"> 46</span>
+<span class="normal"> 47</span>
+<span class="normal"> 48</span>
+<span class="normal"> 49</span>
+<span class="normal"> 50</span>
+<span class="normal"> 51</span>
+<span class="normal"> 52</span>
+<span class="normal"> 53</span>
+<span class="normal"> 54</span>
+<span class="normal"> 55</span>
+<span class="normal"> 56</span>
+<span class="normal"> 57</span>
+<span class="normal"> 58</span>
+<span class="normal"> 59</span>
+<span class="normal"> 60</span>
+<span class="normal"> 61</span>
+<span class="normal"> 62</span>
+<span class="normal"> 63</span>
+<span class="normal"> 64</span>
+<span class="normal"> 65</span>
+<span class="normal"> 66</span>
+<span class="normal"> 67</span>
+<span class="normal"> 68</span>
+<span class="normal"> 69</span>
+<span class="normal"> 70</span>
+<span class="normal"> 71</span>
+<span class="normal"> 72</span>
+<span class="normal"> 73</span>
+<span class="normal"> 74</span>
+<span class="normal"> 75</span>
+<span class="normal"> 76</span>
+<span class="normal"> 77</span>
+<span class="normal"> 78</span>
+<span class="normal"> 79</span>
+<span class="normal"> 80</span>
+<span class="normal"> 81</span>
+<span class="normal"> 82</span>
+<span class="normal"> 83</span>
+<span class="normal"> 84</span>
+<span class="normal"> 85</span>
+<span class="normal"> 86</span>
+<span class="normal"> 87</span>
+<span class="normal"> 88</span>
+<span class="normal"> 89</span>
+<span class="normal"> 90</span>
+<span class="normal"> 91</span>
+<span class="normal"> 92</span>
+<span class="normal"> 93</span>
+<span class="normal"> 94</span>
+<span class="normal"> 95</span>
+<span class="normal"> 96</span>
+<span class="normal"> 97</span>
+<span class="normal"> 98</span>
+<span class="normal"> 99</span>
+<span class="normal">100</span>
+<span class="normal">101</span>
+<span class="normal">102</span>
+<span class="normal">103</span>
+<span class="normal">104</span>
+<span class="normal">105</span>
+<span class="normal">106</span>
+<span class="normal">107</span>
+<span class="normal">108</span>
+<span class="normal">109</span>
+<span class="normal">110</span>
+<span class="normal">111</span>
+<span class="normal">112</span>
+<span class="normal">113</span>
+<span class="normal">114</span>
+<span class="normal">115</span>
+<span class="normal">116</span>
+<span class="normal">117</span>
+<span class="normal">118</span>
+<span class="normal">119</span>
+<span class="normal">120</span>
+<span class="normal">121</span>
+<span class="normal">122</span>
+<span class="normal">123</span>
+<span class="normal">124</span>
+<span class="normal">125</span>
+<span class="normal">126</span>
+<span class="normal">127</span>
+<span class="normal">128</span>
+<span class="normal">129</span>
+<span class="normal">130</span>
+<span class="normal">131</span>
+<span class="normal">132</span>
+<span class="normal">133</span>
+<span class="normal">134</span>
+<span class="normal">135</span>
+<span class="normal">136</span>
+<span class="normal">137</span>
+<span class="normal">138</span>
+<span class="normal">139</span>
+<span class="normal">140</span>
+<span class="normal">141</span>
+<span class="normal">142</span>
+<span class="normal">143</span>
+<span class="normal">144</span>
+<span class="normal">145</span>
+<span class="normal">146</span>
+<span class="normal">147</span>
+<span class="normal">148</span>
+<span class="normal">149</span>
+<span class="normal">150</span>
+<span class="normal">151</span>
+<span class="normal">152</span>
+<span class="normal">153</span>
+<span class="normal">154</span>
+<span class="normal">155</span>
+<span class="normal">156</span>
+<span class="normal">157</span>
+<span class="normal">158</span>
+<span class="normal">159</span>
+<span class="normal">160</span>
+<span class="normal">161</span>
+<span class="normal">162</span>
+<span class="normal">163</span>
+<span class="normal">164</span>
+<span class="normal">165</span>
+<span class="normal">166</span>
+<span class="normal">167</span>
+<span class="normal">168</span>
+<span class="normal">169</span>
+<span class="normal">170</span>
+<span class="normal">171</span>
+<span class="normal">172</span>
+<span class="normal">173</span>
+<span class="normal">174</span>
+<span class="normal">175</span>
+<span class="normal">176</span>
+<span class="normal">177</span>
+<span class="normal">178</span>
+<span class="normal">179</span>
+<span class="normal">180</span>
+<span class="normal">181</span>
+<span class="normal">182</span>
+<span class="normal">183</span>
+<span class="normal">184</span>
+<span class="normal">185</span>
+<span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="c1"># scripts/build-local.sh - Automated local building</span>
+
+<span class="nb">set</span><span class="w"> </span>-euo<span class="w"> </span>pipefail
+
+<span class="c1"># Configuration</span>
+<span class="nv">REGISTRY</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">DOCKER_REGISTRY</span><span class="k">:-</span><span class="nv">webgrip</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nv">TAG</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">BUILD_TAG</span><span class="k">:-</span><span class="nv">local</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nv">PARALLEL</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PARALLEL_BUILDS</span><span class="k">:-</span><span class="nv">2</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nv">BUILD_ARGS</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">BUILD_ARGS</span><span class="k">:-</span><span class="si">}</span><span class="s2">&quot;</span>
+
+<span class="c1"># Colors for output</span>
+<span class="nv">RED</span><span class="o">=</span><span class="s1">&#39;\033[0;31m&#39;</span>
+<span class="nv">GREEN</span><span class="o">=</span><span class="s1">&#39;\033[0;32m&#39;</span>
+<span class="nv">YELLOW</span><span class="o">=</span><span class="s1">&#39;\033[1;33m&#39;</span>
+<span class="nv">NC</span><span class="o">=</span><span class="s1">&#39;\033[0m&#39;</span><span class="w"> </span><span class="c1"># No Color</span>
+
+<span class="c1"># Logging functions</span>
+log_info<span class="o">()</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">GREEN</span><span class="si">}</span><span class="s2">[INFO]</span><span class="si">${</span><span class="nv">NC</span><span class="si">}</span><span class="s2"> </span><span class="nv">$1</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="o">}</span>
+log_warn<span class="o">()</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">YELLOW</span><span class="si">}</span><span class="s2">[WARN]</span><span class="si">${</span><span class="nv">NC</span><span class="si">}</span><span class="s2"> </span><span class="nv">$1</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="o">}</span>
+log_error<span class="o">()</span><span class="w"> </span><span class="o">{</span><span class="w"> </span><span class="nb">echo</span><span class="w"> </span>-e<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">RED</span><span class="si">}</span><span class="s2">[ERROR]</span><span class="si">${</span><span class="nv">NC</span><span class="si">}</span><span class="s2"> </span><span class="nv">$1</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="o">}</span>
+
+<span class="c1"># Image definitions</span>
+<span class="nb">declare</span><span class="w"> </span>-A<span class="w"> </span><span class="nv">IMAGES</span><span class="o">=(</span>
+<span class="w">    </span><span class="o">[</span><span class="s2">&quot;rust-ci-runner&quot;</span><span class="o">]=</span><span class="s2">&quot;ops/docker/rust-ci-runner&quot;</span>
+<span class="w">    </span><span class="o">[</span><span class="s2">&quot;github-runner&quot;</span><span class="o">]=</span><span class="s2">&quot;ops/docker/github-runner&quot;</span>
+<span class="w">    </span><span class="o">[</span><span class="s2">&quot;helm-deploy&quot;</span><span class="o">]=</span><span class="s2">&quot;ops/docker/helm-deploy&quot;</span>
+<span class="w">    </span><span class="o">[</span><span class="s2">&quot;playwright-runner&quot;</span><span class="o">]=</span><span class="s2">&quot;ops/docker/playwright-runner&quot;</span>
+<span class="w">    </span><span class="o">[</span><span class="s2">&quot;act-runner&quot;</span><span class="o">]=</span><span class="s2">&quot;ops/docker/act-runner&quot;</span>
+<span class="w">    </span><span class="o">[</span><span class="s2">&quot;rust-releaser&quot;</span><span class="o">]=</span><span class="s2">&quot;ops/docker/rust-releaser&quot;</span>
+<span class="o">)</span>
+
+<span class="c1"># Build single image</span>
+build_image<span class="o">()</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="nb">local</span><span class="w"> </span><span class="nv">name</span><span class="o">=</span><span class="nv">$1</span>
+<span class="w">    </span><span class="nb">local</span><span class="w"> </span><span class="nv">path</span><span class="o">=</span><span class="nv">$2</span>
+<span class="w">    </span><span class="nb">local</span><span class="w"> </span><span class="nv">full_tag</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">REGISTRY</span><span class="si">}</span><span class="s2">/</span><span class="si">${</span><span class="nv">name</span><span class="si">}</span><span class="s2">:</span><span class="si">${</span><span class="nv">TAG</span><span class="si">}</span><span class="s2">&quot;</span>
+
+<span class="w">    </span>log_info<span class="w"> </span><span class="s2">&quot;Building </span><span class="nv">$name</span><span class="s2"> -&gt; </span><span class="nv">$full_tag</span><span class="s2">&quot;</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span>docker<span class="w"> </span>build<span class="w"> </span><span class="nv">$BUILD_ARGS</span><span class="w"> </span>-t<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$full_tag</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$path</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">        </span>log_info<span class="w"> </span><span class="s2">&quot;✅ Successfully built </span><span class="nv">$full_tag</span><span class="s2">&quot;</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="m">0</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="w">        </span>log_error<span class="w"> </span><span class="s2">&quot;❌ Failed to build </span><span class="nv">$full_tag</span><span class="s2">&quot;</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="m">1</span>
+<span class="w">    </span><span class="k">fi</span>
+<span class="o">}</span>
+
+<span class="c1"># Test image</span>
+test_image<span class="o">()</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="nb">local</span><span class="w"> </span><span class="nv">name</span><span class="o">=</span><span class="nv">$1</span>
+<span class="w">    </span><span class="nb">local</span><span class="w"> </span><span class="nv">full_tag</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">REGISTRY</span><span class="si">}</span><span class="s2">/</span><span class="si">${</span><span class="nv">name</span><span class="si">}</span><span class="s2">:</span><span class="si">${</span><span class="nv">TAG</span><span class="si">}</span><span class="s2">&quot;</span>
+
+<span class="w">    </span>log_info<span class="w"> </span><span class="s2">&quot;Testing </span><span class="nv">$full_tag</span><span class="s2">&quot;</span>
+
+<span class="w">    </span><span class="k">case</span><span class="w"> </span><span class="nv">$name</span><span class="w"> </span><span class="k">in</span>
+<span class="w">        </span><span class="s2">&quot;rust-ci-runner&quot;</span><span class="o">)</span>
+<span class="w">            </span>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$full_tag</span><span class="s2">&quot;</span><span class="w"> </span>rustc<span class="w"> </span>--version<span class="w"> </span>&gt;/dev/null
+<span class="w">            </span><span class="p">;;</span>
+<span class="w">        </span><span class="s2">&quot;github-runner&quot;</span><span class="o">)</span>
+<span class="w">            </span>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$full_tag</span><span class="s2">&quot;</span><span class="w"> </span>php<span class="w"> </span>--version<span class="w"> </span>&gt;/dev/null
+<span class="w">            </span><span class="p">;;</span>
+<span class="w">        </span><span class="s2">&quot;helm-deploy&quot;</span><span class="o">)</span>
+<span class="w">            </span>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$full_tag</span><span class="s2">&quot;</span><span class="w"> </span>helm<span class="w"> </span>version<span class="w"> </span>&gt;/dev/null
+<span class="w">            </span><span class="p">;;</span>
+<span class="w">        </span><span class="s2">&quot;playwright-runner&quot;</span><span class="o">)</span>
+<span class="w">            </span>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$full_tag</span><span class="s2">&quot;</span><span class="w"> </span>npx<span class="w"> </span>playwright<span class="w"> </span>--version<span class="w"> </span>&gt;/dev/null
+<span class="w">            </span><span class="p">;;</span>
+<span class="w">        </span><span class="s2">&quot;act-runner&quot;</span><span class="o">)</span>
+<span class="w">            </span>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$full_tag</span><span class="s2">&quot;</span><span class="w"> </span>act<span class="w"> </span>--version<span class="w"> </span>&gt;/dev/null
+<span class="w">            </span><span class="p">;;</span>
+<span class="w">        </span><span class="s2">&quot;rust-releaser&quot;</span><span class="o">)</span>
+<span class="w">            </span>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$full_tag</span><span class="s2">&quot;</span><span class="w"> </span>node<span class="w"> </span>--version<span class="w"> </span>&gt;/dev/null
+<span class="w">            </span><span class="p">;;</span>
+<span class="w">    </span><span class="k">esac</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">[</span><span class="w"> </span><span class="nv">$?</span><span class="w"> </span>-eq<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">        </span>log_info<span class="w"> </span><span class="s2">&quot;✅ </span><span class="nv">$full_tag</span><span class="s2"> passed basic test&quot;</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="m">0</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="w">        </span>log_error<span class="w"> </span><span class="s2">&quot;❌ </span><span class="nv">$full_tag</span><span class="s2"> failed basic test&quot;</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="m">1</span>
+<span class="w">    </span><span class="k">fi</span>
+<span class="o">}</span>
+
+<span class="c1"># Main function</span>
+main<span class="o">()</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="nb">local</span><span class="w"> </span><span class="nv">target_images</span><span class="o">=()</span>
+<span class="w">    </span><span class="nb">local</span><span class="w"> </span><span class="nv">test_after_build</span><span class="o">=</span><span class="nb">false</span>
+<span class="w">    </span><span class="nb">local</span><span class="w"> </span><span class="nv">clean_before_build</span><span class="o">=</span><span class="nb">false</span>
+
+<span class="w">    </span><span class="c1"># Parse arguments</span>
+<span class="w">    </span><span class="k">while</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="nv">$#</span><span class="w"> </span>-gt<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">        </span><span class="k">case</span><span class="w"> </span><span class="nv">$1</span><span class="w"> </span><span class="k">in</span>
+<span class="w">            </span>--test<span class="o">)</span>
+<span class="w">                </span><span class="nv">test_after_build</span><span class="o">=</span><span class="nb">true</span>
+<span class="w">                </span><span class="nb">shift</span>
+<span class="w">                </span><span class="p">;;</span>
+<span class="w">            </span>--clean<span class="o">)</span>
+<span class="w">                </span><span class="nv">clean_before_build</span><span class="o">=</span><span class="nb">true</span>
+<span class="w">                </span><span class="nb">shift</span>
+<span class="w">                </span><span class="p">;;</span>
+<span class="w">            </span>--parallel<span class="o">)</span>
+<span class="w">                </span><span class="nv">PARALLEL</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$2</span><span class="s2">&quot;</span>
+<span class="w">                </span><span class="nb">shift</span><span class="w"> </span><span class="m">2</span>
+<span class="w">                </span><span class="p">;;</span>
+<span class="w">            </span>--tag<span class="o">)</span>
+<span class="w">                </span><span class="nv">TAG</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$2</span><span class="s2">&quot;</span>
+<span class="w">                </span><span class="nb">shift</span><span class="w"> </span><span class="m">2</span>
+<span class="w">                </span><span class="p">;;</span>
+<span class="w">            </span>--all<span class="o">)</span>
+<span class="w">                </span><span class="nv">target_images</span><span class="o">=(</span><span class="si">${</span><span class="p">!IMAGES[@]</span><span class="si">}</span><span class="o">)</span>
+<span class="w">                </span><span class="nb">shift</span>
+<span class="w">                </span><span class="p">;;</span>
+<span class="w">            </span>*<span class="o">)</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span>-n<span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">IMAGES</span><span class="p">[</span><span class="nv">$1</span><span class="p">]</span><span class="k">:-</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">                    </span><span class="nv">target_images</span><span class="o">+=(</span><span class="s2">&quot;</span><span class="nv">$1</span><span class="s2">&quot;</span><span class="o">)</span>
+<span class="w">                </span><span class="k">else</span>
+<span class="w">                    </span>log_error<span class="w"> </span><span class="s2">&quot;Unknown image: </span><span class="nv">$1</span><span class="s2">&quot;</span>
+<span class="w">                    </span>log_info<span class="w"> </span><span class="s2">&quot;Available images: </span><span class="si">${</span><span class="p">!IMAGES[*]</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="w">                    </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
+<span class="w">                </span><span class="k">fi</span>
+<span class="w">                </span><span class="nb">shift</span>
+<span class="w">                </span><span class="p">;;</span>
+<span class="w">        </span><span class="k">esac</span>
+<span class="w">    </span><span class="k">done</span>
+
+<span class="w">    </span><span class="c1"># Default to all images if none specified</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="si">${#</span><span class="nv">target_images</span><span class="p">[@]</span><span class="si">}</span><span class="w"> </span>-eq<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">        </span><span class="nv">target_images</span><span class="o">=(</span><span class="si">${</span><span class="p">!IMAGES[@]</span><span class="si">}</span><span class="o">)</span>
+<span class="w">    </span><span class="k">fi</span>
+
+<span class="w">    </span>log_info<span class="w"> </span><span class="s2">&quot;Building images: </span><span class="si">${</span><span class="nv">target_images</span><span class="p">[*]</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="w">    </span>log_info<span class="w"> </span><span class="s2">&quot;Registry: </span><span class="nv">$REGISTRY</span><span class="s2">&quot;</span>
+<span class="w">    </span>log_info<span class="w"> </span><span class="s2">&quot;Tag: </span><span class="nv">$TAG</span><span class="s2">&quot;</span>
+
+<span class="w">    </span><span class="c1"># Clean if requested</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$clean_before_build</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">        </span>log_info<span class="w"> </span><span class="s2">&quot;Cleaning Docker cache...&quot;</span>
+<span class="w">        </span>docker<span class="w"> </span>system<span class="w"> </span>prune<span class="w"> </span>-f
+<span class="w">    </span><span class="k">fi</span>
+
+<span class="w">    </span><span class="c1"># Build images</span>
+<span class="w">    </span><span class="nb">local</span><span class="w"> </span><span class="nv">failed_builds</span><span class="o">=()</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span>image<span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">target_images</span><span class="p">[@]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span>!<span class="w"> </span>build_image<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$image</span><span class="s2">&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">IMAGES</span><span class="p">[</span><span class="nv">$image</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">            </span><span class="nv">failed_builds</span><span class="o">+=(</span><span class="s2">&quot;</span><span class="nv">$image</span><span class="s2">&quot;</span><span class="o">)</span>
+<span class="w">        </span><span class="k">fi</span>
+
+<span class="w">        </span><span class="c1"># Test if requested</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$test_after_build</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">            </span>test_image<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$image</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nv">failed_builds</span><span class="o">+=(</span><span class="s2">&quot;</span><span class="nv">$image</span><span class="s2">-test&quot;</span><span class="o">)</span>
+<span class="w">        </span><span class="k">fi</span>
+<span class="w">    </span><span class="k">done</span>
+
+<span class="w">    </span><span class="c1"># Report results</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="si">${#</span><span class="nv">failed_builds</span><span class="p">[@]</span><span class="si">}</span><span class="w"> </span>-eq<span class="w"> </span><span class="m">0</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">        </span>log_info<span class="w"> </span><span class="s2">&quot;🎉 All builds completed successfully!&quot;</span>
+<span class="w">    </span><span class="k">else</span>
+<span class="w">        </span>log_error<span class="w"> </span><span class="s2">&quot;❌ Failed builds: </span><span class="si">${</span><span class="nv">failed_builds</span><span class="p">[*]</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="w">        </span><span class="nb">exit</span><span class="w"> </span><span class="m">1</span>
+<span class="w">    </span><span class="k">fi</span>
+<span class="o">}</span>
+
+<span class="c1"># Usage function</span>
+usage<span class="o">()</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span>cat<span class="w"> </span><span class="s">&lt;&lt; EOF</span>
+<span class="s">Usage: $0 [OPTIONS] [IMAGES...]</span>
+
+<span class="s">Build Docker images locally.</span>
+
+<span class="s">OPTIONS:</span>
+<span class="s">    --test              Test images after building</span>
+<span class="s">    --clean             Clean Docker cache before building</span>
+<span class="s">    --parallel N        Number of parallel builds (default: $PARALLEL)</span>
+<span class="s">    --tag TAG           Tag for built images (default: $TAG)</span>
+<span class="s">    --all               Build all images</span>
+
+<span class="s">IMAGES:</span>
+<span class="s">    ${!IMAGES[*]}</span>
+
+<span class="s">EXAMPLES:</span>
+<span class="s">    $0 --all --test                     # Build and test all images</span>
+<span class="s">    $0 rust-ci-runner playwright-runner # Build specific images</span>
+<span class="s">    $0 --tag dev --clean helm-deploy    # Build with custom tag and clean cache</span>
+
+<span class="s">ENVIRONMENT VARIABLES:</span>
+<span class="s">    DOCKER_REGISTRY     Docker registry (default: webgrip)</span>
+<span class="s">    BUILD_TAG           Default tag (default: local)</span>
+<span class="s">    PARALLEL_BUILDS     Parallel builds (default: 2)</span>
+<span class="s">    BUILD_ARGS          Additional docker build args</span>
+<span class="s">EOF</span>
+<span class="o">}</span>
+
+<span class="c1"># Handle help</span>
+<span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">1</span><span class="k">:-</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;--help&quot;</span><span class="w"> </span><span class="o">]]</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">1</span><span class="k">:-</span><span class="si">}</span><span class="s2">&quot;</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;-h&quot;</span><span class="w"> </span><span class="o">]]</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">    </span>usage
+<span class="w">    </span><span class="nb">exit</span><span class="w"> </span><span class="m">0</span>
+<span class="k">fi</span>
+
+<span class="c1"># Run main function</span>
+main<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$@</span><span class="s2">&quot;</span>
+</code></pre></div></td></tr></table></div>
+<p>Usage:
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Make script executable</span>
+chmod<span class="w"> </span>+x<span class="w"> </span>scripts/build-local.sh
+
+<span class="c1"># Build all images</span>
+./scripts/build-local.sh<span class="w"> </span>--all
+
+<span class="c1"># Build and test specific images</span>
+./scripts/build-local.sh<span class="w"> </span>--test<span class="w"> </span>rust-ci-runner<span class="w"> </span>playwright-runner
+
+<span class="c1"># Build with custom tag and clean cache</span>
+./scripts/build-local.sh<span class="w"> </span>--tag<span class="w"> </span>dev<span class="w"> </span>--clean<span class="w"> </span>helm-deploy
+
+<span class="c1"># Build all with custom configuration</span>
+<span class="nv">BUILD_TAG</span><span class="o">=</span>dev<span class="w"> </span><span class="nv">PARALLEL_BUILDS</span><span class="o">=</span><span class="m">4</span><span class="w"> </span>./scripts/build-local.sh<span class="w"> </span>--all<span class="w"> </span>--test
+</code></pre></div></td></tr></table></div></p>
+<h2 id="testing-built-images">Testing Built Images<a class="headerlink" href="#testing-built-images" title="Permanent link">&para;</a></h2>
+<h3 id="basic-functionality-testing">Basic Functionality Testing<a class="headerlink" href="#basic-functionality-testing" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Test Rust CI Runner</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>webgrip/rust-ci-runner:local<span class="w"> </span>rustc<span class="w"> </span>--version
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>webgrip/rust-ci-runner:local<span class="w"> </span>cargo<span class="w"> </span>--version
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>webgrip/rust-ci-runner:local<span class="w"> </span>cargo<span class="w"> </span>audit<span class="w"> </span>--version
+
+<span class="c1"># Test Playwright Runner</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>webgrip/playwright-runner:local<span class="w"> </span>npx<span class="w"> </span>playwright<span class="w"> </span>--version
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>webgrip/playwright-runner:local<span class="w"> </span>php<span class="w"> </span>--version
+
+<span class="c1"># Test Helm Deploy</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>webgrip/helm-deploy:local<span class="w"> </span>helm<span class="w"> </span>version
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>webgrip/helm-deploy:local<span class="w"> </span>kubectl<span class="w"> </span>version<span class="w"> </span>--client
+
+<span class="c1"># Test ACT Runner</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>webgrip/act-runner:local<span class="w"> </span>act<span class="w"> </span>--version
+
+<span class="c1"># Test GitHub Runner (requires setup)</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>webgrip/github-runner:local<span class="w"> </span>php<span class="w"> </span>--version
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>webgrip/github-runner:local<span class="w"> </span>composer<span class="w"> </span>--version
+
+<span class="c1"># Test Rust Releaser</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>webgrip/rust-releaser:local<span class="w"> </span>node<span class="w"> </span>--version
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>webgrip/rust-releaser:local<span class="w"> </span>npx<span class="w"> </span>semantic-release<span class="w"> </span>--version
+</code></pre></div></td></tr></table></div>
+<h3 id="integration-testing">Integration Testing<a class="headerlink" href="#integration-testing" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Test volume mounting</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/workspace<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-w<span class="w"> </span>/workspace<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>webgrip/rust-ci-runner:local<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>bash<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;ls -la &amp;&amp; rustc --version&quot;</span>
+
+<span class="c1"># Test network connectivity</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>webgrip/rust-ci-runner:local<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>bash<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;curl -s https://crates.io | head -5&quot;</span>
+
+<span class="c1"># Test build functionality</span>
+mkdir<span class="w"> </span>-p<span class="w"> </span>/tmp/test-rust-project
+<span class="nb">cd</span><span class="w"> </span>/tmp/test-rust-project
+cargo<span class="w"> </span>init<span class="w"> </span>--name<span class="w"> </span>test-app
+
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/workspace<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-w<span class="w"> </span>/workspace<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>webgrip/rust-ci-runner:local<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>bash<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;cargo build &amp;&amp; cargo test&quot;</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="performance-testing">Performance Testing<a class="headerlink" href="#performance-testing" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Measure build time</span>
+<span class="nb">time</span><span class="w"> </span>docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>test-build<span class="w"> </span>ops/docker/rust-ci-runner/
+
+<span class="c1"># Measure image size</span>
+docker<span class="w"> </span>images<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>rust-ci-runner
+
+<span class="c1"># Test container startup time</span>
+<span class="nb">time</span><span class="w"> </span>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>webgrip/rust-ci-runner:local<span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Hello World&quot;</span>
+
+<span class="c1"># Memory usage test</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--memory<span class="o">=</span>1g<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>webgrip/rust-ci-runner:local<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>bash<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;echo &#39;Memory test passed&#39;&quot;</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="build-failures">Build Failures<a class="headerlink" href="#build-failures" title="Permanent link">&para;</a></h3>
+<p><strong>Out of disk space</strong>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Check disk usage</span>
+df<span class="w"> </span>-h
+docker<span class="w"> </span>system<span class="w"> </span>df
+
+<span class="c1"># Clean up</span>
+docker<span class="w"> </span>system<span class="w"> </span>prune<span class="w"> </span>-a<span class="w"> </span>--volumes
+docker<span class="w"> </span>builder<span class="w"> </span>prune<span class="w"> </span>--all
+</code></pre></div></td></tr></table></div></p>
+<p><strong>Network timeouts</strong>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Use build args for proxy</span>
+docker<span class="w"> </span>build<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--build-arg<span class="w"> </span><span class="nv">HTTP_PROXY</span><span class="o">=</span>http://proxy:8080<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--build-arg<span class="w"> </span><span class="nv">HTTPS_PROXY</span><span class="o">=</span>http://proxy:8080<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-t<span class="w"> </span>webgrip/rust-ci-runner:local<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>ops/docker/rust-ci-runner/
+</code></pre></div></td></tr></table></div></p>
+<p><strong>Permission errors</strong>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Check Docker daemon access</span>
+docker<span class="w"> </span>info
+
+<span class="c1"># Fix permissions (Linux)</span>
+sudo<span class="w"> </span>usermod<span class="w"> </span>-aG<span class="w"> </span>docker<span class="w"> </span><span class="nv">$USER</span>
+newgrp<span class="w"> </span>docker
+</code></pre></div></td></tr></table></div></p>
+<p><strong>Base image pull failures</strong>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Pre-pull base images</span>
+docker<span class="w"> </span>pull<span class="w"> </span>rust:1.87.0-slim-bookworm
+docker<span class="w"> </span>pull<span class="w"> </span>alpine:3.22.1
+docker<span class="w"> </span>pull<span class="w"> </span>mcr.microsoft.com/playwright:v1.51.0-noble
+
+<span class="c1"># Use local registry mirror</span>
+docker<span class="w"> </span>build<span class="w"> </span>--pull<span class="o">=</span><span class="nb">false</span><span class="w"> </span>-t<span class="w"> </span>local-build<span class="w"> </span>ops/docker/rust-ci-runner/
+</code></pre></div></td></tr></table></div></p>
+<h3 id="runtime-issues">Runtime Issues<a class="headerlink" href="#runtime-issues" title="Permanent link">&para;</a></h3>
+<p><strong>Container won't start</strong>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Debug container</span>
+docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--entrypoint<span class="o">=</span>/bin/bash<span class="w"> </span>webgrip/rust-ci-runner:local
+
+<span class="c1"># Check logs</span>
+docker<span class="w"> </span>logs<span class="w"> </span>&lt;container-id&gt;
+
+<span class="c1"># Inspect image</span>
+docker<span class="w"> </span>inspect<span class="w"> </span>webgrip/rust-ci-runner:local
+</code></pre></div></td></tr></table></div></p>
+<p><strong>Tool not found</strong>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Verify PATH</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>webgrip/rust-ci-runner:local<span class="w"> </span><span class="nb">echo</span><span class="w"> </span><span class="nv">$PATH</span>
+
+<span class="c1"># Check installed tools</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>webgrip/rust-ci-runner:local<span class="w"> </span>which<span class="w"> </span>cargo<span class="w"> </span>rustc
+
+<span class="c1"># Debug package installation</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>webgrip/rust-ci-runner:local<span class="w"> </span>dpkg<span class="w"> </span>-l<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>rust
+</code></pre></div></td></tr></table></div></p>
+<h3 id="build-performance-issues">Build Performance Issues<a class="headerlink" href="#build-performance-issues" title="Permanent link">&para;</a></h3>
+<p><strong>Slow builds</strong>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Use BuildKit</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">DOCKER_BUILDKIT</span><span class="o">=</span><span class="m">1</span>
+
+<span class="c1"># Parallel builds</span>
+docker-compose<span class="w"> </span>build<span class="w"> </span>--parallel
+
+<span class="c1"># Use build cache</span>
+docker<span class="w"> </span>build<span class="w"> </span>--cache-from<span class="w"> </span>webgrip/rust-ci-runner:latest
+</code></pre></div></td></tr></table></div></p>
+<p><strong>Layer cache misses</strong>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Optimize Dockerfile layer order</span>
+<span class="c1"># Place frequently changing content at the end</span>
+
+<span class="c1"># Use .dockerignore</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;target/&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>ops/docker/rust-ci-runner/.dockerignore
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;*.log&quot;</span><span class="w"> </span>&gt;&gt;<span class="w"> </span>ops/docker/rust-ci-runner/.dockerignore
+</code></pre></div></td></tr></table></div></p>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
+<h3 id="development-workflow">Development Workflow<a class="headerlink" href="#development-workflow" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Small, incremental changes</strong>: Test each change incrementally</li>
+<li><strong>Use development tags</strong>: Tag images with descriptive names (<code>dev</code>, <code>test</code>, <code>feature-x</code>)</li>
+<li><strong>Clean up regularly</strong>: Remove unused images and containers</li>
+<li><strong>Use build cache</strong>: Leverage Docker's layer caching for faster builds</li>
+</ol>
+<h3 id="security-considerations">Security Considerations<a class="headerlink" href="#security-considerations" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Scan images for vulnerabilities</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span>/var/run/docker.sock:/var/run/docker.sock<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>aquasec/trivy<span class="w"> </span>image<span class="w"> </span>webgrip/rust-ci-runner:local
+
+<span class="c1"># Check for secrets in images</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span>/var/run/docker.sock:/var/run/docker.sock<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>wagoodman/dive<span class="w"> </span>webgrip/rust-ci-runner:local
+</code></pre></div></td></tr></table></div>
+<h3 id="resource-management">Resource Management<a class="headerlink" href="#resource-management" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Monitor resource usage</span>
+docker<span class="w"> </span>stats
+
+<span class="c1"># Set resource limits</span>
+docker<span class="w"> </span>run<span class="w"> </span>--memory<span class="o">=</span>2g<span class="w"> </span>--cpus<span class="o">=</span><span class="m">1</span><span class="w"> </span>webgrip/rust-ci-runner:local
+
+<span class="c1"># Use multi-stage builds to reduce image size</span>
+<span class="c1"># Optimize package installation order</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="integration-with-development-tools">Integration with Development Tools<a class="headerlink" href="#integration-with-development-tools" title="Permanent link">&para;</a></h2>
+<h3 id="vs-code-integration">VS Code Integration<a class="headerlink" href="#vs-code-integration" title="Permanent link">&para;</a></h3>
+<div class="language-json highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1">// .vscode/tasks.json</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="nt">&quot;version&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2.0.0&quot;</span><span class="p">,</span>
+<span class="w">  </span><span class="nt">&quot;tasks&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Build Rust CI Runner&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;shell&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;docker&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;build&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;-t&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;webgrip/rust-ci-runner:dev&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;ops/docker/rust-ci-runner/&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;group&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;build&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;presentation&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;reveal&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;always&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;panel&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;new&quot;</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="p">{</span>
+<span class="w">      </span><span class="nt">&quot;label&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Test Built Image&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;shell&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;command&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;docker&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;args&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">        </span><span class="s2">&quot;run&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;--rm&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;webgrip/rust-ci-runner:dev&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="s2">&quot;rustc&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;--version&quot;</span>
+<span class="w">      </span><span class="p">],</span>
+<span class="w">      </span><span class="nt">&quot;dependsOn&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Build Rust CI Runner&quot;</span><span class="p">,</span>
+<span class="w">      </span><span class="nt">&quot;group&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;test&quot;</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">]</span>
+<span class="p">}</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="ide-docker-plugin">IDE Docker Plugin<a class="headerlink" href="#ide-docker-plugin" title="Permanent link">&para;</a></h3>
+<p>Most IDEs support Docker plugins for:
+- Building images directly from IDE
+- Running containers with debugging
+- Viewing container logs
+- Managing Docker resources</p>
+<h2 id="related-documentation">Related Documentation<a class="headerlink" href="#related-documentation" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../contributing-images/">Contributing Images</a> - How to contribute new images</li>
+<li><a href="../maintenance/">Maintenance</a> - Ongoing maintenance procedures</li>
+<li><a href="../docker-images/">Docker Images</a> - Individual image documentation</li>
+<li><a href="../../cicd/automated-building/">CI/CD Pipeline</a> - Automated building process</li>
+</ul>
+<hr />
+<blockquote>
+<p><strong>Assumption</strong>: Developers have local Docker installations and sufficient system resources for building container images. Network connectivity requirements may vary based on base image sizes and dependencies. Validation needed: Confirm local development environment standards and resource requirements.</p>
+</blockquote>
+<p><strong>Maintainer</strong>: <a href="https://github.com/orgs/webgrip/teams/ops">WebGrip Ops Team</a><br />
+<strong>Scripts</strong>: Available in repository <code>scripts/</code> directory<br />
+<strong>Support</strong>: <a href="https://github.com/webgrip/infrastructure/issues">GitHub Issues</a></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../../testing/test-execution/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Test Execution">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Test Execution
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../contributing-images/" class="md-footer__link md-footer__link--next" aria-label="Next: Contributing Images">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Contributing Images
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.top", "navigation.sections", "toc.integrate", "navigation.footer", "content.action.edit"], "search": "../../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f1b6f286.min.js"></script>
+      
+        <script src="../../search/main.js"></script>
+      
+    
+  </body>
+</html>

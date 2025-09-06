@@ -1,0 +1,1764 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="CI/CD Infrastructure and Docker Images for WebGrip">
+      
+      
+      
+        <link rel="canonical" href="https://webgrip.github.io/infrastructure/overview/quick-start/">
+      
+      
+        <link rel="prev" href="../architecture/">
+      
+      
+        <link rel="next" href="../../docker-images/rust-ci-runner/">
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.5">
+    
+    
+      
+        <title>Quick Start - WebGrip Infrastructure</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.8608ea7d.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#quick-start-guide" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="WebGrip Infrastructure" class="md-header__button md-logo" aria-label="WebGrip Infrastructure" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            WebGrip Infrastructure
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Quick Start
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../.." class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+    
+  
+  
+    
+    
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../purpose/" class="md-tabs__link">
+          
+  
+  Overview
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../docker-images/rust-ci-runner/" class="md-tabs__link">
+          
+  
+  Docker Images
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../cicd/automated-building/" class="md-tabs__link">
+          
+  
+  CI/CD Pipeline
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../testing/playwright-setup/" class="md-tabs__link">
+          
+  
+  Testing
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../../operations/building-locally/" class="md-tabs__link">
+          
+  
+  Operations
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../adrs/" class="md-tabs__link">
+        
+  
+    
+  
+  ADRs
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="WebGrip Infrastructure" class="md-nav__button md-logo" aria-label="WebGrip Infrastructure" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    WebGrip Infrastructure
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+      
+        
+        
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Overview
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../purpose/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Purpose & Scope
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Quick Start
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    Quick Start
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#prerequisites" class="md-nav__link">
+    <span class="md-ellipsis">
+      Prerequisites
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#option-1-using-pre-built-images-recommended" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option 1: Using Pre-built Images (Recommended)
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Option 1: Using Pre-built Images (Recommended)">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#rust-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      🦀 Rust Development
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#end-to-end-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      🎭 End-to-End Testing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#local-github-actions-testing" class="md-nav__link">
+    <span class="md-ellipsis">
+      ⚙️ Local GitHub Actions Testing
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#kubernetes-deployment" class="md-nav__link">
+    <span class="md-ellipsis">
+      ☸️ Kubernetes Deployment
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#option-2-building-locally" class="md-nav__link">
+    <span class="md-ellipsis">
+      Option 2: Building Locally
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Option 2: Building Locally">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#clone-the-repository" class="md-nav__link">
+    <span class="md-ellipsis">
+      Clone the Repository
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#build-specific-images" class="md-nav__link">
+    <span class="md-ellipsis">
+      Build Specific Images
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#verify-local-builds" class="md-nav__link">
+    <span class="md-ellipsis">
+      Verify Local Builds
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-use-cases" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Use Cases
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Use Cases">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#setting-up-cicd-for-a-new-project" class="md-nav__link">
+    <span class="md-ellipsis">
+      🔄 Setting Up CI/CD for a New Project
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#local-development-workflow" class="md-nav__link">
+    <span class="md-ellipsis">
+      🧪 Local Development Workflow
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#release-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      🚀 Release Process
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#environment-specific-configurations" class="md-nav__link">
+    <span class="md-ellipsis">
+      Environment-Specific Configurations
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Environment-Specific Configurations">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#development-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      Development Environment
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#production-environment" class="md-nav__link">
+    <span class="md-ellipsis">
+      Production Environment
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#troubleshooting" class="md-nav__link">
+    <span class="md-ellipsis">
+      Troubleshooting
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Troubleshooting">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#common-issues" class="md-nav__link">
+    <span class="md-ellipsis">
+      Common Issues
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#getting-help" class="md-nav__link">
+    <span class="md-ellipsis">
+      Getting Help
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      Next Steps
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick Reference
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Quick Reference">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#image-quick-reference" class="md-nav__link">
+    <span class="md-ellipsis">
+      Image Quick Reference
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#resource-links" class="md-nav__link">
+    <span class="md-ellipsis">
+      Resource Links
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Docker Images
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Docker Images
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/rust-ci-runner/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rust CI Runner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/github-runner/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    GitHub Actions Runner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/helm-deploy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Helm Deploy
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/playwright-runner/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Playwright Runner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/act-runner/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ACT Runner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../docker-images/rust-releaser/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rust Releaser
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    CI/CD Pipeline
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            CI/CD Pipeline
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cicd/automated-building/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Automated Building
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cicd/docker-registry/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Docker Registry
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../cicd/workflow-details/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Workflow Details
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Testing
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Testing
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/playwright-setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Playwright Setup
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../testing/test-execution/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Test Execution
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Operations
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Operations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operations/building-locally/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Building Locally
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operations/contributing-images/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing Images
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operations/maintenance/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Maintenance
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../operations/maintaining-techdocs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Maintaining TechDocs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../adrs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ADRs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="quick-start-guide">Quick Start Guide<a class="headerlink" href="#quick-start-guide" title="Permanent link">&para;</a></h1>
+<p>Get up and running with WebGrip Infrastructure in minutes, not hours.</p>
+<h2 id="prerequisites">Prerequisites<a class="headerlink" href="#prerequisites" title="Permanent link">&para;</a></h2>
+<p>Before you begin, ensure you have:</p>
+<ul>
+<li><a href="https://docs.docker.com/get-docker/">Docker</a> installed and running</li>
+<li><a href="https://git-scm.com/downloads">Git</a> for cloning repositories</li>
+<li>Access to the WebGrip organization on GitHub</li>
+</ul>
+<h2 id="option-1-using-pre-built-images-recommended">Option 1: Using Pre-built Images (Recommended)<a class="headerlink" href="#option-1-using-pre-built-images-recommended" title="Permanent link">&para;</a></h2>
+<p>The fastest way to get started is using our pre-built images from Docker Hub.</p>
+<h3 id="rust-development">🦀 Rust Development<a class="headerlink" href="#rust-development" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Pull the latest Rust CI image</span>
+docker<span class="w"> </span>pull<span class="w"> </span>webgrip/rust-ci-runner:latest
+
+<span class="c1"># Start a Rust development environment</span>
+docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/workspace<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-w<span class="w"> </span>/workspace<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>webgrip/rust-ci-runner:latest<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>bash
+
+<span class="c1"># Inside the container, you now have access to:</span>
+<span class="c1"># - Rust toolchain (latest stable)</span>
+<span class="c1"># - cargo-audit, cargo-tarpaulin</span>
+<span class="c1"># - Common build tools</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="end-to-end-testing">🎭 End-to-End Testing<a class="headerlink" href="#end-to-end-testing" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Pull the Playwright testing image</span>
+docker<span class="w"> </span>pull<span class="w"> </span>webgrip/playwright-runner:latest
+
+<span class="c1"># Run in your project directory with tests</span>
+docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/app<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-w<span class="w"> </span>/app<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>webgrip/playwright-runner:latest<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="local-github-actions-testing">⚙️ Local GitHub Actions Testing<a class="headerlink" href="#local-github-actions-testing" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Pull the ACT runner image</span>
+docker<span class="w"> </span>pull<span class="w"> </span>webgrip/act-runner:latest
+
+<span class="c1"># Test your GitHub Actions workflows locally</span>
+docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/workspace<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span>/var/run/docker.sock:/var/run/docker.sock<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-w<span class="w"> </span>/workspace<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>webgrip/act-runner:latest<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>act
+</code></pre></div></td></tr></table></div>
+<h3 id="kubernetes-deployment">☸️ Kubernetes Deployment<a class="headerlink" href="#kubernetes-deployment" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Pull the Helm deployment image  </span>
+docker<span class="w"> </span>pull<span class="w"> </span>webgrip/helm-deploy:latest
+
+<span class="c1"># Deploy to Kubernetes (requires kubectl config)</span>
+docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/workspace<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span>~/.kube:/root/.kube<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-w<span class="w"> </span>/workspace<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>webgrip/helm-deploy:latest<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>helm<span class="w"> </span>upgrade<span class="w"> </span>--install<span class="w"> </span>myapp<span class="w"> </span>./charts/myapp
+</code></pre></div></td></tr></table></div>
+<h2 id="option-2-building-locally">Option 2: Building Locally<a class="headerlink" href="#option-2-building-locally" title="Permanent link">&para;</a></h2>
+<p>If you need to modify images or test local changes:</p>
+<h3 id="clone-the-repository">Clone the Repository<a class="headerlink" href="#clone-the-repository" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/webgrip/infrastructure.git
+<span class="nb">cd</span><span class="w"> </span>infrastructure
+</code></pre></div></td></tr></table></div>
+<h3 id="build-specific-images">Build Specific Images<a class="headerlink" href="#build-specific-images" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Build all images</span>
+docker-compose<span class="w"> </span>build
+
+<span class="c1"># Or build specific images</span>
+docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>my-rust-ci<span class="w"> </span>ops/docker/rust-ci-runner/
+docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>my-playwright<span class="w"> </span>ops/docker/playwright-runner/
+docker<span class="w"> </span>build<span class="w"> </span>-t<span class="w"> </span>my-helm-deploy<span class="w"> </span>ops/docker/helm-deploy/
+</code></pre></div></td></tr></table></div>
+<h3 id="verify-local-builds">Verify Local Builds<a class="headerlink" href="#verify-local-builds" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Test the Rust CI runner</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>my-rust-ci<span class="w"> </span>rustc<span class="w"> </span>--version
+
+<span class="c1"># Test the Playwright runner  </span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>my-playwright<span class="w"> </span>npx<span class="w"> </span>playwright<span class="w"> </span>--version
+
+<span class="c1"># Test the Helm deploy image</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>my-helm-deploy<span class="w"> </span>helm<span class="w"> </span>version
+</code></pre></div></td></tr></table></div>
+<h2 id="common-use-cases">Common Use Cases<a class="headerlink" href="#common-use-cases" title="Permanent link">&para;</a></h2>
+<h3 id="setting-up-cicd-for-a-new-project">🔄 Setting Up CI/CD for a New Project<a class="headerlink" href="#setting-up-cicd-for-a-new-project" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p><strong>Choose the appropriate images</strong> for your technology stack:
+   <div class="language-yaml highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># .github/workflows/ci.yml</span>
+<span class="nt">jobs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">test</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">    </span><span class="nt">container</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webgrip/rust-ci-runner:latest</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cargo test</span>
+
+<span class="w">  </span><span class="nt">e2e-test</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span><span class="w">  </span>
+<span class="w">    </span><span class="nt">container</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webgrip/playwright-runner:latest</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">npx playwright test</span>
+</code></pre></div></td></tr></table></div></p>
+</li>
+<li>
+<p><strong>Configure deployment</strong> using the Helm image:
+   <div class="language-yaml highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nt">deploy</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">needs</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">test</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="nv">e2e-test</span><span class="p p-Indicator">]</span>
+<span class="w">  </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">  </span><span class="nt">container</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webgrip/helm-deploy:latest</span>
+<span class="w">  </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">helm upgrade --install myapp ./charts/myapp</span>
+</code></pre></div></td></tr></table></div></p>
+</li>
+</ol>
+<h3 id="local-development-workflow">🧪 Local Development Workflow<a class="headerlink" href="#local-development-workflow" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p><strong>Start your development environment</strong>:
+   <div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># For Rust projects</span>
+docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/workspace<span class="w"> </span>-w<span class="w"> </span>/workspace<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>webgrip/rust-ci-runner:latest<span class="w"> </span>bash
+</code></pre></div></td></tr></table></div></p>
+</li>
+<li>
+<p><strong>Test your changes locally</strong> before pushing:
+   <div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Test GitHub Actions workflows</span>
+docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/workspace<span class="w"> </span>-w<span class="w"> </span>/workspace<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span>/var/run/docker.sock:/var/run/docker.sock<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>webgrip/act-runner:latest<span class="w"> </span>act
+</code></pre></div></td></tr></table></div></p>
+</li>
+<li>
+<p><strong>Run end-to-end tests</strong>:
+   <div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/app<span class="w"> </span>-w<span class="w"> </span>/app<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>webgrip/playwright-runner:latest<span class="w"> </span>npx<span class="w"> </span>playwright<span class="w"> </span><span class="nb">test</span>
+</code></pre></div></td></tr></table></div></p>
+</li>
+</ol>
+<h3 id="release-process">🚀 Release Process<a class="headerlink" href="#release-process" title="Permanent link">&para;</a></h3>
+<p>For Rust projects, use our release automation:</p>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Pull the release image</span>
+docker<span class="w"> </span>pull<span class="w"> </span>webgrip/rust-releaser:latest
+
+<span class="c1"># Run release process (configure via environment variables)</span>
+docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--rm<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/workspace<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-w<span class="w"> </span>/workspace<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-e<span class="w"> </span><span class="nv">GITHUB_TOKEN</span><span class="o">=</span><span class="nv">$GITHUB_TOKEN</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>webgrip/rust-releaser:latest<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>./release-script.sh
+</code></pre></div></td></tr></table></div>
+<h2 id="environment-specific-configurations">Environment-Specific Configurations<a class="headerlink" href="#environment-specific-configurations" title="Permanent link">&para;</a></h2>
+<h3 id="development-environment">Development Environment<a class="headerlink" href="#development-environment" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Use latest images for development</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">IMAGE_TAG</span><span class="o">=</span>latest
+
+<span class="c1"># Enable verbose logging</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">RUST_LOG</span><span class="o">=</span>debug
+<span class="nb">export</span><span class="w"> </span><span class="nv">PLAYWRIGHT_DEBUG</span><span class="o">=</span><span class="m">1</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="production-environment">Production Environment<a class="headerlink" href="#production-environment" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Use specific SHA tags for production</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">IMAGE_TAG</span><span class="o">=</span><span class="si">${</span><span class="p">{ github.sha </span><span class="si">}</span><span class="o">}</span>
+
+<span class="c1"># Optimize for production</span>
+<span class="nb">export</span><span class="w"> </span><span class="nv">RUST_LOG</span><span class="o">=</span>info
+<span class="nb">export</span><span class="w"> </span><span class="nv">NODE_ENV</span><span class="o">=</span>production
+</code></pre></div></td></tr></table></div>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">&para;</a></h2>
+<h3 id="common-issues">Common Issues<a class="headerlink" href="#common-issues" title="Permanent link">&para;</a></h3>
+<p><strong>"Permission denied" errors</strong>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Fix file permissions</span>
+docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/workspace<span class="w"> </span>-w<span class="w"> </span>/workspace<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>webgrip/rust-ci-runner:latest<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>chown<span class="w"> </span>-R<span class="w"> </span><span class="k">$(</span>id<span class="w"> </span>-u<span class="k">)</span>:<span class="k">$(</span>id<span class="w"> </span>-g<span class="k">)</span><span class="w"> </span>.
+</code></pre></div></td></tr></table></div></p>
+<p><strong>Image not found</strong>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Verify image exists</span>
+docker<span class="w"> </span>images<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>webgrip
+
+<span class="c1"># Pull latest version</span>
+docker<span class="w"> </span>pull<span class="w"> </span>webgrip/rust-ci-runner:latest
+</code></pre></div></td></tr></table></div></p>
+<p><strong>Container exits immediately</strong>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Check container logs</span>
+docker<span class="w"> </span>logs<span class="w"> </span>&lt;container-id&gt;
+
+<span class="c1"># Run with interactive shell for debugging</span>
+docker<span class="w"> </span>run<span class="w"> </span>-it<span class="w"> </span>--entrypoint<span class="o">=</span>/bin/bash<span class="w"> </span>webgrip/rust-ci-runner:latest
+</code></pre></div></td></tr></table></div></p>
+<h3 id="getting-help">Getting Help<a class="headerlink" href="#getting-help" title="Permanent link">&para;</a></h3>
+<ol>
+<li>
+<p><strong>Check the logs</strong> first:
+   <div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>docker<span class="w"> </span>logs<span class="w"> </span>-f<span class="w"> </span>&lt;container-name&gt;
+</code></pre></div></td></tr></table></div></p>
+</li>
+<li>
+<p><strong>Verify image integrity</strong>:
+   <div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>docker<span class="w"> </span>inspect<span class="w"> </span>webgrip/rust-ci-runner:latest
+</code></pre></div></td></tr></table></div></p>
+</li>
+<li>
+<p><strong>Test with minimal setup</strong>:
+   <div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>webgrip/rust-ci-runner:latest<span class="w"> </span>rustc<span class="w"> </span>--version
+</code></pre></div></td></tr></table></div></p>
+</li>
+</ol>
+<h2 id="next-steps">Next Steps<a class="headerlink" href="#next-steps" title="Permanent link">&para;</a></h2>
+<p>Now that you're up and running:</p>
+<ol>
+<li><strong>Explore individual images</strong>: Check out detailed documentation for each <a href="../docker-images/">Docker image</a></li>
+<li><strong>Understand the CI/CD pipeline</strong>: Learn about our <a href="../../cicd/automated-building/">automated building process</a></li>
+<li><strong>Contribute improvements</strong>: Read our <a href="../../operations/contributing-images/">contributing guide</a></li>
+<li><strong>Set up testing</strong>: Configure <a href="../../testing/playwright-setup/">Playwright testing</a> for your projects</li>
+</ol>
+<h2 id="quick-reference">Quick Reference<a class="headerlink" href="#quick-reference" title="Permanent link">&para;</a></h2>
+<h3 id="image-quick-reference">Image Quick Reference<a class="headerlink" href="#image-quick-reference" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Need</th>
+<th>Use This Image</th>
+<th>Quick Command</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rust development</td>
+<td><code>webgrip/rust-ci-runner</code></td>
+<td><code>docker run -it --rm -v $(pwd):/workspace webgrip/rust-ci-runner bash</code></td>
+</tr>
+<tr>
+<td>E2E testing</td>
+<td><code>webgrip/playwright-runner</code></td>
+<td><code>docker run --rm -v $(pwd):/app webgrip/playwright-runner npx playwright test</code></td>
+</tr>
+<tr>
+<td>K8s deployment</td>
+<td><code>webgrip/helm-deploy</code></td>
+<td><code>docker run --rm -v $(pwd):/workspace webgrip/helm-deploy helm version</code></td>
+</tr>
+<tr>
+<td>Local Actions testing</td>
+<td><code>webgrip/act-runner</code></td>
+<td><code>docker run --rm -v $(pwd):/workspace webgrip/act-runner act</code></td>
+</tr>
+<tr>
+<td>GitHub Actions runner</td>
+<td><code>webgrip/github-runner</code></td>
+<td>See <a href="../../docker-images/github-runner/">GitHub Runner docs</a></td>
+</tr>
+<tr>
+<td>Release automation</td>
+<td><code>webgrip/rust-releaser</code></td>
+<td>See <a href="../../docker-images/rust-releaser/">Rust Releaser docs</a></td>
+</tr>
+</tbody>
+</table>
+<h3 id="resource-links">Resource Links<a class="headerlink" href="#resource-links" title="Permanent link">&para;</a></h3>
+<ul>
+<li>📖 <strong><a href="../architecture/">Architecture Overview</a></strong> - Understanding the big picture</li>
+<li>🛠️ <strong><a href="../../operations/building-locally/">Operations Guide</a></strong> - Building and maintaining images</li>
+<li>🐛 <strong><a href="https://github.com/webgrip/infrastructure/issues">Issue Tracker</a></strong> - Report problems or request features</li>
+<li>💬 <strong><a href="https://github.com/orgs/webgrip/teams/ops">Team Contact</a></strong> - Get help from the ops team</li>
+</ul>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../architecture/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Architecture">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Architecture
+              </div>
+            </div>
+          </a>
+        
+        
+          
+          <a href="../../docker-images/rust-ci-runner/" class="md-footer__link md-footer__link--next" aria-label="Next: Rust CI Runner">
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              <div class="md-ellipsis">
+                Rust CI Runner
+              </div>
+            </div>
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.top", "navigation.sections", "toc.integrate", "navigation.footer", "content.action.edit"], "search": "../../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.f1b6f286.min.js"></script>
+      
+        <script src="../../search/main.js"></script>
+      
+    
+  </body>
+</html>

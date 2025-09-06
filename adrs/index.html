@@ -1,0 +1,1952 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="CI/CD Infrastructure and Docker Images for WebGrip">
+      
+      
+      
+        <link rel="canonical" href="https://webgrip.github.io/infrastructure/adrs/">
+      
+      
+        <link rel="prev" href="../operations/maintaining-techdocs/">
+      
+      
+      
+      <link rel="icon" href="../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.5">
+    
+    
+      
+        <title>ADRs - WebGrip Infrastructure</title>
+      
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/main.8608ea7d.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+    
+  </head>
+  
+  
+    <body dir="ltr">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#architectural-decision-records-adrs" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href=".." title="WebGrip Infrastructure" class="md-header__button md-logo" aria-label="WebGrip Infrastructure" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            WebGrip Infrastructure
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              ADRs
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+    
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href=".." class="md-tabs__link">
+        
+  
+    
+  
+  Home
+
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../overview/purpose/" class="md-tabs__link">
+          
+  
+  Overview
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../docker-images/rust-ci-runner/" class="md-tabs__link">
+          
+  
+  Docker Images
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../cicd/automated-building/" class="md-tabs__link">
+          
+  
+  CI/CD Pipeline
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../testing/playwright-setup/" class="md-tabs__link">
+          
+  
+  Testing
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+  
+    
+    
+      <li class="md-tabs__item">
+        <a href="../operations/building-locally/" class="md-tabs__link">
+          
+  
+  Operations
+
+        </a>
+      </li>
+    
+  
+
+      
+        
+  
+  
+    
+  
+  
+    <li class="md-tabs__item md-tabs__item--active">
+      <a href="./" class="md-tabs__link">
+        
+  
+    
+  
+  ADRs
+
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+  
+
+
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href=".." title="WebGrip Infrastructure" class="md-nav__button md-logo" aria-label="WebGrip Infrastructure" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    WebGrip Infrastructure
+  </label>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href=".." class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Home
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            Overview
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../overview/purpose/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Purpose & Scope
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../overview/architecture/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Architecture
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../overview/quick-start/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Quick Start
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Docker Images
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            Docker Images
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docker-images/rust-ci-runner/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rust CI Runner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docker-images/github-runner/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    GitHub Actions Runner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docker-images/helm-deploy/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Helm Deploy
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docker-images/playwright-runner/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Playwright Runner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docker-images/act-runner/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    ACT Runner
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../docker-images/rust-releaser/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Rust Releaser
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    CI/CD Pipeline
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            CI/CD Pipeline
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cicd/automated-building/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Automated Building
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cicd/docker-registry/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Docker Registry
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../cicd/workflow-details/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Workflow Details
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Testing
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Testing
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../testing/playwright-setup/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Playwright Setup
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../testing/test-execution/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Test Execution
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Operations
+    
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_6">
+            <span class="md-nav__icon md-icon"></span>
+            Operations
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../operations/building-locally/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Building Locally
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../operations/contributing-images/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Contributing Images
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../operations/maintenance/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Maintenance
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../operations/maintaining-techdocs/" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Maintaining TechDocs
+    
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    ADRs
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  <span class="md-ellipsis">
+    ADRs
+    
+  </span>
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-are-adrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      What are ADRs?
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-format" class="md-nav__link">
+    <span class="md-ellipsis">
+      ADR Format
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR Format">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#template-structure" class="md-nav__link">
+    <span class="md-ellipsis">
+      Template Structure
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#current-adrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Current ADRs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Current ADRs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#infrastructure-architecture" class="md-nav__link">
+    <span class="md-ellipsis">
+      Infrastructure Architecture
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#image-design-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Image Design Decisions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#operational-decisions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Operational Decisions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-new-adrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Creating New ADRs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Creating New ADRs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#when-to-create-an-adr" class="md-nav__link">
+    <span class="md-ellipsis">
+      When to Create an ADR
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#process" class="md-nav__link">
+    <span class="md-ellipsis">
+      Process
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#naming-convention" class="md-nav__link">
+    <span class="md-ellipsis">
+      Naming Convention
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-location" class="md-nav__link">
+    <span class="md-ellipsis">
+      File Location
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adr-lifecycle" class="md-nav__link">
+    <span class="md-ellipsis">
+      ADR Lifecycle
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="ADR Lifecycle">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#status-transitions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Status Transitions
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#reviewing-adrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Reviewing ADRs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#using-adrs-in-development" class="md-nav__link">
+    <span class="md-ellipsis">
+      Using ADRs in Development
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Using ADRs in Development">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#referencing-adrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Referencing ADRs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#updating-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Updating Implementation
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#tools-and-automation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Tools and Automation
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Tools and Automation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#adr-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      ADR Management
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#integration-with-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Integration with Documentation
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#github-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      GitHub Integration
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      Best Practices
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#writing-effective-adrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Writing Effective ADRs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#decision-process" class="md-nav__link">
+    <span class="md-ellipsis">
+      Decision Process
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maintenance" class="md-nav__link">
+    <span class="md-ellipsis">
+      Maintenance
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#contributing-to-adrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Contributing to ADRs
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Contributing to ADRs">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#proposing-new-adrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Proposing New ADRs
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#improving-existing-adrs" class="md-nav__link">
+    <span class="md-ellipsis">
+      Improving Existing ADRs
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#related-documentation" class="md-nav__link">
+    <span class="md-ellipsis">
+      Related Documentation
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#templates-and-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      Templates and Examples
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+
+<h1 id="architectural-decision-records-adrs">Architectural Decision Records (ADRs)<a class="headerlink" href="#architectural-decision-records-adrs" title="Permanent link">&para;</a></h1>
+<p>Index of architectural decisions made for the WebGrip infrastructure repository.</p>
+<h2 id="what-are-adrs">What are ADRs?<a class="headerlink" href="#what-are-adrs" title="Permanent link">&para;</a></h2>
+<p>Architectural Decision Records (ADRs) document important architectural decisions along with their context and consequences. They help teams:</p>
+<ul>
+<li><strong>Track decision history</strong> and understand why choices were made</li>
+<li><strong>Share context</strong> with new team members and contributors</li>
+<li><strong>Revisit decisions</strong> when circumstances change</li>
+<li><strong>Learn from past decisions</strong> to improve future choices</li>
+</ul>
+<h2 id="adr-format">ADR Format<a class="headerlink" href="#adr-format" title="Permanent link">&para;</a></h2>
+<p>We use the <a href="https://adr.github.io/madr/">MADR (Markdown Architectural Decision Records)</a> format for consistency and clarity.</p>
+<h3 id="template-structure">Template Structure<a class="headerlink" href="#template-structure" title="Permanent link">&para;</a></h3>
+<div class="language-markdown highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="gh"># [short title of solved problem and solution]</span>
+
+<span class="k">*</span><span class="w"> </span>Status: [<span class="nt">proposed | rejected | accepted | deprecated | superseded by [ADR-0005</span>](<span class="na">0005-example.md</span>)]
+<span class="k">*</span><span class="w"> </span>Deciders: [list everyone involved in the decision]
+<span class="k">*</span><span class="w"> </span>Date: [YYYY-MM-DD when the decision was last updated]
+
+<span class="gu">## Context and Problem Statement</span>
+
+[Describe the context and problem statement, e.g., in free form using two to three sentences. You may want to articulate the problem in form of a question.]
+
+<span class="gu">## Decision Drivers</span>
+
+<span class="k">*</span><span class="w"> </span>[driver 1, e.g., a force, facing concern, …]
+<span class="k">*</span><span class="w"> </span>[driver 2, e.g., a force, facing concern, …]
+<span class="k">*</span><span class="w"> </span>… &lt;!-- numbers of drivers can vary --&gt;
+
+<span class="gu">## Considered Options</span>
+
+<span class="k">*</span><span class="w"> </span>[option 1]
+<span class="k">*</span><span class="w"> </span>[option 2]
+<span class="k">*</span><span class="w"> </span>[option 3]
+<span class="k">*</span><span class="w"> </span>… &lt;!-- numbers of options can vary --&gt;
+
+<span class="gu">## Decision Outcome</span>
+
+Chosen option: &quot;[option 1]&quot;, because [justification. e.g., only option, which meets k.o. criterion decision driver | which resolves force force | … | comes out best (see below)].
+
+<span class="gu">### Positive Consequences</span>
+
+<span class="k">*</span><span class="w"> </span>[e.g., improvement of quality attribute satisfaction, follow-up decisions required, …]
+<span class="k">*</span><span class="w"> </span>…
+
+<span class="gu">### Negative Consequences</span>
+
+<span class="k">*</span><span class="w"> </span>[e.g., compromising quality attribute, follow-up decisions required, …]
+<span class="k">*</span><span class="w"> </span>…
+
+<span class="gu">## Links</span>
+
+<span class="k">*</span><span class="w"> </span>[Link type] [Link to ADR] &lt;!-- example: Refines [<span class="nt">ADR-0005</span>](<span class="na">0005-example.md</span>) --&gt;
+<span class="k">*</span><span class="w"> </span>… &lt;!-- numbers of links can vary --&gt;
+</code></pre></div></td></tr></table></div>
+<h2 id="current-adrs">Current ADRs<a class="headerlink" href="#current-adrs" title="Permanent link">&para;</a></h2>
+<h3 id="infrastructure-architecture">Infrastructure Architecture<a class="headerlink" href="#infrastructure-architecture" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>ADR</th>
+<th>Title</th>
+<th>Status</th>
+<th>Date</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="0001-docker-image-architecture.md">ADR-0001</a></td>
+<td>Docker Image Architecture and Organization</td>
+<td>Accepted</td>
+<td>2024-01-15</td>
+</tr>
+<tr>
+<td><a href="0002-ci-cd-workflow-strategy.md">ADR-0002</a></td>
+<td>CI/CD Workflow Strategy with Reusable Components</td>
+<td>Accepted</td>
+<td>2024-01-20</td>
+</tr>
+<tr>
+<td><a href="0003-documentation-platform.md">ADR-0003</a></td>
+<td>Documentation Platform Selection (TechDocs)</td>
+<td>Accepted</td>
+<td>2024-01-25</td>
+</tr>
+</tbody>
+</table>
+<h3 id="image-design-decisions">Image Design Decisions<a class="headerlink" href="#image-design-decisions" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>ADR</th>
+<th>Title</th>
+<th>Status</th>
+<th>Date</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="0004-base-image-selection.md">ADR-0004</a></td>
+<td>Base Image Selection Strategy</td>
+<td>Accepted</td>
+<td>2024-02-01</td>
+</tr>
+<tr>
+<td><a href="0005-multi-stage-builds.md">ADR-0005</a></td>
+<td>Multi-stage Build Pattern Adoption</td>
+<td>Accepted</td>
+<td>2024-02-05</td>
+</tr>
+<tr>
+<td><a href="0006-security-hardening.md">ADR-0006</a></td>
+<td>Container Security Hardening Standards</td>
+<td>Accepted</td>
+<td>2024-02-10</td>
+</tr>
+</tbody>
+</table>
+<h3 id="operational-decisions">Operational Decisions<a class="headerlink" href="#operational-decisions" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>ADR</th>
+<th>Title</th>
+<th>Status</th>
+<th>Date</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="0007-registry-strategy.md">ADR-0007</a></td>
+<td>Docker Registry Strategy and Management</td>
+<td>Accepted</td>
+<td>2024-02-15</td>
+</tr>
+<tr>
+<td><a href="0008-testing-approach.md">ADR-0008</a></td>
+<td>Testing Strategy for Infrastructure Images</td>
+<td>Accepted</td>
+<td>2024-02-20</td>
+</tr>
+<tr>
+<td><a href="0009-maintenance-automation.md">ADR-0009</a></td>
+<td>Maintenance and Update Automation</td>
+<td>Proposed</td>
+<td>2024-02-25</td>
+</tr>
+</tbody>
+</table>
+<h2 id="creating-new-adrs">Creating New ADRs<a class="headerlink" href="#creating-new-adrs" title="Permanent link">&para;</a></h2>
+<h3 id="when-to-create-an-adr">When to Create an ADR<a class="headerlink" href="#when-to-create-an-adr" title="Permanent link">&para;</a></h3>
+<p>Create an ADR when making decisions that:</p>
+<ul>
+<li><strong>Affect system architecture</strong> or overall design</li>
+<li><strong>Have long-term impact</strong> on the project</li>
+<li><strong>Involve trade-offs</strong> between different approaches</li>
+<li><strong>Change existing patterns</strong> or standards</li>
+<li><strong>Require team consensus</strong> to move forward</li>
+</ul>
+<h3 id="process">Process<a class="headerlink" href="#process" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Identify the Decision</strong>: Recognize that an architectural decision needs to be made</li>
+<li><strong>Research Options</strong>: Investigate different approaches and their trade-offs</li>
+<li><strong>Draft ADR</strong>: Create a new ADR using the template</li>
+<li><strong>Gather Input</strong>: Share with team members and stakeholders for feedback</li>
+<li><strong>Make Decision</strong>: Finalize the decision and update the ADR status</li>
+<li><strong>Communicate</strong>: Share the decision with relevant teams</li>
+</ol>
+<h3 id="naming-convention">Naming Convention<a class="headerlink" href="#naming-convention" title="Permanent link">&para;</a></h3>
+<p>ADRs are numbered sequentially and use descriptive titles:</p>
+<div class="language-text highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>NNNN-short-descriptive-title.md
+</code></pre></div></td></tr></table></div>
+<p>Examples:
+- <code>0001-docker-image-architecture.md</code>
+- <code>0010-monitoring-and-alerting-strategy.md</code>
+- <code>0015-dependency-management-approach.md</code></p>
+<h3 id="file-location">File Location<a class="headerlink" href="#file-location" title="Permanent link">&para;</a></h3>
+<p>ADRs are stored in the <a href="../../adrs/"><code>docs/adrs/</code></a> directory:</p>
+<div class="language-text highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code>docs/adrs/
+├── 0001-docker-image-architecture.md
+├── 0002-ci-cd-workflow-strategy.md
+├── 0003-documentation-platform.md
+└── template.md
+</code></pre></div></td></tr></table></div>
+<h2 id="adr-lifecycle">ADR Lifecycle<a class="headerlink" href="#adr-lifecycle" title="Permanent link">&para;</a></h2>
+<h3 id="status-transitions">Status Transitions<a class="headerlink" href="#status-transitions" title="Permanent link">&para;</a></h3>
+<pre class="mermaid"><code>flowchart TD
+    DRAFT[Draft] --&gt; PROPOSED[Proposed]
+    PROPOSED --&gt; ACCEPTED[Accepted]
+    PROPOSED --&gt; REJECTED[Rejected]
+    ACCEPTED --&gt; DEPRECATED[Deprecated]
+    ACCEPTED --&gt; SUPERSEDED[Superseded]
+
+    PROPOSED --&gt; DRAFT
+    REJECTED --&gt; DRAFT</code></pre>
+<p><strong>Draft</strong>: Initial version being developed
+<strong>Proposed</strong>: Ready for review and decision
+<strong>Accepted</strong>: Decision has been made and is being implemented
+<strong>Rejected</strong>: Decision was considered but not adopted
+<strong>Deprecated</strong>: Decision is no longer recommended but not replaced
+<strong>Superseded</strong>: Decision has been replaced by a newer ADR</p>
+<h3 id="reviewing-adrs">Reviewing ADRs<a class="headerlink" href="#reviewing-adrs" title="Permanent link">&para;</a></h3>
+<p>ADRs should be reviewed:</p>
+<ul>
+<li><strong>Quarterly</strong>: Review all current ADRs for relevance and accuracy</li>
+<li><strong>When circumstances change</strong>: Major technology shifts or requirement changes</li>
+<li><strong>Before major decisions</strong>: Ensure new decisions align with existing ADRs</li>
+<li><strong>During onboarding</strong>: Help new team members understand architectural context</li>
+</ul>
+<h2 id="using-adrs-in-development">Using ADRs in Development<a class="headerlink" href="#using-adrs-in-development" title="Permanent link">&para;</a></h2>
+<h3 id="referencing-adrs">Referencing ADRs<a class="headerlink" href="#referencing-adrs" title="Permanent link">&para;</a></h3>
+<p>When making implementation decisions, reference relevant ADRs:</p>
+<div class="language-markdown highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div><pre><span></span><code>&lt;!-- In pull request descriptions --&gt;
+This change implements the multi-stage build pattern as decided in [<span class="nt">ADR-0005</span>](<span class="na">docs/adrs/0005-multi-stage-builds.md</span>).
+
+&lt;!-- In code comments --&gt;
+// Following the security hardening standards from ADR-0006
+USER appuser
+</code></pre></div></td></tr></table></div>
+<h3 id="updating-implementation">Updating Implementation<a class="headerlink" href="#updating-implementation" title="Permanent link">&para;</a></h3>
+<p>When ADR decisions affect implementation:</p>
+<ol>
+<li><strong>Review existing code</strong> for compliance with ADR decisions</li>
+<li><strong>Update implementation</strong> to align with architectural decisions</li>
+<li><strong>Document deviations</strong> if full compliance isn't immediately possible</li>
+<li><strong>Plan migration</strong> for systems that don't yet follow ADR guidelines</li>
+</ol>
+<h2 id="tools-and-automation">Tools and Automation<a class="headerlink" href="#tools-and-automation" title="Permanent link">&para;</a></h2>
+<h3 id="adr-management">ADR Management<a class="headerlink" href="#adr-management" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span>
+<span class="normal">39</span>
+<span class="normal">40</span>
+<span class="normal">41</span>
+<span class="normal">42</span>
+<span class="normal">43</span>
+<span class="normal">44</span>
+<span class="normal">45</span>
+<span class="normal">46</span>
+<span class="normal">47</span>
+<span class="normal">48</span>
+<span class="normal">49</span>
+<span class="normal">50</span>
+<span class="normal">51</span>
+<span class="normal">52</span>
+<span class="normal">53</span>
+<span class="normal">54</span>
+<span class="normal">55</span>
+<span class="normal">56</span>
+<span class="normal">57</span>
+<span class="normal">58</span>
+<span class="normal">59</span>
+<span class="normal">60</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="ch">#!/bin/bash</span>
+<span class="c1"># scripts/adr-tools.sh</span>
+
+<span class="c1"># Create new ADR</span>
+create_adr<span class="o">()</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="nb">local</span><span class="w"> </span><span class="nv">title</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$1</span><span class="s2">&quot;</span>
+<span class="w">    </span><span class="nb">local</span><span class="w"> </span><span class="nv">number</span><span class="o">=</span><span class="k">$(</span><span class="nb">printf</span><span class="w"> </span><span class="s2">&quot;%04d&quot;</span><span class="w"> </span><span class="k">$(($(</span>ls<span class="w"> </span>docs/adrs/<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>-E<span class="w"> </span><span class="s1">&#39;^[0-9]{4}-&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span>wc<span class="w"> </span>-l<span class="k">)</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="m">1</span><span class="k">)))</span>
+<span class="w">    </span><span class="nb">local</span><span class="w"> </span><span class="nv">filename</span><span class="o">=</span><span class="s2">&quot;docs/adrs/</span><span class="si">${</span><span class="nv">number</span><span class="si">}</span><span class="s2">-</span><span class="si">${</span><span class="nv">title</span><span class="si">}</span><span class="s2">.md&quot;</span>
+
+<span class="w">    </span><span class="c1"># Copy template and update</span>
+<span class="w">    </span>cp<span class="w"> </span>docs/adrs/template.md<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$filename</span><span class="s2">&quot;</span>
+<span class="w">    </span>sed<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;s/\[short title of solved problem and solution\]/</span><span class="nv">$title</span><span class="s2">/&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$filename</span><span class="s2">&quot;</span>
+<span class="w">    </span>sed<span class="w"> </span>-i<span class="w"> </span><span class="s2">&quot;s/Date: \[YYYY-MM-DD when the decision was last updated\]/Date: </span><span class="k">$(</span>date<span class="w"> </span>+%Y-%m-%d<span class="k">)</span><span class="s2">/&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$filename</span><span class="s2">&quot;</span>
+
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Created ADR: </span><span class="nv">$filename</span><span class="s2">&quot;</span>
+<span class="o">}</span>
+
+<span class="c1"># List ADRs by status</span>
+list_adrs<span class="o">()</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="nb">local</span><span class="w"> </span><span class="nv">status</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$1</span><span class="s2">&quot;</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;ADRs with status: </span><span class="nv">$status</span><span class="s2">&quot;</span>
+<span class="w">    </span>grep<span class="w"> </span>-l<span class="w"> </span><span class="s2">&quot;Status:.*</span><span class="nv">$status</span><span class="s2">&quot;</span><span class="w"> </span>docs/adrs/*.md<span class="w"> </span><span class="p">|</span><span class="w"> </span>sort
+<span class="o">}</span>
+
+<span class="c1"># Validate ADRs</span>
+validate_adrs<span class="o">()</span><span class="w"> </span><span class="o">{</span>
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Validating ADR format...&quot;</span>
+
+<span class="w">    </span><span class="k">for</span><span class="w"> </span>adr<span class="w"> </span><span class="k">in</span><span class="w"> </span>docs/adrs/<span class="o">[</span><span class="m">0</span>-9<span class="o">]</span>*.md<span class="p">;</span><span class="w"> </span><span class="k">do</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span>!<span class="w"> </span>grep<span class="w"> </span>-q<span class="w"> </span><span class="s2">&quot;^# &quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$adr</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">            </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;❌ </span><span class="nv">$adr</span><span class="s2">: Missing title&quot;</span>
+<span class="w">        </span><span class="k">fi</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span>!<span class="w"> </span>grep<span class="w"> </span>-q<span class="w"> </span><span class="s2">&quot;Status:&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$adr</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">            </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;❌ </span><span class="nv">$adr</span><span class="s2">: Missing status&quot;</span>
+<span class="w">        </span><span class="k">fi</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span>!<span class="w"> </span>grep<span class="w"> </span>-q<span class="w"> </span><span class="s2">&quot;Date:&quot;</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$adr</span><span class="s2">&quot;</span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">            </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;❌ </span><span class="nv">$adr</span><span class="s2">: Missing date&quot;</span>
+<span class="w">        </span><span class="k">fi</span>
+<span class="w">    </span><span class="k">done</span>
+
+<span class="w">    </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;ADR validation complete&quot;</span>
+<span class="o">}</span>
+
+<span class="c1"># Usage</span>
+<span class="k">case</span><span class="w"> </span><span class="s2">&quot;</span><span class="nv">$1</span><span class="s2">&quot;</span><span class="w"> </span><span class="k">in</span>
+<span class="w">    </span><span class="s2">&quot;create&quot;</span><span class="o">)</span>
+<span class="w">        </span>create_adr<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$2</span><span class="s2">&quot;</span>
+<span class="w">        </span><span class="p">;;</span>
+<span class="w">    </span><span class="s2">&quot;list&quot;</span><span class="o">)</span>
+<span class="w">        </span>list_adrs<span class="w"> </span><span class="s2">&quot;</span><span class="nv">$2</span><span class="s2">&quot;</span>
+<span class="w">        </span><span class="p">;;</span>
+<span class="w">    </span><span class="s2">&quot;validate&quot;</span><span class="o">)</span>
+<span class="w">        </span>validate_adrs
+<span class="w">        </span><span class="p">;;</span>
+<span class="w">    </span>*<span class="o">)</span>
+<span class="w">        </span><span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Usage: </span><span class="nv">$0</span><span class="s2"> {create|list|validate} [args]&quot;</span>
+<span class="w">        </span><span class="p">;;</span>
+<span class="k">esac</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="integration-with-documentation">Integration with Documentation<a class="headerlink" href="#integration-with-documentation" title="Permanent link">&para;</a></h3>
+<p>ADRs are automatically included in the TechDocs site navigation and can be referenced from other documentation pages.</p>
+<h3 id="github-integration">GitHub Integration<a class="headerlink" href="#github-integration" title="Permanent link">&para;</a></h3>
+<div class="language-yaml highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span>
+<span class="normal">26</span>
+<span class="normal">27</span>
+<span class="normal">28</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># .github/workflows/adr-validation.yml</span>
+<span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ADR Validation</span>
+<span class="nt">on</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">pull_request</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">paths</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="s">&#39;docs/adrs/**&#39;</span>
+
+<span class="nt">jobs</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">validate</span><span class="p">:</span>
+<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Validate ADR format</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">./scripts/adr-tools.sh validate</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Check for duplicate numbers</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no">duplicates=$(ls docs/adrs/[0-9]*.md | sed &#39;s/.*\/\([0-9]*\)-.*/\1/&#39; | sort | uniq -d)</span>
+<span class="w">          </span><span class="no">if [[ -n &quot;$duplicates&quot; ]]; then</span>
+<span class="w">            </span><span class="no">echo &quot;❌ Duplicate ADR numbers found: $duplicates&quot;</span>
+<span class="w">            </span><span class="no">exit 1</span>
+<span class="w">          </span><span class="no">fi</span>
+
+<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">Validate links</span>
+<span class="w">        </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">|</span>
+<span class="w">          </span><span class="no"># Check that all ADR links are valid</span>
+<span class="w">          </span><span class="no">find docs/adrs -name &quot;*.md&quot; -exec markdown-link-check {} \;</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="best-practices">Best Practices<a class="headerlink" href="#best-practices" title="Permanent link">&para;</a></h2>
+<h3 id="writing-effective-adrs">Writing Effective ADRs<a class="headerlink" href="#writing-effective-adrs" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Be Specific</strong>: Focus on one architectural decision per ADR</li>
+<li><strong>Include Context</strong>: Explain the problem and constraints clearly</li>
+<li><strong>Compare Options</strong>: Show what alternatives were considered</li>
+<li><strong>Document Trade-offs</strong>: Explain both positive and negative consequences</li>
+<li><strong>Keep Updated</strong>: Update status and content as decisions evolve</li>
+</ol>
+<h3 id="decision-process">Decision Process<a class="headerlink" href="#decision-process" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Involve Stakeholders</strong>: Include relevant team members in decision-making</li>
+<li><strong>Time-box Decisions</strong>: Set deadlines to avoid endless discussion</li>
+<li><strong>Document Assumptions</strong>: Make implicit assumptions explicit</li>
+<li><strong>Plan Reviews</strong>: Schedule regular reviews of important decisions</li>
+<li><strong>Learn from Outcomes</strong>: Track how decisions work out in practice</li>
+</ol>
+<h3 id="maintenance">Maintenance<a class="headerlink" href="#maintenance" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Regular Reviews</strong>: Review ADRs quarterly for relevance</li>
+<li><strong>Update Status</strong>: Keep status information current</li>
+<li><strong>Link Maintenance</strong>: Ensure all links remain valid</li>
+<li><strong>Archive Old ADRs</strong>: Mark superseded ADRs clearly</li>
+<li><strong>Extract Patterns</strong>: Identify common decision patterns over time</li>
+</ol>
+<h2 id="contributing-to-adrs">Contributing to ADRs<a class="headerlink" href="#contributing-to-adrs" title="Permanent link">&para;</a></h2>
+<h3 id="proposing-new-adrs">Proposing New ADRs<a class="headerlink" href="#proposing-new-adrs" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Create Issue</strong>: Start with a GitHub issue to discuss the need for an ADR</li>
+<li><strong>Draft ADR</strong>: Create initial draft using the template</li>
+<li><strong>Seek Feedback</strong>: Share with team members for input</li>
+<li><strong>Iterate</strong>: Refine the ADR based on feedback</li>
+<li><strong>Finalize</strong>: Update status to "Accepted" after team agreement</li>
+</ol>
+<h3 id="improving-existing-adrs">Improving Existing ADRs<a class="headerlink" href="#improving-existing-adrs" title="Permanent link">&para;</a></h3>
+<ol>
+<li><strong>Identify Gaps</strong>: Notice missing information or outdated content</li>
+<li><strong>Propose Changes</strong>: Create pull request with improvements</li>
+<li><strong>Update Status</strong>: Change status if decision has evolved</li>
+<li><strong>Add Links</strong>: Connect related ADRs for better navigation</li>
+<li><strong>Enhance Context</strong>: Add more background information if helpful</li>
+</ol>
+<h2 id="related-documentation">Related Documentation<a class="headerlink" href="#related-documentation" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../overview/architecture/">Architecture Overview</a> - High-level architectural context</li>
+<li><a href="../operations/contributing-images/">Contributing Images</a> - How architectural decisions affect contributions</li>
+<li><a href="../operations/maintenance/">Maintenance</a> - How ADRs guide maintenance decisions</li>
+</ul>
+<h2 id="templates-and-examples">Templates and Examples<a class="headerlink" href="#templates-and-examples" title="Permanent link">&para;</a></h2>
+<ul>
+<li><a href="../../adrs/template.md">ADR Template</a> - Standard template for new ADRs</li>
+<li><a href="../../adrs/">Example ADRs</a> - Real examples from this project</li>
+<li><a href="https://adr.github.io/madr/">MADR Documentation</a> - Detailed format specification</li>
+</ul>
+<hr />
+<blockquote>
+<p><strong>Note</strong>: ADRs are living documents that should evolve with the project. Regular review and updates ensure they remain valuable for decision-making and knowledge sharing.</p>
+</blockquote>
+<p><strong>Maintainer</strong>: <a href="https://github.com/orgs/webgrip/teams/ops">WebGrip Ops Team</a><br />
+<strong>Location</strong>: <a href="../../adrs/"><code>docs/adrs/</code></a><br />
+<strong>Format</strong>: <a href="https://adr.github.io/madr/">MADR (Markdown ADR)</a></p>
+
+
+
+
+
+
+
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+      
+      <nav class="md-footer__inner md-grid" aria-label="Footer" >
+        
+          
+          <a href="../operations/maintaining-techdocs/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Maintaining TechDocs">
+            <div class="md-footer__button md-icon">
+              
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+            </div>
+            <div class="md-footer__title">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              <div class="md-ellipsis">
+                Maintaining TechDocs
+              </div>
+            </div>
+          </a>
+        
+        
+      </nav>
+    
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.top", "navigation.sections", "toc.integrate", "navigation.footer", "content.action.edit"], "search": "../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../assets/javascripts/bundle.f1b6f286.min.js"></script>
+      
+        <script src="../search/main.js"></script>
+      
+    
+  </body>
+</html>
