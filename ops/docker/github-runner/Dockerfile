@@ -21,6 +21,14 @@ RUN apt-get update && \
         rsync \
         software-properties-common
 
+# https://github.com/orgs/community/discussions/177903
+# This "fixes" a "bug" that causes errors on self-hosted runners when runner ghcp agents workloads
+# The problem is that the workload expects codeql to be installed, but it's not present by default
+
+# Run https://github.com/actions/runner-images/blob/main/images/ubuntu/scripts/build/install-codeql-bundle.sh
+RUN bash -c "$(curl -fsSL https://raw.githubusercontent.com/actions/runner-images/main/images/ubuntu/scripts/build/install-codeql-bundle.sh)"
+
+
 ARG PHP_VERSION=8.3
 RUN add-apt-repository ppa:ondrej/php -y && \
         apt-get update && \
