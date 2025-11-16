@@ -1,6 +1,11 @@
-FROM alpine:3.22.1
+ARG BASE_IMAGE=alpine:3.22.1
+FROM ${BASE_IMAGE}
 
-LABEL maintainer="Ryan Grippeling <ryan@webgrip.nl>"
+LABEL maintainer="Ryan Grippeling <ryan@webgrip.nl>" \
+  org.opencontainers.image.source="https://github.com/webgrip/infrastructure" \
+  org.opencontainers.image.description="Helm + kubectl + auxiliary tooling for deployments" \
+  org.opencontainers.image.base.name="${BASE_IMAGE}" \
+  org.opencontainers.image.licenses="MIT"
 
 RUN apk add --no-cache \
     ca-certificates \

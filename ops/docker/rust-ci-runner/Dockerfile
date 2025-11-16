@@ -40,7 +40,8 @@ RUN rustup default ${RUST_VERSION} \
 # ────────────────────────────────────────────────────────────────
 # 2️⃣ Runtime / CI stage – tiny Debian image
 # ────────────────────────────────────────────────────────────────
-FROM debian:bookworm-slim AS final
+ARG DEBIAN_BASE=debian:bookworm-slim
+FROM ${DEBIAN_BASE} AS final
 
 # 2.1 Runtime **and** build tools (gcc, make, pkg-config, OpenSSL headers)
 RUN apt-get update -qq \
@@ -61,5 +62,10 @@ ENV \
   CARGO_HOME=/usr/local/cargo \
   RUSTUP_HOME=/usr/local/rustup \
   PATH="/usr/local/cargo/bin:${PATH}"
+
+LABEL org.opencontainers.image.source="https://github.com/webgrip/infrastructure" \
+     org.opencontainers.image.description="Rust CI runner with auditing and testing tools" \
+     org.opencontainers.image.base.name="rust:${RUST_VERSION}-slim-bookworm" \
+     org.opencontainers.image.licenses="MIT"
 
 ENTRYPOINT ["bash"]

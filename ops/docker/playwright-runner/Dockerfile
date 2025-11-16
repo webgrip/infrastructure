@@ -1,4 +1,7 @@
-FROM mcr.microsoft.com/playwright:v1.51.0-noble
+ARG PLAYWRIGHT_VERSION=1.51.0
+ARG UBUNTU_CODENAME=noble
+ARG BASE_IMAGE=mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-${UBUNTU_CODENAME}
+FROM ${BASE_IMAGE}
 
 ARG TZ=Europe/Amsterdam
 ENV TZ=${TZ}
@@ -23,27 +26,33 @@ RUN apt-get update && \
         software-properties-common \
         yq
 
+ARG PHP_VERSION=8.3
 RUN add-apt-repository ppa:ondrej/php -y && \
-    apt-get install -y \
-      php8.3-cli \
-      php8.3-common \
-      php8.3-bcmath \
-      php8.3-curl \
-      php8.3-gd \
-      php8.3-intl \
-      php8.3-mbstring \
-      php8.3-mysql \
-      php8.3-soap \
-      php8.3-sockets \
-      php8.3-xml \
-      php8.3-zip \
-    && apt-get clean
+        apt-get install -y \
+            php${PHP_VERSION}-cli \
+            php${PHP_VERSION}-common \
+            php${PHP_VERSION}-bcmath \
+            php${PHP_VERSION}-curl \
+            php${PHP_VERSION}-gd \
+            php${PHP_VERSION}-intl \
+            php${PHP_VERSION}-mbstring \
+            php${PHP_VERSION}-mysql \
+            php${PHP_VERSION}-soap \
+            php${PHP_VERSION}-sockets \
+            php${PHP_VERSION}-xml \
+            php${PHP_VERSION}-zip \
+        && apt-get clean
 
 
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
     php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
     php -r "unlink('composer-setup.php');" && \
     chmod +x /usr/local/bin/composer
+
+LABEL org.opencontainers.image.source="https://github.com/webgrip/infrastructure" \
+    org.opencontainers.image.description="Playwright test runner with PHP ${PHP_VERSION}" \
+    org.opencontainers.image.base.name="${BASE_IMAGE}" \
+    org.opencontainers.image.licenses="MIT"
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["npx", "playwright", "test"]
