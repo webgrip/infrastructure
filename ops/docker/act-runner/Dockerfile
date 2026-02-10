@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=alpine:3.22.1
+ARG BASE_IMAGE=alpine:3.23.3
 FROM ${BASE_IMAGE}
 
 # Install dependencies needed by ACT
