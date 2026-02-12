@@ -1,0 +1,70 @@
+name: "[Action] Semantic Release (Monorepo)"
+description: "Run semantic-release for a single monorepo package path (e.g. ops/docker/<image>) without committing package.json."
+
+inputs:
+  package-path:
+    description: "Path to the package directory (repo-relative), e.g. ops/docker/helm-deploy"
+    required: true
+  package-name:
+    description: "Package name used for tag prefix, e.g. helm-deploy"
+    required: true
+  token:
+    description: "Token to use for pushing tags/releases (e.g., GitHub App token)"
+    required: false
+
+outputs:
+  version:
+    description: "The new version number (from exec plugin writing to $GITHUB_OUTPUT)"
+    value: ${{ steps.semantic-release.outputs.version }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "22"
+
+    - name: Run semantic-release
+      shell: bash
+      id: semantic-release
+      env:
+        GITHUB_OUTPUT: $GITHUB_OUTPUT
+        GITHUB_TOKEN: ${{ inputs.token || github.token }}
+      run: |
+        set -euo pipefail
+
+        pkg_dir="${GITHUB_WORKSPACE}/${{ inputs.package-path }}"
+        pkg_name="${{ inputs.package-name }}"
+        pkg_json="$pkg_dir/package.json"
+        created_pkg_json="false"
+
+        if [[ ! -d "$pkg_dir" ]]; then
+          echo "package-path does not exist: $pkg_dir" >&2
+          exit 1
+        fi
+
+        if [[ ! -f "$pkg_json" ]]; then
+          printf '{\n  "name": "%s",\n  "version": "0.0.0",\n  "private": true\n}\n' "$pkg_name" > "$pkg_json"
+          created_pkg_json="true"
+        fi
+
+        cleanup() {
+          if [[ "$created_pkg_json" == "true" ]]; then
+            rm -f "$pkg_json" || true
+          fi
+        }
+        trap cleanup EXIT
+
+        cd "$pkg_dir"
+
+        npm install --no-save --no-audit --no-fund \
+          semantic-release@24.2.7 \
+          semantic-release-monorepo@8.0.2 \
+          @semantic-release/commit-analyzer@13.0.0 \
+          @semantic-release/exec@7.0.3 \
+          @semantic-release/github@11.0.0 \
+          @semantic-release/release-notes-generator@14.0.0 \
+          conventional-changelog-conventionalcommits@7.0.2
+
+        npx semantic-release --config "${GITHUB_WORKSPACE}/.releaserc.js"
