@@ -50,4 +50,3 @@ RUN wget -q "https://github.com/mozilla/sops/releases/download/v${SOPS_VERSION}/
 WORKDIR /workspace
 
 CMD ["bash"]
-

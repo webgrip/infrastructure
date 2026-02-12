@@ -10,7 +10,6 @@ on:
     paths:
       - 'ops/docker/**'
       - '.releaserc.js'
-      - '.github/actions/semantic-release-monorepo/action.yml'
       - '.github/workflows/on_source_change.yml'
       - '.github/workflows/on_release_published.yml'
 
@@ -49,7 +48,7 @@ jobs:
           repositories: ${{ github.event.repository.name }}
 
       - name: Semantic Release (image)
-        uses: ./.github/actions/semantic-release-monorepo
+        uses: webgrip/workflows/.github/composite-actions/semantic-release-monorepo@main
         with:
           package-path: ${{ matrix.path }}
           package-name: ${{ matrix.basename }}
