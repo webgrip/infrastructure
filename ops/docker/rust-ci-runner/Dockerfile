@@ -69,3 +69,4 @@ LABEL org.opencontainers.image.source="https://github.com/webgrip/infrastructure
      org.opencontainers.image.licenses="MIT"
 
 ENTRYPOINT ["bash"]
+
