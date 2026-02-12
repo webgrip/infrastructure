@@ -97,12 +97,12 @@ runs:
         cd "$pkg_dir"
 
         npm install --no-save --no-audit --no-fund \
-          semantic-release
-          semantic-release-monorepo
-          @semantic-release/commit-analyzer
-          @semantic-release/exec
-          @semantic-release/github
-          @semantic-release/release-notes-generator
+          semantic-release \
+          semantic-release-monorepo \
+          @semantic-release/commit-analyzer \
+          @semantic-release/exec \
+          @semantic-release/github \
+          @semantic-release/release-notes-generator \
           conventional-changelog-conventionalcommits
 
         npx semantic-release ${{ steps.set-config.outputs.release_config }}
