@@ -1,0 +1,56 @@
+name: '[Workflow] On Source Change'
+
+concurrency:
+  group: push-${{ github.ref_name }}
+
+on:
+  push:
+    branches:
+      - '**'
+    paths:
+      - 'ops/docker/**'
+      - '.releaserc.js'
+      - '.github/actions/semantic-release-monorepo/action.yml'
+      - '.github/workflows/on_source_change.yml'
+      - '.github/workflows/on_release_published.yml'
+
+jobs:
+  determine-changed-directories:
+    name: 'Determine changed images'
+    uses: webgrip/workflows/.github/workflows/determine-changed-directories.yml@ubuntu-latest
+    with:
+      inside-dir: 'ops/docker'
+
+  release-per-image:
+    name: 'Release'
+    needs: [determine-changed-directories]
+    if: >
+      always()
+      && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/'))
+      && needs.determine-changed-directories.result == 'success'
+      && needs.determine-changed-directories.outputs.matrix != '[]'
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.determine-changed-directories.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Mint GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ secrets.WEBGRIP_CI_APP_ID }}
+          private-key: ${{ secrets.WEBGRIP_CI_APP_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+          repositories: ${{ github.event.repository.name }}
+
+      - name: Semantic Release (image)
+        uses: ./.github/actions/semantic-release-monorepo
+        with:
+          package-path: ${{ matrix.path }}
+          package-name: ${{ matrix.basename }}
+          token: ${{ steps.app-token.outputs.token }}

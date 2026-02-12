@@ -1,0 +1,68 @@
+name: '[Workflow] On Release Published'
+
+concurrency:
+  group: release-${{ github.ref }}
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  parse-release-tag:
+    name: 'Parse tag'
+    runs-on: ubuntu-latest
+    outputs:
+      image: ${{ steps.parse.outputs.image }}
+      version: ${{ steps.parse.outputs.version }}
+      is_prerelease: ${{ steps.parse.outputs.is_prerelease }}
+    steps:
+      - id: parse
+        name: Extract image + version
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag='${{ github.event.release.tag_name }}'
+
+          if [[ "$tag" =~ ^(.+)-v(.+)$ ]]; then
+            image="${BASH_REMATCH[1]}"
+            version="${BASH_REMATCH[2]}"
+          else
+            echo "Unsupported tag format: $tag" >&2
+            echo "Expected: <image>-v<version> (e.g. helm-deploy-v1.2.3)" >&2
+            exit 1
+          fi
+
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "is_prerelease=${{ github.event.release.prerelease }}" >> "$GITHUB_OUTPUT"
+
+  release-distribute-ghcr:
+    name: 'Distribute'
+    needs: [parse-release-tag]
+    if: ${{ needs.parse-release-tag.outputs.is_prerelease != 'true' }}
+    permissions:
+      contents: read
+      packages: write
+    uses: webgrip/workflows/.github/workflows/docker-build-and-push-ghcr.yml@main
+    with:
+      docker-context: "ops/docker/${{ needs.parse-release-tag.outputs.image }}"
+      docker-file: "Dockerfile"
+      docker-tags: |
+        ${{ github.repository_owner }}/${{ needs.parse-release-tag.outputs.image }}:${{ needs.parse-release-tag.outputs.version }}
+        ${{ github.repository_owner }}/${{ needs.parse-release-tag.outputs.image }}:latest
+    secrets: inherit
+
+  release-distribute-ghcr-prerelease:
+    name: 'Distribute (prerelease)'
+    needs: [parse-release-tag]
+    if: ${{ needs.parse-release-tag.outputs.is_prerelease == 'true' }}
+    permissions:
+      contents: read
+      packages: write
+    uses: webgrip/workflows/.github/workflows/docker-build-and-push-ghcr.yml@main
+    with:
+      docker-context: "ops/docker/${{ needs.parse-release-tag.outputs.image }}"
+      docker-file: "Dockerfile"
+      docker-tags: |
+        ${{ github.repository_owner }}/${{ needs.parse-release-tag.outputs.image }}:${{ needs.parse-release-tag.outputs.version }}
+    secrets: inherit
