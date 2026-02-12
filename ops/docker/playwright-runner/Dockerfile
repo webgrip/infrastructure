@@ -56,3 +56,4 @@ LABEL org.opencontainers.image.source="https://github.com/webgrip/infrastructure
 
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["npx", "playwright", "test"]
+
