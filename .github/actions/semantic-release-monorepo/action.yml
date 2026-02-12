@@ -66,9 +66,9 @@ runs:
 
         if [[ -n "${{ inputs.release-type }}" ]]; then
           if [[ -f ".releaserc.${{ inputs.release-type }}.js" ]]; then
-            echo "release_config=--extends=file://${workspace}/.releaserc.${{ inputs.release-type }}.js" >> "$GITHUB_OUTPUT"
+            echo "release_config=--extends=${workspace}/.releaserc.${{ inputs.release-type }}.js" >> "$GITHUB_OUTPUT"
           elif [[ -f ".releaserc.${{ inputs.release-type }}.json" ]]; then
-            echo "release_config=--extends=file://${workspace}/.releaserc.${{ inputs.release-type }}.json" >> "$GITHUB_OUTPUT"
+            echo "release_config=--extends=${workspace}/.releaserc.${{ inputs.release-type }}.json" >> "$GITHUB_OUTPUT"
           else
             echo "No semantic-release config found for release-type '${{ inputs.release-type }}'" >&2
             exit 1
@@ -76,9 +76,9 @@ runs:
         else
           # semantic-release v24 supports --extends (not --config)
           if [[ -f ".releaserc.js" ]]; then
-            echo "release_config=--extends=file://${workspace}/.releaserc.js" >> "$GITHUB_OUTPUT"
+            echo "release_config=--extends=${workspace}/.releaserc.js" >> "$GITHUB_OUTPUT"
           elif [[ -f ".releaserc.json" ]]; then
-            echo "release_config=--extends=file://${workspace}/.releaserc.json" >> "$GITHUB_OUTPUT"
+            echo "release_config=--extends=${workspace}/.releaserc.json" >> "$GITHUB_OUTPUT"
           else
             echo "No semantic-release config found (.releaserc.js/.releaserc.json)" >&2
             exit 1
