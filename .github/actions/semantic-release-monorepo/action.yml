@@ -60,30 +60,52 @@ runs:
       run: |
         set -euo pipefail
 
-        # This composite action later runs semantic-release from within the package directory.
-        # Use a file:// URL so semantic-release can always resolve the config regardless of cwd.
         workspace="${GITHUB_WORKSPACE}"
+        pkg_dir="${workspace}/${{ inputs.package-path }}"
+
+        if [[ ! -d "$pkg_dir" ]]; then
+          echo "package-path does not exist: $pkg_dir" >&2
+          exit 1
+        fi
+
+        pick_config() {
+          local candidate
+          for candidate in "$@"; do
+            if [[ -f "$candidate" ]]; then
+              echo "$candidate"
+              return 0
+            fi
+          done
+          return 1
+        }
+
+        config=""
 
         if [[ -n "${{ inputs.release-type }}" ]]; then
-          if [[ -f ".releaserc.${{ inputs.release-type }}.js" ]]; then
-            echo "release_config=--extends=${workspace}/.releaserc.${{ inputs.release-type }}.js" >> "$GITHUB_OUTPUT"
-          elif [[ -f ".releaserc.${{ inputs.release-type }}.json" ]]; then
-            echo "release_config=--extends=${workspace}/.releaserc.${{ inputs.release-type }}.json" >> "$GITHUB_OUTPUT"
-          else
-            echo "No semantic-release config found for release-type '${{ inputs.release-type }}'" >&2
-            exit 1
-          fi
+          config="$(pick_config \
+            "$pkg_dir/.releaserc.${{ inputs.release-type }}.cjs" \
+            "$pkg_dir/.releaserc.${{ inputs.release-type }}.js" \
+            "$pkg_dir/.releaserc.${{ inputs.release-type }}.json" \
+            "$workspace/.releaserc.${{ inputs.release-type }}.js" \
+            "$workspace/.releaserc.${{ inputs.release-type }}.json" \
+          )" || true
         else
-          # semantic-release v24 supports --extends (not --config)
-          if [[ -f ".releaserc.js" ]]; then
-            echo "release_config=--extends=${workspace}/.releaserc.js" >> "$GITHUB_OUTPUT"
-          elif [[ -f ".releaserc.json" ]]; then
-            echo "release_config=--extends=${workspace}/.releaserc.json" >> "$GITHUB_OUTPUT"
-          else
-            echo "No semantic-release config found (.releaserc.js/.releaserc.json)" >&2
-            exit 1
-          fi
+          config="$(pick_config \
+            "$pkg_dir/.releaserc.cjs" \
+            "$pkg_dir/.releaserc.js" \
+            "$pkg_dir/.releaserc.json" \
+            "$workspace/.releaserc.js" \
+            "$workspace/.releaserc.json" \
+          )" || true
         fi
+
+        if [[ -z "$config" ]]; then
+          echo "No semantic-release config found" >&2
+          exit 1
+        fi
+
+        # Use absolute path so it resolves after we cd into the package directory.
+        echo "release_config=$config" >> "$GITHUB_OUTPUT"
 
     - name: Run semantic-release
       shell: bash
@@ -97,6 +119,7 @@ runs:
         pkg_dir="${GITHUB_WORKSPACE}/${{ inputs.package-path }}"
         pkg_name="${{ inputs.package-name }}"
         pkg_json="$pkg_dir/package.json"
+        release_config="${{ steps.set-config.outputs.release_config }}"
         created_pkg_json="false"
 
         if [[ ! -d "$pkg_dir" ]]; then
@@ -127,4 +150,4 @@ runs:
           @semantic-release/release-notes-generator \
           conventional-changelog-conventionalcommits
 
-        npx semantic-release ${{ steps.set-config.outputs.release_config }}
+        npx semantic-release --extends="$release_config"
