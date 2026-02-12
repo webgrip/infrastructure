@@ -48,6 +48,11 @@ jobs:
           owner: ${{ github.repository_owner }}
           repositories: ${{ github.event.repository.name }}
 
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # semantic-release requires all commits/tags
+          token: ${{ steps.app-token.outputs.token }}
+
       - name: Semantic Release (image)
         uses: ./.github/actions/semantic-release-monorepo
         with:
