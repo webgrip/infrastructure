@@ -55,7 +55,7 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
 
       - name: Semantic Release (image)
-        uses: ./.github/actions/semantic-release-monorepo
+        uses: webgrip/workflows/.github/composite-actions/semantic-release-monorepo@main
         with:
           package-path: ${{ matrix.path }}
           package-name: ${{ matrix.basename }}
