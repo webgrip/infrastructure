@@ -36,11 +36,23 @@ runs:
 
     - name: Install dependencies
       shell: bash
-      run: npm ci || true
+      run: |
+        set -euo pipefail
+        if [[ -f "package.json" ]]; then
+          npm ci
+        else
+          echo "No package.json at repo root; skipping npm ci"
+        fi
 
     - name: Build
       shell: bash
-      run: npm run build || true
+      run: |
+        set -euo pipefail
+        if [[ -f "package.json" ]]; then
+          npm run build
+        else
+          echo "No package.json at repo root; skipping npm run build"
+        fi
 
     - name: Set semantic-release config file
       id: set-config
@@ -48,18 +60,28 @@ runs:
       run: |
         set -euo pipefail
 
+        # This composite action later runs semantic-release from within the package directory.
+        # Use a file:// URL so semantic-release can always resolve the config regardless of cwd.
+        workspace="${GITHUB_WORKSPACE}"
+
         if [[ -n "${{ inputs.release-type }}" ]]; then
           if [[ -f ".releaserc.${{ inputs.release-type }}.js" ]]; then
-            echo "release_config=--extends=./.releaserc.${{ inputs.release-type }}.js" >> "$GITHUB_OUTPUT"
+            echo "release_config=--extends=file://${workspace}/.releaserc.${{ inputs.release-type }}.js" >> "$GITHUB_OUTPUT"
           elif [[ -f ".releaserc.${{ inputs.release-type }}.json" ]]; then
-            echo "release_config=--extends=./.releaserc.${{ inputs.release-type }}.json" >> "$GITHUB_OUTPUT"
+            echo "release_config=--extends=file://${workspace}/.releaserc.${{ inputs.release-type }}.json" >> "$GITHUB_OUTPUT"
+          else
+            echo "No semantic-release config found for release-type '${{ inputs.release-type }}'" >&2
+            exit 1
           fi
         else
           # semantic-release v24 supports --extends (not --config)
           if [[ -f ".releaserc.js" ]]; then
-            echo "release_config=--extends=./.releaserc.js" >> "$GITHUB_OUTPUT"
+            echo "release_config=--extends=file://${workspace}/.releaserc.js" >> "$GITHUB_OUTPUT"
           elif [[ -f ".releaserc.json" ]]; then
-            echo "release_config=--extends=./.releaserc.json" >> "$GITHUB_OUTPUT"
+            echo "release_config=--extends=file://${workspace}/.releaserc.json" >> "$GITHUB_OUTPUT"
+          else
+            echo "No semantic-release config found (.releaserc.js/.releaserc.json)" >&2
+            exit 1
           fi
         fi
 
