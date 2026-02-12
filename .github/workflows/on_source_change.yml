@@ -48,14 +48,8 @@ jobs:
           owner: ${{ github.repository_owner }}
           repositories: ${{ github.event.repository.name }}
 
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ steps.app-token.outputs.token }}
-
       - name: Semantic Release (image)
-        uses: webgrip/workflows/.github/composite-actions/semantic-release-monorepo@main
+        uses: ./.github/actions/semantic-release-monorepo
         with:
           package-path: ${{ matrix.path }}
           package-name: ${{ matrix.basename }}

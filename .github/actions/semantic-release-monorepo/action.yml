@@ -1,16 +1,19 @@
-name: "[Action] Semantic Release (Monorepo)"
-description: "Run semantic-release for a single monorepo package path (e.g. ops/docker/<image>) without committing package.json."
+name: "[Action] Semantic Release"
+description: "Use semantic-release to automate versioning and releases"
 
 inputs:
+  release-type:
+    description: "The type of release"
+    required: false
+  token:
+    description: "Token to use for pushing tags/releases (e.g., GitHub App token)"
+    required: false
   package-path:
     description: "Path to the package directory (repo-relative), e.g. ops/docker/helm-deploy"
     required: true
   package-name:
     description: "Package name used for tag prefix, e.g. helm-deploy"
     required: true
-  token:
-    description: "Token to use for pushing tags/releases (e.g., GitHub App token)"
-    required: false
 
 outputs:
   version:
@@ -20,10 +23,45 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Check out repo
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0 # semantic-release requires all commits/tags
+        token: ${{ inputs.token || github.token }}
+
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
         node-version: "22"
+
+    - name: Install dependencies
+      shell: bash
+      run: npm ci || true
+
+    - name: Build
+      shell: bash
+      run: npm run build || true
+
+    - name: Set semantic-release config file
+      id: set-config
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        if [[ -n "${{ inputs.release-type }}" ]]; then
+          if [[ -f ".releaserc.${{ inputs.release-type }}.js" ]]; then
+            echo "release_config=--extends=./.releaserc.${{ inputs.release-type }}.js" >> "$GITHUB_OUTPUT"
+          elif [[ -f ".releaserc.${{ inputs.release-type }}.json" ]]; then
+            echo "release_config=--extends=./.releaserc.${{ inputs.release-type }}.json" >> "$GITHUB_OUTPUT"
+          fi
+        else
+          # semantic-release v24 supports --extends (not --config)
+          if [[ -f ".releaserc.js" ]]; then
+            echo "release_config=--extends=./.releaserc.js" >> "$GITHUB_OUTPUT"
+          elif [[ -f ".releaserc.json" ]]; then
+            echo "release_config=--extends=./.releaserc.json" >> "$GITHUB_OUTPUT"
+          fi
+        fi
 
     - name: Run semantic-release
       shell: bash
@@ -59,12 +97,12 @@ runs:
         cd "$pkg_dir"
 
         npm install --no-save --no-audit --no-fund \
-          semantic-release@24.2.7 \
-          semantic-release-monorepo@8.0.2 \
-          @semantic-release/commit-analyzer@13.0.0 \
-          @semantic-release/exec@7.0.3 \
-          @semantic-release/github@11.0.0 \
-          @semantic-release/release-notes-generator@14.0.0 \
-          conventional-changelog-conventionalcommits@7.0.2
+          semantic-release
+          semantic-release-monorepo
+          @semantic-release/commit-analyzer
+          @semantic-release/exec
+          @semantic-release/github
+          @semantic-release/release-notes-generator
+          conventional-changelog-conventionalcommits
 
-        npx semantic-release --config "${GITHUB_WORKSPACE}/.releaserc.js"
+        npx semantic-release ${{ steps.set-config.outputs.release_config }}

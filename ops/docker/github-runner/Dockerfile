@@ -54,4 +54,3 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" &&
     chmod +x /usr/local/bin/composer
 
 USER runner
-
