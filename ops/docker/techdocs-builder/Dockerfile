@@ -1,4 +1,4 @@
-FROM node:23-alpine3.20 AS node
+FROM node:23-alpine3.20@sha256:78d6e102e0889545bcf80ded837034f485ba7f7ebe09211d0f2d383082a7a047 AS node
 
 RUN corepack enable && corepack prepare npm@latest --activate
 
@@ -7,7 +7,7 @@ RUN npm install -g \
     @mermaid-js/mermaid-cli@11.4.2
 
 
-FROM python:3.13.2-alpine3.20 AS python
+FROM python:3.13.3-alpine3.20@sha256:40a4559d3d6b2117b1fbe426f17d55b9100fa40609733a1d0c3f39e2151d4b33 AS python
 
 RUN apk add --no-cache graphviz
 
@@ -29,7 +29,7 @@ RUN curl -o /opt/plantuml.jar -L http://sourceforge.net/projects/plantuml/files/
     chmod +x /usr/local/bin/plantuml
 
 
-FROM alpine:3.20 AS final
+FROM alpine:3.23@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659 AS final
 
 RUN apk add --no-cache \
     libstdc++ \
