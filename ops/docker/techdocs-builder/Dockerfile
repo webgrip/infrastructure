@@ -19,7 +19,7 @@ RUN pip3 install --no-cache-dir \
     mkdocs-dracula-theme==1.0.7
 
 
-FROM openjdk:11.0.11-jre-slim@sha256:sha256:1efc10742a26c56416e400611b1d7ba871dab6c478e8017ab0a226d87f26b78b AS openjdk
+FROM openjdk:11.0.11-jre-slim@sha256:1efc10742a26c56416e400611b1d7ba871dab6c478e8017ab0a226d87f26b78b AS openjdk
 
 RUN apt-get update && apt-get install -y curl && apt-get clean
 
