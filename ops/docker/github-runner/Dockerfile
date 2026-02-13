@@ -1,4 +1,4 @@
-ARG RUNNER_VERSION=2.331.0
+ARG RUNNER_VERSION=2.331.0@sha256:dced476aa42703ebd9aafc295ce52f160989c4528e831fc3be2aef83a1b3f6da
 FROM ghcr.io/actions/actions-runner:${RUNNER_VERSION} AS runner
 
 
