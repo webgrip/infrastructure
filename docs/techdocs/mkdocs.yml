@@ -10,6 +10,7 @@ nav:
     - Quick Start: overview/quick-start.md
   - Docker Images:
     - Rust CI Runner: docker-images/rust-ci-runner.md
+    - PHP CI Runner: docker-images/php-ci-runner.md
     - GitHub Actions Runner: docker-images/github-runner.md
     - Helm Deploy: docker-images/helm-deploy.md
     - Playwright Runner: docker-images/playwright-runner.md
