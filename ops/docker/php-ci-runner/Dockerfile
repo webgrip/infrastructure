@@ -22,7 +22,7 @@ RUN apt-get update -yq \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-ARG PHP_VERSION=8.3
+ARG PHP_VERSION=8.4
 RUN add-apt-repository ppa:ondrej/php -y \
  && apt-get update -yq \
  && apt-get install -y --no-install-recommends \
@@ -34,6 +34,7 @@ RUN add-apt-repository ppa:ondrej/php -y \
       php${PHP_VERSION}-intl \
       php${PHP_VERSION}-mbstring \
       php${PHP_VERSION}-mysql \
+      php${PHP_VERSION}-pcov \
       php${PHP_VERSION}-soap \
       php${PHP_VERSION}-sockets \
       php${PHP_VERSION}-xml \
