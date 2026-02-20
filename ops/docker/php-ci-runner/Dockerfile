@@ -1,11 +1,17 @@
-ARG BASE_IMAGE=ubuntu:noble
-FROM ${BASE_IMAGE}
+ARG COMPOSER_IMAGE=composer:2@sha256:f0809732b2188154b3faa8e44ab900595acb0b09cd0aa6c34e798efe4ebc9021
+ARG PHP_IMAGE=php:8.4-cli@sha256:84877094d221791b6f2fdaed3bf4221b1366f4147d24c7c0e3799787da1a6879
 
-ARG BASE_IMAGE
+FROM ${COMPOSER_IMAGE} AS composer
+FROM ${PHP_IMAGE}
+
+ARG COMPOSER_IMAGE
+ARG PHP_IMAGE
 
 ENV DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /workspace
+
+COPY --from=composer /usr/bin/composer /usr/local/bin/composer
 
 RUN apt-get update -yq \
  && apt-get install -y --no-install-recommends \
@@ -18,39 +24,49 @@ RUN apt-get update -yq \
       jq \
       patch \
       rsync \
-      software-properties-common \
+      libicu76 \
+     libzip5 \
+      libpng16-16 \
+      libjpeg62-turbo \
+      libfreetype6 \
+      $PHPIZE_DEPS \
+      pkg-config \
+      libicu-dev \
+      libzip-dev \
+      libpng-dev \
+      libjpeg62-turbo-dev \
+      libfreetype6-dev \
+      libonig-dev \
+      libxml2-dev \
+ && docker-php-ext-configure gd --with-freetype --with-jpeg \
+ && docker-php-ext-install -j"$(nproc)" \
+      bcmath \
+      intl \
+      gd \
+      mbstring \
+      pdo_mysql \
+      soap \
+      sockets \
+      zip \
+ && pecl install pcov \
+ && docker-php-ext-enable pcov \
+ && apt-get purge -y \
+      $PHPIZE_DEPS \
+      pkg-config \
+      libicu-dev \
+      libzip-dev \
+      libpng-dev \
+      libjpeg62-turbo-dev \
+      libfreetype6-dev \
+      libonig-dev \
+      libxml2-dev \
+ && apt-get autoremove -y \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
-
-ARG PHP_VERSION=8.4
-RUN add-apt-repository ppa:ondrej/php -y \
- && apt-get update -yq \
- && apt-get install -y --no-install-recommends \
-      php${PHP_VERSION}-cli \
-      php${PHP_VERSION}-common \
-      php${PHP_VERSION}-bcmath \
-      php${PHP_VERSION}-curl \
-      php${PHP_VERSION}-gd \
-      php${PHP_VERSION}-intl \
-      php${PHP_VERSION}-mbstring \
-      php${PHP_VERSION}-mysql \
-      php${PHP_VERSION}-pcov \
-      php${PHP_VERSION}-soap \
-      php${PHP_VERSION}-sockets \
-      php${PHP_VERSION}-xml \
-      php${PHP_VERSION}-zip \
- && apt-get clean \
- && rm -rf /var/lib/apt/lists/*
-
-# Install Composer using the official installer
-RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
- && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
- && php -r "unlink('composer-setup.php');" \
- && chmod +x /usr/local/bin/composer
 
 LABEL org.opencontainers.image.source="https://github.com/webgrip/infrastructure" \
     org.opencontainers.image.description="PHP CI runner with Composer and common extensions" \
-    org.opencontainers.image.base.name="${BASE_IMAGE}" \
+     org.opencontainers.image.base.name="${PHP_IMAGE}" \
     org.opencontainers.image.licenses="MIT"
 
-ENTRYPOINT ["bash"]
+CMD ["bash"]

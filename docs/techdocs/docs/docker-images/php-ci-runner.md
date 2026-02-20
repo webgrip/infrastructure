@@ -6,14 +6,16 @@ The PHP CI Runner provides a lightweight, reproducible container environment for
 
 | Property | Value |
 |----------|-------|
-| **Base Image** | `ubuntu:noble` |
-| **PHP Version** | 8.3 (configurable via build arg) |
+| **Base Image** | `php:8.4-cli` (digest-pinned; configurable via build arg) |
+| **PHP Version** | 8.4 (currently resolves to `8.4.18-cli-trixie`) |
+| **Composer** | 2.x (currently resolves to `2.9.5`) |
 | **Registry** | `webgrip/php-ci-runner` |
 | **Dockerfile** | [`ops/docker/php-ci-runner/Dockerfile`](../../../ops/docker/php-ci-runner/Dockerfile) |
 
 ## Included Tooling
 
 - **PHP CLI** + common extensions (`bcmath`, `curl`, `gd`, `intl`, `mbstring`, `mysql`, `soap`, `sockets`, `xml`, `zip`)
+- **PCOV** for code coverage
 - **Composer** (installed to `/usr/local/bin/composer`)
 - Common CI utilities: `git`, `curl`, `jq`, `patch`, `rsync`, `zip`, `unzip`
 
@@ -47,14 +49,24 @@ jobs:
 ### Build Arguments
 
 ```dockerfile
-ARG PHP_VERSION=8.3
+ARG PHP_IMAGE=php:8.4-cli
+ARG COMPOSER_IMAGE=composer:2
 ```
 
-Build with a different PHP version:
+Build with a different PHP base tag:
 
 ```bash
 docker build \
-  --build-arg PHP_VERSION=8.2 \
+  --build-arg PHP_IMAGE=php:8.3-cli \
+  -t webgrip/php-ci-runner:local \
+  ops/docker/php-ci-runner/
+```
+
+Build with a different Composer base tag:
+
+```bash
+docker build \
+  --build-arg COMPOSER_IMAGE=composer:2.8 \
   -t webgrip/php-ci-runner:local \
   ops/docker/php-ci-runner/
 ```
