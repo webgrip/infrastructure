@@ -40,7 +40,7 @@ RUN rustup default ${RUST_VERSION} \
 # ────────────────────────────────────────────────────────────────
 # 2️⃣ Runtime / CI stage – tiny Debian image
 # ────────────────────────────────────────────────────────────────
-ARG DEBIAN_BASE=debian:bookworm-slim@sha256:98f4b71de414932439ac6ac690d7060df1f27161073c5036a7553723881bffbe
+ARG DEBIAN_BASE=debian:bookworm-slim@sha256:74d56e3931e0d5a1dd51f8c8a2466d21de84a271cd3b5a733b803aa91abf4421
 FROM ${DEBIAN_BASE} AS final
 
 # 2.1 Runtime **and** build tools (gcc, make, pkg-config, OpenSSL headers)
