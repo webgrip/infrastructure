@@ -1,6 +1,6 @@
-ARG RUNNER_VERSION=2.332.0@sha256:8c3f5970b8ceb90cbd3e89b80c6806bb74d9c31686e9177c743323a4539d12f5
-FROM ghcr.io/actions/actions-runner:${RUNNER_VERSION} AS runner
 
+ARG RUNNER_VERSION=2.333.0@sha256:1ad983536759ceec39ed75a2c8f007ca8c37b66eee35ed86f13623b29a4db97d
+FROM ghcr.io/actions/actions-runner:${RUNNER_VERSION} AS runner
 
 LABEL maintainer="Ryan Grippeling <ryan@webgrip.nl>" \
     org.opencontainers.image.source="https://github.com/webgrip/infrastructure" \
@@ -12,6 +12,7 @@ USER root
 
 RUN apt-get update && \
     apt-get install -y \
+        ca-certificates \
         curl \
         bash \
         jq \
@@ -28,6 +29,21 @@ RUN apt-get update && \
 # Run https://github.com/actions/runner-images/blob/main/images/ubuntu/scripts/build/install-codeql-bundle.sh
 RUN bash -c "$(curl -fsSL https://raw.githubusercontent.com/actions/runner-images/main/images/ubuntu/scripts/build/install-codeql-bundle.sh)"
 
+ARG DOTNET_CHANNEL=9.0
+ENV DOTNET_INSTALL_DIR=/opt/dotnet \
+    DOTNET_ROOT=/opt/dotnet \
+    PATH=/opt/dotnet:/opt/dotnet/tools:${PATH} \
+    DOTNET_CLI_TELEMETRY_OPTOUT=1 \
+    DOTNET_NOLOGO=1
+
+RUN set -eux; \
+    mkdir -p "$DOTNET_INSTALL_DIR"; \
+    curl -fsSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh; \
+    chmod +x /tmp/dotnet-install.sh; \
+    /tmp/dotnet-install.sh --channel "$DOTNET_CHANNEL" --quality ga --install-dir "$DOTNET_INSTALL_DIR"; \
+    rm -f /tmp/dotnet-install.sh; \
+    dotnet --info; \
+    chown -R runner:runner "$DOTNET_INSTALL_DIR"
 
 ARG PHP_VERSION=8.3
 RUN add-apt-repository ppa:ondrej/php -y && \
