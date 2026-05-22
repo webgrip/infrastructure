@@ -1,5 +1,5 @@
 
-ARG RUNNER_VERSION=2.333.0@sha256:1ad983536759ceec39ed75a2c8f007ca8c37b66eee35ed86f13623b29a4db97d
+ARG RUNNER_VERSION=2.334.0@sha256:b6614fce332517f74d0a76e7c762fb08e4f2ff13dcf333183397c8a5725b6e8e
 FROM ghcr.io/actions/actions-runner:${RUNNER_VERSION} AS runner
 
 LABEL maintainer="Ryan Grippeling <ryan@webgrip.nl>" \
@@ -12,15 +12,24 @@ USER root
 
 RUN apt-get update && \
     apt-get install -y \
-        ca-certificates \
-        curl \
-        bash \
-        jq \
-        git \
-        patch \
-        unzip \
-        rsync \
-        software-properties-common
+    ca-certificates \
+    curl \
+    bash \
+    jq \
+    git \
+    patch \
+    unzip \
+    rsync \
+    software-properties-common
+
+RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+        | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
+    chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg && \
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+        | tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
+    apt-get update && \
+    apt-get install -y gh && \
+    apt-get clean
 
 # https://github.com/orgs/community/discussions/177903
 # This "fixes" a "bug" that causes errors on self-hosted runners when runner ghcp agents workloads
@@ -47,21 +56,21 @@ RUN set -eux; \
 
 ARG PHP_VERSION=8.3
 RUN add-apt-repository ppa:ondrej/php -y && \
-        apt-get update && \
-        apt-get install -y \
-            php${PHP_VERSION}-cli \
-            php${PHP_VERSION}-common \
-            php${PHP_VERSION}-bcmath \
-            php${PHP_VERSION}-curl \
-            php${PHP_VERSION}-gd \
-            php${PHP_VERSION}-intl \
-            php${PHP_VERSION}-mbstring \
-            php${PHP_VERSION}-mysql \
-            php${PHP_VERSION}-soap \
-            php${PHP_VERSION}-sockets \
-            php${PHP_VERSION}-xml \
-            php${PHP_VERSION}-zip \
-        && apt-get clean
+    apt-get update && \
+    apt-get install -y \
+    php${PHP_VERSION}-cli \
+    php${PHP_VERSION}-common \
+    php${PHP_VERSION}-bcmath \
+    php${PHP_VERSION}-curl \
+    php${PHP_VERSION}-gd \
+    php${PHP_VERSION}-intl \
+    php${PHP_VERSION}-mbstring \
+    php${PHP_VERSION}-mysql \
+    php${PHP_VERSION}-soap \
+    php${PHP_VERSION}-sockets \
+    php${PHP_VERSION}-xml \
+    php${PHP_VERSION}-zip \
+    && apt-get clean
 
 # Install Composer using the official installer
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
