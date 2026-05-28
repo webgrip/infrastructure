@@ -20,6 +20,13 @@ nav:
       - Automated Building: cicd/automated-building.md
       - Docker Registry: cicd/docker-registry.md
       - Workflow Details: cicd/workflow-details.md
+  - Security:
+      - Overview: security/index.md
+      - Supply Chain Security: security/supply-chain-security.md
+      - Image Signing: security/image-signing.md
+      - SBOM & Attestations: security/sbom-attestations.md
+      - Vulnerability Scanning: security/vulnerability-scanning.md
+      - Kyverno Enforcement: security/kyverno-enforcement.md
   - Testing:
       - Playwright Setup: testing/playwright-setup.md
       - Test Execution: testing/test-execution.md

@@ -1,0 +1,132 @@
+# ClusterPolicy: verify-webgrip-images
+#
+# Enforces supply chain integrity for all container images from ghcr.io/webgrip.
+# Requires:
+#   1. A valid cosign signature from the webgrip/infrastructure release workflow
+#      (signed using GitHub OIDC keyless — no long-lived keys).
+#   2. A CycloneDX SBOM attestation produced by the same workflow.
+#
+# The policy also mutates admitted Pod specs to pin image tags to their digest
+# reference (ghcr.io/webgrip/img:tag -> ghcr.io/webgrip/img@sha256:...),
+# which prevents tag-squatting attacks after signing.
+#
+# Start with validationFailureAction: Audit, switch to Enforce once all images
+# in your cluster are covered by the signing pipeline.
+#
+# Apply to the homelab-cluster:
+#   kubectl apply -f ops/kyverno/cluster-policies/verify-webgrip-images.yaml
+#   # or via Flux Kustomization — copy to kubernetes/apps/security/kyverno-policies/
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: verify-webgrip-images
+  annotations:
+    policies.kyverno.io/title: Verify WebGrip Container Image Signatures and Attestations
+    policies.kyverno.io/category: Supply Chain Security
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/minversion: 1.11.0
+    policies.kyverno.io/description: >
+      Enforces that container images from ghcr.io/webgrip carry a valid cosign
+      keyless signature (issued via GitHub OIDC from the webgrip/infrastructure
+      release workflow) and an attested CycloneDX SBOM. Image tags are mutated
+      to digest references at admission time to prevent tag-mutation attacks.
+spec:
+  # Start in Audit mode. Switch to Enforce once you have verified that all
+  # webgrip images in your cluster have been through the signing pipeline.
+  validationFailureAction: Audit
+  background: false
+  webhookTimeoutSeconds: 30
+  failurePolicy: Fail
+  rules:
+    - name: verify-signature-and-sbom
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+      exclude:
+        any:
+          # System namespaces that may run unsigned infrastructure images
+          - resources:
+              namespaces:
+                - kube-system
+                - flux-system
+                - cert-manager
+                - security
+                - monitoring
+                - network
+                - storage
+      verifyImages:
+        - imageReferences:
+            - "ghcr.io/webgrip/*"
+
+          # Mutate image tag to digest at admission time.
+          # After this mutation, the running container spec will contain:
+          #   ghcr.io/webgrip/github-runner@sha256:<digest>
+          # which is immutable and cannot be tampered with via tag reassignment.
+          mutateDigest: true
+          verifyDigest: true
+          required: true
+
+          # Signature verification: only images signed by the exact release
+          # workflow path in webgrip/infrastructure are accepted.
+          attestors:
+            - count: 1
+              entries:
+                - keyless:
+                    subject: "https://github.com/webgrip/infrastructure/.github/workflows/on_release_published.yml@refs/tags/*"
+                    issuer: "https://token.actions.githubusercontent.com"
+                    rekor:
+                      url: https://rekor.sigstore.dev
+
+          # SBOM attestation verification: the image must also carry a
+          # CycloneDX SBOM attestation from the same workflow.
+          attestations:
+            - predicateType: https://cyclonedx.org/bom
+              attestors:
+                - entries:
+                    - keyless:
+                        subject: "https://github.com/webgrip/infrastructure/.github/workflows/on_release_published.yml@refs/tags/*"
+                        issuer: "https://token.actions.githubusercontent.com"
+              # Require at least one component in the SBOM (sanity check)
+              conditions:
+                - all:
+                    - key: "{{ components | length(@) }}"
+                      operator: GreaterThan
+                      value: 0
+---
+# Optional: audit policy that logs when images are pulled without a signature.
+# Useful during the rollout period before switching the above to Enforce.
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: audit-unsigned-webgrip-images
+  annotations:
+    policies.kyverno.io/title: Audit Unsigned WebGrip Images
+    policies.kyverno.io/category: Supply Chain Security
+    policies.kyverno.io/severity: medium
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >
+      Generates PolicyReport events for any webgrip image that does not have
+      a valid cosign signature. Used during the migration period before
+      switching verify-webgrip-images to Enforce mode.
+spec:
+  validationFailureAction: Audit
+  background: true
+  rules:
+    - name: check-webgrip-image-signed
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+      verifyImages:
+        - imageReferences:
+            - "ghcr.io/webgrip/*"
+          required: false
+          mutateDigest: false
+          attestors:
+            - entries:
+                - keyless:
+                    subject: "https://github.com/webgrip/infrastructure/.github/workflows/on_release_published.yml@refs/tags/*"
+                    issuer: "https://token.actions.githubusercontent.com"

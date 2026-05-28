@@ -66,3 +66,62 @@ jobs:
       docker-tags: |
         ${{ github.repository_owner }}/${{ needs.parse-release-tag.outputs.image }}:${{ needs.parse-release-tag.outputs.version }}
     secrets: inherit
+
+  # ── Supply chain security ──────────────────────────────────────────────────
+  # Signs the published image using GitHub OIDC (no stored keys), generates
+  # CycloneDX + SPDX SBOMs, attests them in the OCI registry, records SLSA
+  # Build Provenance in GitHub's attestation store, and uploads a Trivy
+  # vulnerability report to the GitHub Security tab.
+  #
+  # Required permissions (granted below, not in the reusable workflow):
+  #   id-token: write      — GitHub OIDC token for cosign keyless signing
+  #   security-events: write — Trivy SARIF upload to GitHub Security tab
+  #   attestations: write  — actions/attest-build-provenance
+  #   packages: write      — push attestation OCI artifacts to GHCR
+
+  release-sign-and-attest:
+    name: 'Sign & Attest'
+    needs: [parse-release-tag, release-distribute-ghcr]
+    if: ${{ needs.parse-release-tag.outputs.is_prerelease != 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      security-events: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sign, attest and scan
+        uses: ./.github/actions/cosign-sign-attest
+        with:
+          image-name: ghcr.io/${{ github.repository_owner }}/${{ needs.parse-release-tag.outputs.image }}
+          image-version: ${{ needs.parse-release-tag.outputs.version }}
+          registry-username: ${{ github.actor }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
+
+  release-sign-and-attest-prerelease:
+    name: 'Sign & Attest (prerelease)'
+    needs: [parse-release-tag, release-distribute-ghcr-prerelease]
+    if: ${{ needs.parse-release-tag.outputs.is_prerelease == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      security-events: write
+      attestations: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sign, attest and scan (prerelease)
+        uses: ./.github/actions/cosign-sign-attest
+        with:
+          image-name: ghcr.io/${{ github.repository_owner }}/${{ needs.parse-release-tag.outputs.image }}
+          image-version: ${{ needs.parse-release-tag.outputs.version }}
+          registry-username: ${{ github.actor }}
+          registry-password: ${{ secrets.GITHUB_TOKEN }}
+          # Pre-releases skip Security-tab SARIF to reduce noise in the dashboard.
+          # SBOM artifacts are still uploaded and the image is still signed.
+          upload-sarif: 'false'
