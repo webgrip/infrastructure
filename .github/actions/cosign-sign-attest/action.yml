@@ -38,6 +38,9 @@ inputs:
   sbom-retention-days:
     description: 'Days to retain uploaded SBOM artifacts'
     default: '90'
+  dry-run:
+    description: 'Run ACT/local smoke mode (no registry mutation, no OIDC signing)'
+    default: 'false'
 
 outputs:
   digest:
@@ -63,11 +66,13 @@ runs:
     # ── Tool installation ──────────────────────────────────────────────────
 
     - name: Install cosign
+      if: ${{ inputs.dry-run != 'true' }}
       uses: sigstore/cosign-installer@v3
       with:
         cosign-release: 'v2.4.3'
 
     - name: Install Syft (SBOM generator)
+      if: ${{ inputs.dry-run != 'true' }}
       uses: anchore/sbom-action/download-syft@v0
       with:
         syft-version: 'v1.21.0'
@@ -75,6 +80,7 @@ runs:
     # ── Registry authentication ────────────────────────────────────────────
 
     - name: Log in to ${{ inputs.registry }}
+      if: ${{ inputs.dry-run != 'true' }}
       uses: docker/login-action@v3
       with:
         registry: ${{ inputs.registry }}
@@ -91,16 +97,22 @@ runs:
       shell: bash
       env:
         IMAGE_REF: ${{ inputs.image-name }}:${{ inputs.image-version }}
+        DRY_RUN: ${{ inputs.dry-run }}
       run: |
         set -euo pipefail
         echo "Resolving digest for: ${IMAGE_REF}"
 
-        DIGEST=$(docker buildx imagetools inspect "${IMAGE_REF}" \
-          --format '{{.Manifest.Digest}}' 2>&1)
+        if [[ "${DRY_RUN}" == "true" ]]; then
+          DIGEST="sha256:0000000000000000000000000000000000000000000000000000000000000000"
+          echo "ACT dry-run enabled; using synthetic digest: ${DIGEST}"
+        else
+          DIGEST=$(docker buildx imagetools inspect "${IMAGE_REF}" \
+            --format '{{.Manifest.Digest}}' 2>&1)
 
-        if [[ -z "${DIGEST}" || "${DIGEST}" != sha256:* ]]; then
-          echo "::error::Failed to resolve digest for ${IMAGE_REF}. Output: ${DIGEST}"
-          exit 1
+          if [[ -z "${DIGEST}" || "${DIGEST}" != sha256:* ]]; then
+            echo "::error::Failed to resolve digest for ${IMAGE_REF}. Output: ${DIGEST}"
+            exit 1
+          fi
         fi
 
         IMAGE_WITH_DIGEST="${{ inputs.image-name }}@${DIGEST}"
@@ -120,6 +132,7 @@ runs:
     # workflow path are trusted by the cluster policy.
 
     - name: Sign image with cosign (keyless GitHub OIDC)
+      if: ${{ inputs.dry-run != 'true' }}
       id: sign
       shell: bash
       env:
@@ -157,6 +170,7 @@ runs:
         IMAGE_REF: ${{ inputs.image-name }}:${{ inputs.image-version }}
         IMAGE_SLUG: ${{ inputs.image-name }}
         VERSION: ${{ inputs.image-version }}
+        DRY_RUN: ${{ inputs.dry-run }}
       run: |
         set -euo pipefail
         SLUG=$(echo "${IMAGE_SLUG}" | tr '/:.@' '-' | sed 's/^-*//' | sed 's/-*$//')
@@ -164,13 +178,18 @@ runs:
         CDX_PATH="${RUNNER_TEMP}/sbom-${SLUG}-${VERSION}.cdx.json"
         SPDX_PATH="${RUNNER_TEMP}/sbom-${SLUG}-${VERSION}.spdx.json"
 
-        echo "Generating SBOM for: ${IMAGE_REF}"
-
-        syft "${IMAGE_REF}" \
-          --output "cyclonedx-json=${CDX_PATH}" \
-          --output "spdx-json=${SPDX_PATH}"
-
-        COMPONENT_COUNT=$(jq '.components | length' "${CDX_PATH}")
+        if [[ "${DRY_RUN}" == "true" ]]; then
+          echo "ACT dry-run enabled; writing synthetic SBOM files"
+          printf '{"bomFormat":"CycloneDX","specVersion":"1.6","version":1,"components":[]}\n' > "${CDX_PATH}"
+          printf '{"spdxVersion":"SPDX-2.3","name":"%s","SPDXID":"SPDXRef-DOCUMENT"}\n' "${IMAGE_REF}" > "${SPDX_PATH}"
+          COMPONENT_COUNT=0
+        else
+          echo "Generating SBOM for: ${IMAGE_REF}"
+          syft "${IMAGE_REF}" \
+            --output "cyclonedx-json=${CDX_PATH}" \
+            --output "spdx-json=${SPDX_PATH}"
+          COMPONENT_COUNT=$(jq '.components | length' "${CDX_PATH}")
+        fi
         echo "\U0001F4E6 SBOM generated: ${COMPONENT_COUNT} components"
 
         echo "sbom-cdx-path=${CDX_PATH}"                           >> "$GITHUB_OUTPUT"
@@ -186,6 +205,7 @@ runs:
     # The attestation predicate type is https://cyclonedx.org/bom.
 
     - name: Attest CycloneDX SBOM with cosign
+      if: ${{ inputs.dry-run != 'true' }}
       shell: bash
       env:
         IMAGE_WITH_DIGEST: ${{ steps.resolve-digest.outputs.image-with-digest }}
@@ -209,6 +229,7 @@ runs:
     # Verifiable with: gh attestation verify oci://<image> --owner <org>
 
     - name: Attest SLSA Build Provenance (GitHub native)
+      if: ${{ inputs.dry-run != 'true' }}
       uses: actions/attest-build-provenance@v2
       with:
         subject-name: ${{ inputs.image-name }}
@@ -222,6 +243,7 @@ runs:
     # creates traceability; remediation is tracked separately.
 
     - name: Trivy vulnerability scan (SARIF)
+      if: ${{ inputs.dry-run != 'true' }}
       uses: aquasecurity/trivy-action@master
       with:
         image-ref: ${{ inputs.image-name }}:${{ inputs.image-version }}
@@ -233,13 +255,14 @@ runs:
         exit-code: '0'
 
     - name: Upload Trivy SARIF to GitHub Security tab
-      if: ${{ inputs.upload-sarif == 'true' && always() }}
+      if: ${{ inputs.dry-run != 'true' && inputs.upload-sarif == 'true' && always() }}
       uses: github/codeql-action/upload-sarif@v3
       with:
         sarif_file: trivy-results.sarif
         category: container-scan
 
     - name: Trivy vulnerability scan (table — inline log)
+      if: ${{ inputs.dry-run != 'true' }}
       uses: aquasecurity/trivy-action@master
       with:
         image-ref: ${{ inputs.image-name }}:${{ inputs.image-version }}
@@ -275,17 +298,29 @@ runs:
       env:
         IMAGE_WITH_DIGEST: ${{ steps.resolve-digest.outputs.image-with-digest }}
         COMPONENT_COUNT: ${{ steps.generate-sbom.outputs.component-count }}
+        DRY_RUN: ${{ inputs.dry-run }}
       run: |
+        if [[ "${DRY_RUN}" == "true" ]]; then
+          SIGN_STATUS="🟡 (dry-run)"
+          ATTEST_STATUS="🟡 (dry-run)"
+          PROVENANCE_STATUS="🟡 (dry-run)"
+          TRIVY_STATUS="🟡 (dry-run)"
+        else
+          SIGN_STATUS="✅"
+          ATTEST_STATUS="✅"
+          PROVENANCE_STATUS="✅"
+          TRIVY_STATUS="✅"
+        fi
         {
           echo "## \U0001F510 Supply Chain Security Report"
           echo ""
           echo "| Check | Status |"
           echo "|-------|--------|"
-          echo "| Image signed (cosign keyless OIDC) | \u2705 |"
+          echo "| Image signed (cosign keyless OIDC) | ${SIGN_STATUS} |"
           echo "| CycloneDX SBOM generated (Syft) | \u2705 |"
-          echo "| SBOM attested (cosign in-toto) | \u2705 |"
-          echo "| SLSA Build Provenance (GitHub native) | \u2705 |"
-          echo "| Vulnerability scan (Trivy) | \u2705 |"
+          echo "| SBOM attested (cosign in-toto) | ${ATTEST_STATUS} |"
+          echo "| SLSA Build Provenance (GitHub native) | ${PROVENANCE_STATUS} |"
+          echo "| Vulnerability scan (Trivy) | ${TRIVY_STATUS} |"
           echo ""
           echo "**Signed image:** \`${IMAGE_WITH_DIGEST}\`"
           echo ""
