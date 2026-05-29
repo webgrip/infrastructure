@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://webgrip.github.io/infrastructure/docker-images/php-ci-runner/">
+        <link rel="canonical" href="https://webgrip.github.io/infrastructure/security/kyverno-enforcement/">
       
       
-        <link rel="prev" href="../rust-ci-runner/">
+        <link rel="prev" href="../vulnerability-scanning/">
       
       
-        <link rel="next" href="../github-runner/">
+        <link rel="next" href="../../testing/playwright-setup/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -24,7 +24,7 @@
     
     
       
-        <title>PHP CI Runner - WebGrip Infrastructure</title>
+        <title>Kyverno Enforcement - WebGrip Infrastructure</title>
       
     
     
@@ -66,7 +66,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#php-ci-runner" class="md-skip">
+        <a href="#kyverno-enforcement" class="md-skip">
           Skip to content
         </a>
       
@@ -100,7 +100,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              PHP CI Runner
+              Kyverno Enforcement
             
           </span>
         </div>
@@ -163,13 +163,11 @@
         
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="../rust-ci-runner/" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../../docker-images/rust-ci-runner/" class="md-tabs__link">
           
   
   Docker Images
@@ -201,11 +199,13 @@
         
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../security/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="../" class="md-tabs__link">
           
   
   Security
@@ -443,30 +443,25 @@
       
   
   
-    
   
   
-  
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -478,7 +473,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             Docker Images
@@ -492,7 +487,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../rust-ci-runner/" class="md-nav__link">
+      <a href="../../docker-images/rust-ci-runner/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -511,31 +506,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    PHP CI Runner
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../../docker-images/php-ci-runner/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -545,101 +519,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#image-details" class="md-nav__link">
-    <span class="md-ellipsis">
-      Image Details
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#included-tooling" class="md-nav__link">
-    <span class="md-ellipsis">
-      Included Tooling
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#usage-examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      Usage Examples
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Usage Examples">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#run-composer-phpunit" class="md-nav__link">
-    <span class="md-ellipsis">
-      Run Composer + PHPUnit
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#use-in-github-actions-container-job" class="md-nav__link">
-    <span class="md-ellipsis">
-      Use in GitHub Actions (container job)
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      Configuration
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Configuration">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#build-arguments" class="md-nav__link">
-    <span class="md-ellipsis">
-      Build Arguments
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -652,7 +531,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../github-runner/" class="md-nav__link">
+      <a href="../../docker-images/github-runner/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -674,7 +553,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../helm-deploy/" class="md-nav__link">
+      <a href="../../docker-images/helm-deploy/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -696,7 +575,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../playwright-runner/" class="md-nav__link">
+      <a href="../../docker-images/playwright-runner/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -718,7 +597,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../act-runner/" class="md-nav__link">
+      <a href="../../docker-images/act-runner/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -740,7 +619,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../rust-releaser/" class="md-nav__link">
+      <a href="../../docker-images/rust-releaser/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -880,25 +759,30 @@
       
   
   
+    
   
   
+  
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   <span class="md-ellipsis">
@@ -910,7 +794,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             Security
@@ -924,7 +808,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/" class="md-nav__link">
+      <a href="../" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -946,7 +830,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/supply-chain-security/" class="md-nav__link">
+      <a href="../supply-chain-security/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -968,7 +852,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/image-signing/" class="md-nav__link">
+      <a href="../image-signing/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -990,7 +874,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/sbom-attestations/" class="md-nav__link">
+      <a href="../sbom-attestations/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1012,7 +896,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/vulnerability-scanning/" class="md-nav__link">
+      <a href="../vulnerability-scanning/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1031,10 +915,31 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../security/kyverno-enforcement/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Kyverno Enforcement
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -1044,6 +949,155 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#the-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      The policy
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#rollout-strategy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Rollout strategy
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Rollout strategy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#step-1-apply-in-audit-mode-and-monitor" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 1: Apply in Audit mode and monitor
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-2-sign-existing-images" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 2: Sign existing images
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#step-3-switch-to-enforce" class="md-nav__link">
+    <span class="md-ellipsis">
+      Step 3: Switch to Enforce
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#understanding-the-policy-rules" class="md-nav__link">
+    <span class="md-ellipsis">
+      Understanding the policy rules
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Understanding the policy rules">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#mutatedigest-true" class="md-nav__link">
+    <span class="md-ellipsis">
+      mutateDigest: true
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#required-true" class="md-nav__link">
+    <span class="md-ellipsis">
+      required: true
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#namespace-exclusions" class="md-nav__link">
+    <span class="md-ellipsis">
+      Namespace exclusions
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#viewing-kyverno-reports" class="md-nav__link">
+    <span class="md-ellipsis">
+      Viewing Kyverno reports
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#testing-the-policy" class="md-nav__link">
+    <span class="md-ellipsis">
+      Testing the policy
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#kyverno-guac-integration" class="md-nav__link">
+    <span class="md-ellipsis">
+      Kyverno + GUAC integration
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -1321,99 +1375,185 @@
 
 
 
-<h1 id="php-ci-runner">PHP CI Runner<a class="headerlink" href="#php-ci-runner" title="Permanent link">&para;</a></h1>
-<p>The PHP CI Runner provides a lightweight, reproducible container environment for running PHP CI tasks (Composer installs, unit tests, static analysis, etc.).</p>
-<h2 id="image-details">Image Details<a class="headerlink" href="#image-details" title="Permanent link">&para;</a></h2>
-<table>
-<thead>
-<tr>
-<th>Property</th>
-<th>Value</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><strong>Base Image</strong></td>
-<td><code>php:8.4-cli</code> (digest-pinned; configurable via build arg)</td>
-</tr>
-<tr>
-<td><strong>PHP Version</strong></td>
-<td>8.4 (currently resolves to <code>8.4.18-cli-trixie</code>)</td>
-</tr>
-<tr>
-<td><strong>Composer</strong></td>
-<td>2.x (currently resolves to <code>2.9.5</code>)</td>
-</tr>
-<tr>
-<td><strong>Registry</strong></td>
-<td><code>webgrip/php-ci-runner</code></td>
-</tr>
-<tr>
-<td><strong>Dockerfile</strong></td>
-<td><a href="../../../ops/docker/php-ci-runner/Dockerfile"><code>ops/docker/php-ci-runner/Dockerfile</code></a></td>
-</tr>
-</tbody>
-</table>
-<h2 id="included-tooling">Included Tooling<a class="headerlink" href="#included-tooling" title="Permanent link">&para;</a></h2>
-<ul>
-<li><strong>PHP CLI</strong> + common extensions (<code>bcmath</code>, <code>curl</code>, <code>gd</code>, <code>intl</code>, <code>mbstring</code>, <code>mysql</code>, <code>soap</code>, <code>sockets</code>, <code>xml</code>, <code>zip</code>)</li>
-<li><strong>PCOV</strong> for code coverage</li>
-<li><strong>Composer</strong> (installed to <code>/usr/local/bin/composer</code>)</li>
-<li>Common CI utilities: <code>git</code>, <code>curl</code>, <code>jq</code>, <code>patch</code>, <code>rsync</code>, <code>zip</code>, <code>unzip</code></li>
-</ul>
-<h2 id="usage-examples">Usage Examples<a class="headerlink" href="#usage-examples" title="Permanent link">&para;</a></h2>
-<h3 id="run-composer-phpunit">Run Composer + PHPUnit<a class="headerlink" href="#run-composer-phpunit" title="Permanent link">&para;</a></h3>
+<h1 id="kyverno-enforcement">Kyverno Enforcement<a class="headerlink" href="#kyverno-enforcement" title="Permanent link">&para;</a></h1>
+<h2 id="overview">Overview<a class="headerlink" href="#overview" title="Permanent link">&para;</a></h2>
+<p>The homelab cluster uses <a href="https://kyverno.io">Kyverno</a> to enforce supply chain security policies at admission time. When a Pod is submitted to the Kubernetes API, Kyverno intercepts the request and verifies that any <code>ghcr.io/webgrip/*</code> images are:</p>
+<ol>
+<li>Signed by the <code>webgrip/infrastructure</code> release workflow via cosign</li>
+<li>Accompanied by an attested CycloneDX SBOM</li>
+</ol>
+<p>If verification fails in <code>Enforce</code> mode, the Pod is rejected before any containers are started.</p>
+<h2 id="the-policy">The policy<a class="headerlink" href="#the-policy" title="Permanent link">&para;</a></h2>
+<p>The policy is defined in <code>ops/kyverno/cluster-policies/verify-webgrip-images.yaml</code> in this repository. Apply it to the cluster:</p>
 <div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
 <span class="normal">3</span>
 <span class="normal">4</span>
-<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-it<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/workspace<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-w<span class="w"> </span>/workspace<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>webgrip/php-ci-runner:latest<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>bash<span class="w"> </span>-lc<span class="w"> </span><span class="s2">&quot;composer install &amp;&amp; vendor/bin/phpunit&quot;</span>
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Apply directly</span>
+kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ops/kyverno/cluster-policies/verify-webgrip-images.yaml
+
+<span class="c1"># Or add to the homelab-cluster GitOps repo:</span>
+<span class="c1"># copy to kubernetes/apps/security/kyverno-policies/verify-webgrip-images.yaml</span>
+<span class="c1"># and add to kustomization.yaml</span>
 </code></pre></div></td></tr></table></div>
-<h3 id="use-in-github-actions-container-job">Use in GitHub Actions (container job)<a class="headerlink" href="#use-in-github-actions-container-job" title="Permanent link">&para;</a></h3>
-<div class="language-yaml highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<h2 id="rollout-strategy">Rollout strategy<a class="headerlink" href="#rollout-strategy" title="Permanent link">&para;</a></h2>
+<p>The policy ships in <code>Audit</code> mode. Switch to <code>Enforce</code> only after verifying all running webgrip images are signed.</p>
+<h3 id="step-1-apply-in-audit-mode-and-monitor">Step 1: Apply in Audit mode and monitor<a class="headerlink" href="#step-1-apply-in-audit-mode-and-monitor" title="Permanent link">&para;</a></h3>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Apply the policy</span>
+kubectl<span class="w"> </span>apply<span class="w"> </span>-f<span class="w"> </span>ops/kyverno/cluster-policies/verify-webgrip-images.yaml
+
+<span class="c1"># Monitor PolicyReport for violations</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>policyreport<span class="w"> </span>-A
+kubectl<span class="w"> </span>get<span class="w"> </span>clusterpolicyreport
+
+<span class="c1"># List all failing resources</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>policyreport<span class="w"> </span>-A<span class="w"> </span>-o<span class="w"> </span>json<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;.items[].results[] | select(.result == &quot;fail&quot;)&#39;</span>
+</code></pre></div></td></tr></table></div>
+<h3 id="step-2-sign-existing-images">Step 2: Sign existing images<a class="headerlink" href="#step-2-sign-existing-images" title="Permanent link">&para;</a></h3>
+<p>For any image that was published before this signing pipeline, create a new GitHub Release to trigger the signing workflow. Alternatively, re-sign an existing image manually:</p>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Sign an existing image manually (requires id-token from a GitHub Actions context,</span>
+<span class="c1"># or use a local key for one-off signing during migration)</span>
+cosign<span class="w"> </span>sign<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--key<span class="w"> </span>cosign.key<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>ghcr.io/webgrip/&lt;image&gt;@sha256:&lt;digest&gt;
+</code></pre></div></td></tr></table></div>
+<h3 id="step-3-switch-to-enforce">Step 3: Switch to Enforce<a class="headerlink" href="#step-3-switch-to-enforce" title="Permanent link">&para;</a></h3>
+<p>Once PolicyReport shows no violations:</p>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Edit the policy</span>
+kubectl<span class="w"> </span>patch<span class="w"> </span>clusterpolicy<span class="w"> </span>verify-webgrip-images<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--type<span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>-p<span class="w"> </span><span class="s1">&#39;[{&quot;op&quot;: &quot;replace&quot;, &quot;path&quot;: &quot;/spec/validationFailureAction&quot;, &quot;value&quot;: &quot;Enforce&quot;}]&#39;</span>
+
+<span class="c1"># Or update the YAML and re-apply</span>
+</code></pre></div></td></tr></table></div>
+<h2 id="understanding-the-policy-rules">Understanding the policy rules<a class="headerlink" href="#understanding-the-policy-rules" title="Permanent link">&para;</a></h2>
+<h3 id="mutatedigest-true"><code>mutateDigest: true</code><a class="headerlink" href="#mutatedigest-true" title="Permanent link">&para;</a></h3>
+<p>When Kyverno admits a Pod, it rewrites any image tag to include the resolved digest:</p>
+<div class="language-text highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
+<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code>ghcr.io/webgrip/github-runner:1.2.3
+  → ghcr.io/webgrip/github-runner@sha256:abc123...
+</code></pre></div></td></tr></table></div>
+<p>This means the container runtime always pulls the exact image that was signed — tag reassignment after signing has no effect on running workloads.</p>
+<h3 id="required-true"><code>required: true</code><a class="headerlink" href="#required-true" title="Permanent link">&para;</a></h3>
+<p>Pods containing <code>ghcr.io/webgrip/*</code> images without a valid signature are blocked (in <code>Enforce</code> mode) or generate a PolicyReport violation (in <code>Audit</code> mode). Images from other registries are not affected.</p>
+<h3 id="namespace-exclusions">Namespace exclusions<a class="headerlink" href="#namespace-exclusions" title="Permanent link">&para;</a></h3>
+<p>The policy excludes system namespaces by default:</p>
+<div class="language-yaml highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nt">exclude</span><span class="p">:</span>
+<span class="w">  </span><span class="nt">any</span><span class="p">:</span>
+<span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">resources</span><span class="p">:</span>
+<span class="w">        </span><span class="nt">namespaces</span><span class="p">:</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">kube-system</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">flux-system</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">cert-manager</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">security</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">monitoring</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">network</span>
+<span class="w">          </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">storage</span>
+</code></pre></div></td></tr></table></div>
+<p>Expand or reduce this list to match your cluster's structure.</p>
+<h2 id="viewing-kyverno-reports">Viewing Kyverno reports<a class="headerlink" href="#viewing-kyverno-reports" title="Permanent link">&para;</a></h2>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
 <span class="normal">2</span>
 <span class="normal">3</span>
 <span class="normal">4</span>
 <span class="normal">5</span>
 <span class="normal">6</span>
 <span class="normal">7</span>
-<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nt">jobs</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">test</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
-<span class="w">    </span><span class="nt">container</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webgrip/php-ci-runner:latest</span>
-<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">composer install</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vendor/bin/phpunit</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># All policy reports (namespace-scoped)</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>policyreport<span class="w"> </span>-A
+
+<span class="c1"># Cluster-wide policy report summary</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>clusterpolicyreport
+
+<span class="c1"># Detailed violations for a namespace</span>
+kubectl<span class="w"> </span>get<span class="w"> </span>policyreport<span class="w"> </span>-n<span class="w"> </span>&lt;namespace&gt;<span class="w"> </span>-o<span class="w"> </span>json<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span><span class="p">|</span><span class="w"> </span>jq<span class="w"> </span><span class="s1">&#39;.results[] | select(.result == &quot;fail&quot;) | {resource: .resources[0].name, message: .message}&#39;</span>
 </code></pre></div></td></tr></table></div>
-<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
-<h3 id="build-arguments">Build Arguments<a class="headerlink" href="#build-arguments" title="Permanent link">&para;</a></h3>
-<div class="language-dockerfile highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
-<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">ARG</span><span class="w"> </span><span class="nv">PHP_IMAGE</span><span class="o">=</span>php:8.4-cli
-<span class="k">ARG</span><span class="w"> </span><span class="nv">COMPOSER_IMAGE</span><span class="o">=</span>composer:2
+<p>In the homelab cluster, policy-reporter aggregates these reports and exposes them in Grafana dashboards.</p>
+<h2 id="testing-the-policy">Testing the policy<a class="headerlink" href="#testing-the-policy" title="Permanent link">&para;</a></h2>
+<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span>
+<span class="normal">11</span>
+<span class="normal">12</span>
+<span class="normal">13</span>
+<span class="normal">14</span>
+<span class="normal">15</span>
+<span class="normal">16</span>
+<span class="normal">17</span>
+<span class="normal">18</span>
+<span class="normal">19</span>
+<span class="normal">20</span>
+<span class="normal">21</span>
+<span class="normal">22</span>
+<span class="normal">23</span>
+<span class="normal">24</span>
+<span class="normal">25</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Test with an unsigned image (should fail in Enforce mode)</span>
+kubectl<span class="w"> </span>run<span class="w"> </span>test-unsigned<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--image<span class="o">=</span>ghcr.io/webgrip/github-runner:latest<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--dry-run<span class="o">=</span>server
+
+<span class="c1"># Test with a signed image (should succeed)</span>
+<span class="c1"># First verify the signature manually:</span>
+cosign<span class="w"> </span>verify<span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--certificate-identity-regexp<span class="w"> </span><span class="s1">&#39;https://github.com/webgrip/infrastructure/.*&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>--certificate-oidc-issuer<span class="w"> </span><span class="s1">&#39;https://token.actions.githubusercontent.com&#39;</span><span class="w"> </span><span class="se">\</span>
+<span class="w">  </span>ghcr.io/webgrip/&lt;image&gt;@sha256:&lt;digest&gt;
+
+<span class="c1"># Then apply a test pod manifest</span>
+kubectl<span class="w"> </span>apply<span class="w"> </span>--dry-run<span class="o">=</span>server<span class="w"> </span>-f<span class="w"> </span>-<span class="w"> </span><span class="s">&lt;&lt;EOF</span>
+<span class="s">apiVersion: v1</span>
+<span class="s">kind: Pod</span>
+<span class="s">metadata:</span>
+<span class="s">  name: test-signed</span>
+<span class="s">  namespace: default</span>
+<span class="s">spec:</span>
+<span class="s">  containers:</span>
+<span class="s">    - name: runner</span>
+<span class="s">      image: ghcr.io/webgrip/&lt;image&gt;@sha256:&lt;digest&gt;</span>
+<span class="s">  restartPolicy: Never</span>
+<span class="s">EOF</span>
 </code></pre></div></td></tr></table></div>
-<p>Build with a different PHP base tag:</p>
-<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
-<span class="normal">2</span>
-<span class="normal">3</span>
-<span class="normal">4</span></pre></div></td><td class="code"><div><pre><span></span><code>docker<span class="w"> </span>build<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--build-arg<span class="w"> </span><span class="nv">PHP_IMAGE</span><span class="o">=</span>php:8.3-cli<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-t<span class="w"> </span>webgrip/php-ci-runner:local<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>ops/docker/php-ci-runner/
-</code></pre></div></td></tr></table></div>
-<p>Build with a different Composer base tag:</p>
-<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
-<span class="normal">2</span>
-<span class="normal">3</span>
-<span class="normal">4</span></pre></div></td><td class="code"><div><pre><span></span><code>docker<span class="w"> </span>build<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--build-arg<span class="w"> </span><span class="nv">COMPOSER_IMAGE</span><span class="o">=</span>composer:2.8<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-t<span class="w"> </span>webgrip/php-ci-runner:local<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>ops/docker/php-ci-runner/
-</code></pre></div></td></tr></table></div>
+<h2 id="kyverno-guac-integration">Kyverno + GUAC integration<a class="headerlink" href="#kyverno-guac-integration" title="Permanent link">&para;</a></h2>
+<p>For advanced supply chain governance, GUAC (running in the <code>security</code> namespace) can be used as a policy information point: query GUAC's GraphQL API to determine whether a given image has known vulnerabilities before admitting it. This requires a custom Kyverno <code>generate</code> or <code>validate</code> rule with an external data source call to the GUAC API.</p>
 
 
 
@@ -1449,7 +1589,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../rust-ci-runner/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Rust CI Runner">
+          <a href="../vulnerability-scanning/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Vulnerability Scanning">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1459,20 +1599,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Rust CI Runner
+                Vulnerability Scanning
               </div>
             </div>
           </a>
         
         
           
-          <a href="../github-runner/" class="md-footer__link md-footer__link--next" aria-label="Next: GitHub Actions Runner">
+          <a href="../../testing/playwright-setup/" class="md-footer__link md-footer__link--next" aria-label="Next: Playwright Setup">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                GitHub Actions Runner
+                Playwright Setup
               </div>
             </div>
             <div class="md-footer__button md-icon">

@@ -10,25 +10,25 @@
       
       
       
-        <link rel="canonical" href="https://webgrip.github.io/infrastructure/docker-images/php-ci-runner/">
+        <link rel="canonical" href="https://webgrip.github.io/infrastructure/security/">
       
       
-        <link rel="prev" href="../rust-ci-runner/">
+        <link rel="prev" href="../cicd/workflow-details/">
       
       
-        <link rel="next" href="../github-runner/">
+        <link rel="next" href="supply-chain-security/">
       
       
-      <link rel="icon" href="../../assets/images/favicon.png">
+      <link rel="icon" href="../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.6.5">
     
     
       
-        <title>PHP CI Runner - WebGrip Infrastructure</title>
+        <title>Overview - WebGrip Infrastructure</title>
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.8608ea7d.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.8608ea7d.min.css">
       
       
 
@@ -47,7 +47,7 @@
       
     
     
-    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
 
@@ -66,7 +66,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#php-ci-runner" class="md-skip">
+        <a href="#security-overview" class="md-skip">
           Skip to content
         </a>
       
@@ -80,7 +80,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="WebGrip Infrastructure" class="md-header__button md-logo" aria-label="WebGrip Infrastructure" data-md-component="logo">
+    <a href=".." title="WebGrip Infrastructure" class="md-header__button md-logo" aria-label="WebGrip Infrastructure" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -100,7 +100,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              PHP CI Runner
+              Overview
             
           </span>
         </div>
@@ -130,7 +130,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../.." class="md-tabs__link">
+      <a href=".." class="md-tabs__link">
         
   
     
@@ -149,7 +149,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../overview/purpose/" class="md-tabs__link">
+        <a href="../overview/purpose/" class="md-tabs__link">
           
   
   Overview
@@ -163,13 +163,11 @@
         
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
-        <a href="../rust-ci-runner/" class="md-tabs__link">
+      <li class="md-tabs__item">
+        <a href="../docker-images/rust-ci-runner/" class="md-tabs__link">
           
   
   Docker Images
@@ -187,7 +185,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../cicd/automated-building/" class="md-tabs__link">
+        <a href="../cicd/automated-building/" class="md-tabs__link">
           
   
   CI/CD Pipeline
@@ -201,11 +199,13 @@
         
   
   
+    
+  
   
     
     
-      <li class="md-tabs__item">
-        <a href="../../security/" class="md-tabs__link">
+      <li class="md-tabs__item md-tabs__item--active">
+        <a href="./" class="md-tabs__link">
           
   
   Security
@@ -223,7 +223,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../testing/playwright-setup/" class="md-tabs__link">
+        <a href="../testing/playwright-setup/" class="md-tabs__link">
           
   
   Testing
@@ -241,7 +241,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../../operations/building-locally/" class="md-tabs__link">
+        <a href="../operations/building-locally/" class="md-tabs__link">
           
   
   Operations
@@ -257,7 +257,7 @@
   
   
     <li class="md-tabs__item">
-      <a href="../../adrs/" class="md-tabs__link">
+      <a href="../adrs/" class="md-tabs__link">
         
   
     
@@ -293,7 +293,7 @@
 
 <nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="WebGrip Infrastructure" class="md-nav__button md-logo" aria-label="WebGrip Infrastructure" data-md-component="logo">
+    <a href=".." title="WebGrip Infrastructure" class="md-nav__button md-logo" aria-label="WebGrip Infrastructure" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
@@ -311,7 +311,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../.." class="md-nav__link">
+      <a href=".." class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -373,7 +373,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../overview/purpose/" class="md-nav__link">
+      <a href="../overview/purpose/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -395,7 +395,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../overview/architecture/" class="md-nav__link">
+      <a href="../overview/architecture/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -417,7 +417,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../overview/quick-start/" class="md-nav__link">
+      <a href="../overview/quick-start/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -443,30 +443,25 @@
       
   
   
-    
   
   
-  
     
     
     
-      
-        
-        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
-          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -478,7 +473,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_3">
             <span class="md-nav__icon md-icon"></span>
             Docker Images
@@ -492,7 +487,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../rust-ci-runner/" class="md-nav__link">
+      <a href="../docker-images/rust-ci-runner/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -511,31 +506,10 @@
                 
   
   
-    
   
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    PHP CI Runner
-    
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../docker-images/php-ci-runner/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -545,101 +519,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#image-details" class="md-nav__link">
-    <span class="md-ellipsis">
-      Image Details
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#included-tooling" class="md-nav__link">
-    <span class="md-ellipsis">
-      Included Tooling
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#usage-examples" class="md-nav__link">
-    <span class="md-ellipsis">
-      Usage Examples
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Usage Examples">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#run-composer-phpunit" class="md-nav__link">
-    <span class="md-ellipsis">
-      Run Composer + PHPUnit
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#use-in-github-actions-container-job" class="md-nav__link">
-    <span class="md-ellipsis">
-      Use in GitHub Actions (container job)
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#configuration" class="md-nav__link">
-    <span class="md-ellipsis">
-      Configuration
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Configuration">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#build-arguments" class="md-nav__link">
-    <span class="md-ellipsis">
-      Build Arguments
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -652,7 +531,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../github-runner/" class="md-nav__link">
+      <a href="../docker-images/github-runner/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -674,7 +553,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../helm-deploy/" class="md-nav__link">
+      <a href="../docker-images/helm-deploy/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -696,7 +575,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../playwright-runner/" class="md-nav__link">
+      <a href="../docker-images/playwright-runner/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -718,7 +597,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../act-runner/" class="md-nav__link">
+      <a href="../docker-images/act-runner/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -740,7 +619,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../rust-releaser/" class="md-nav__link">
+      <a href="../docker-images/rust-releaser/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -810,7 +689,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cicd/automated-building/" class="md-nav__link">
+      <a href="../cicd/automated-building/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -832,7 +711,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cicd/docker-registry/" class="md-nav__link">
+      <a href="../cicd/docker-registry/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -854,7 +733,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../cicd/workflow-details/" class="md-nav__link">
+      <a href="../cicd/workflow-details/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -880,25 +759,30 @@
       
   
   
+    
   
   
+  
     
     
     
+      
+        
+        
       
       
         
       
     
     
-    <li class="md-nav__item md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" checked>
         
           
-          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
             
   
   <span class="md-ellipsis">
@@ -910,7 +794,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="true">
           <label class="md-nav__title" for="__nav_5">
             <span class="md-nav__icon md-icon"></span>
             Security
@@ -921,10 +805,31 @@
                 
   
   
+    
   
   
-    <li class="md-nav__item">
-      <a href="../../security/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  <span class="md-ellipsis">
+    Overview
+    
+  </span>
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -934,6 +839,62 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-we-protect-against" class="md-nav__link">
+    <span class="md-ellipsis">
+      What we protect against
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#security-pipeline-overview" class="md-nav__link">
+    <span class="md-ellipsis">
+      Security pipeline overview
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#standards-coverage" class="md-nav__link">
+    <span class="md-ellipsis">
+      Standards coverage
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#quick-links" class="md-nav__link">
+    <span class="md-ellipsis">
+      Quick links
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -946,7 +907,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/supply-chain-security/" class="md-nav__link">
+      <a href="supply-chain-security/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -968,7 +929,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/image-signing/" class="md-nav__link">
+      <a href="image-signing/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -990,7 +951,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/sbom-attestations/" class="md-nav__link">
+      <a href="sbom-attestations/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1012,7 +973,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/vulnerability-scanning/" class="md-nav__link">
+      <a href="vulnerability-scanning/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1034,7 +995,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../security/kyverno-enforcement/" class="md-nav__link">
+      <a href="kyverno-enforcement/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1104,7 +1065,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../testing/playwright-setup/" class="md-nav__link">
+      <a href="../testing/playwright-setup/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1126,7 +1087,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../testing/test-execution/" class="md-nav__link">
+      <a href="../testing/test-execution/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1196,7 +1157,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../operations/building-locally/" class="md-nav__link">
+      <a href="../operations/building-locally/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1218,7 +1179,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../operations/contributing-images/" class="md-nav__link">
+      <a href="../operations/contributing-images/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1240,7 +1201,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../operations/maintenance/" class="md-nav__link">
+      <a href="../operations/maintenance/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1262,7 +1223,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../operations/maintaining-techdocs/" class="md-nav__link">
+      <a href="../operations/maintaining-techdocs/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1291,7 +1252,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../../adrs/" class="md-nav__link">
+      <a href="../adrs/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1321,99 +1282,99 @@
 
 
 
-<h1 id="php-ci-runner">PHP CI Runner<a class="headerlink" href="#php-ci-runner" title="Permanent link">&para;</a></h1>
-<p>The PHP CI Runner provides a lightweight, reproducible container environment for running PHP CI tasks (Composer installs, unit tests, static analysis, etc.).</p>
-<h2 id="image-details">Image Details<a class="headerlink" href="#image-details" title="Permanent link">&para;</a></h2>
+<h1 id="security-overview">Security Overview<a class="headerlink" href="#security-overview" title="Permanent link">&para;</a></h1>
+<p>This section documents the supply chain security measures applied to all container images built and published from this repository.</p>
+<h2 id="what-we-protect-against">What we protect against<a class="headerlink" href="#what-we-protect-against" title="Permanent link">&para;</a></h2>
 <table>
 <thead>
 <tr>
-<th>Property</th>
-<th>Value</th>
+<th>Threat</th>
+<th>Mitigation</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>Base Image</strong></td>
-<td><code>php:8.4-cli</code> (digest-pinned; configurable via build arg)</td>
+<td>Tag mutation (image replaced after signing)</td>
+<td>Kyverno pins tags to digests at admission time</td>
 </tr>
 <tr>
-<td><strong>PHP Version</strong></td>
-<td>8.4 (currently resolves to <code>8.4.18-cli-trixie</code>)</td>
+<td>Compromised registry</td>
+<td>cosign signatures are independently verifiable via Rekor transparency log</td>
 </tr>
 <tr>
-<td><strong>Composer</strong></td>
-<td>2.x (currently resolves to <code>2.9.5</code>)</td>
+<td>Unsigned image deployed to cluster</td>
+<td>Kyverno ClusterPolicy blocks unsigned webgrip images</td>
 </tr>
 <tr>
-<td><strong>Registry</strong></td>
-<td><code>webgrip/php-ci-runner</code></td>
+<td>Unknown software components</td>
+<td>CycloneDX SBOM generated and attested for every release</td>
 </tr>
 <tr>
-<td><strong>Dockerfile</strong></td>
-<td><a href="../../../ops/docker/php-ci-runner/Dockerfile"><code>ops/docker/php-ci-runner/Dockerfile</code></a></td>
+<td>Unpatched CVEs in base images</td>
+<td>Trivy scans on every release, results in GitHub Security tab</td>
+</tr>
+<tr>
+<td>Workflow impersonation</td>
+<td>OIDC certificate is bound to the exact workflow file path and Git ref</td>
 </tr>
 </tbody>
 </table>
-<h2 id="included-tooling">Included Tooling<a class="headerlink" href="#included-tooling" title="Permanent link">&para;</a></h2>
+<h2 id="security-pipeline-overview">Security pipeline overview<a class="headerlink" href="#security-pipeline-overview" title="Permanent link">&para;</a></h2>
+<pre class="mermaid"><code>graph LR
+    A[git push / release] --&gt; B[Build &amp; push image]
+    B --&gt; C[Resolve digest]
+    C --&gt; D[cosign sign]
+    C --&gt; E[Syft SBOM]
+    E --&gt; F[cosign attest SBOM]
+    C --&gt; G[GitHub attest provenance]
+    C --&gt; H[Trivy scan]
+    H --&gt; I[GitHub Security tab]
+    D --&gt; J[Rekor transparency log]
+    F --&gt; J
+    D --&gt; K[OCI registry]
+    F --&gt; K
+    G --&gt; K
+    G --&gt; L[GitHub Attestation store]</code></pre>
+<h2 id="standards-coverage">Standards coverage<a class="headerlink" href="#standards-coverage" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th>Standard</th>
+<th>Coverage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a href="https://slsa.dev/spec/v1.0/levels">SLSA Build Level 2</a></td>
+<td>Build provenance attestation, hermetic builds</td>
+</tr>
+<tr>
+<td><a href="https://csrc.nist.gov/publications/detail/sp/800-218/final">NIST SSDF PW.4</a></td>
+<td>Verify third-party software components via SBOM</td>
+</tr>
+<tr>
+<td><a href="https://www.ntia.gov/report/2021/minimum-elements-software-bill-materials-sbom">NTIA Minimum SBOM Elements</a></td>
+<td>Author, timestamp, component name/version/supplier, unique ID, dependency relationships</td>
+</tr>
+<tr>
+<td><a href="https://www.cisecurity.org/insights/white-papers/cis-software-supply-chain-security-guide">CIS Software Supply Chain Guide</a></td>
+<td>Signed releases, provenance, artefact integrity</td>
+</tr>
+<tr>
+<td>EU Cyber Resilience Act (CRA) — in progress</td>
+<td>SBOM generation, vulnerability disclosure</td>
+</tr>
+</tbody>
+</table>
+<h2 id="quick-links">Quick links<a class="headerlink" href="#quick-links" title="Permanent link">&para;</a></h2>
 <ul>
-<li><strong>PHP CLI</strong> + common extensions (<code>bcmath</code>, <code>curl</code>, <code>gd</code>, <code>intl</code>, <code>mbstring</code>, <code>mysql</code>, <code>soap</code>, <code>sockets</code>, <code>xml</code>, <code>zip</code>)</li>
-<li><strong>PCOV</strong> for code coverage</li>
-<li><strong>Composer</strong> (installed to <code>/usr/local/bin/composer</code>)</li>
-<li>Common CI utilities: <code>git</code>, <code>curl</code>, <code>jq</code>, <code>patch</code>, <code>rsync</code>, <code>zip</code>, <code>unzip</code></li>
+<li><a href="supply-chain-security/">Supply Chain Security</a> — conceptual overview, SLSA framework</li>
+<li><a href="image-signing/">Image Signing</a> — cosign keyless signing, how to verify</li>
+<li><a href="sbom-attestations/">SBOM &amp; Attestations</a> — what SBOMs contain, how to inspect them</li>
+<li><a href="vulnerability-scanning/">Vulnerability Scanning</a> — Trivy, GitHub Security tab, triage</li>
+<li><a href="kyverno-enforcement/">Kyverno Enforcement</a> — cluster-side policy enforcement</li>
+<li><a href="../../adrs/0002-supply-chain-security.md">ADR-0002</a> — decision record for this approach</li>
 </ul>
-<h2 id="usage-examples">Usage Examples<a class="headerlink" href="#usage-examples" title="Permanent link">&para;</a></h2>
-<h3 id="run-composer-phpunit">Run Composer + PHPUnit<a class="headerlink" href="#run-composer-phpunit" title="Permanent link">&para;</a></h3>
-<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
-<span class="normal">2</span>
-<span class="normal">3</span>
-<span class="normal">4</span>
-<span class="normal">5</span></pre></div></td><td class="code"><div><pre><span></span><code>docker<span class="w"> </span>run<span class="w"> </span>--rm<span class="w"> </span>-it<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-v<span class="w"> </span><span class="k">$(</span><span class="nb">pwd</span><span class="k">)</span>:/workspace<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-w<span class="w"> </span>/workspace<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>webgrip/php-ci-runner:latest<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>bash<span class="w"> </span>-lc<span class="w"> </span><span class="s2">&quot;composer install &amp;&amp; vendor/bin/phpunit&quot;</span>
-</code></pre></div></td></tr></table></div>
-<h3 id="use-in-github-actions-container-job">Use in GitHub Actions (container job)<a class="headerlink" href="#use-in-github-actions-container-job" title="Permanent link">&para;</a></h3>
-<div class="language-yaml highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
-<span class="normal">2</span>
-<span class="normal">3</span>
-<span class="normal">4</span>
-<span class="normal">5</span>
-<span class="normal">6</span>
-<span class="normal">7</span>
-<span class="normal">8</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nt">jobs</span><span class="p">:</span>
-<span class="w">  </span><span class="nt">test</span><span class="p">:</span>
-<span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
-<span class="w">    </span><span class="nt">container</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">webgrip/php-ci-runner:latest</span>
-<span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">composer install</span>
-<span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">vendor/bin/phpunit</span>
-</code></pre></div></td></tr></table></div>
-<h2 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h2>
-<h3 id="build-arguments">Build Arguments<a class="headerlink" href="#build-arguments" title="Permanent link">&para;</a></h3>
-<div class="language-dockerfile highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
-<span class="normal">2</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">ARG</span><span class="w"> </span><span class="nv">PHP_IMAGE</span><span class="o">=</span>php:8.4-cli
-<span class="k">ARG</span><span class="w"> </span><span class="nv">COMPOSER_IMAGE</span><span class="o">=</span>composer:2
-</code></pre></div></td></tr></table></div>
-<p>Build with a different PHP base tag:</p>
-<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
-<span class="normal">2</span>
-<span class="normal">3</span>
-<span class="normal">4</span></pre></div></td><td class="code"><div><pre><span></span><code>docker<span class="w"> </span>build<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--build-arg<span class="w"> </span><span class="nv">PHP_IMAGE</span><span class="o">=</span>php:8.3-cli<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-t<span class="w"> </span>webgrip/php-ci-runner:local<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>ops/docker/php-ci-runner/
-</code></pre></div></td></tr></table></div>
-<p>Build with a different Composer base tag:</p>
-<div class="language-bash highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
-<span class="normal">2</span>
-<span class="normal">3</span>
-<span class="normal">4</span></pre></div></td><td class="code"><div><pre><span></span><code>docker<span class="w"> </span>build<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>--build-arg<span class="w"> </span><span class="nv">COMPOSER_IMAGE</span><span class="o">=</span>composer:2.8<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>-t<span class="w"> </span>webgrip/php-ci-runner:local<span class="w"> </span><span class="se">\</span>
-<span class="w">  </span>ops/docker/php-ci-runner/
-</code></pre></div></td></tr></table></div>
 
 
 
@@ -1449,7 +1410,7 @@
       <nav class="md-footer__inner md-grid" aria-label="Footer" >
         
           
-          <a href="../rust-ci-runner/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Rust CI Runner">
+          <a href="../cicd/workflow-details/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Workflow Details">
             <div class="md-footer__button md-icon">
               
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
@@ -1459,20 +1420,20 @@
                 Previous
               </span>
               <div class="md-ellipsis">
-                Rust CI Runner
+                Workflow Details
               </div>
             </div>
           </a>
         
         
           
-          <a href="../github-runner/" class="md-footer__link md-footer__link--next" aria-label="Next: GitHub Actions Runner">
+          <a href="supply-chain-security/" class="md-footer__link md-footer__link--next" aria-label="Next: Supply Chain Security">
             <div class="md-footer__title">
               <span class="md-footer__direction">
                 Next
               </span>
               <div class="md-ellipsis">
-                GitHub Actions Runner
+                Supply Chain Security
               </div>
             </div>
             <div class="md-footer__button md-icon">
@@ -1506,12 +1467,12 @@
     </div>
     
     
-    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.top", "navigation.sections", "toc.integrate", "navigation.footer", "content.action.edit"], "search": "../../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.top", "navigation.sections", "toc.integrate", "navigation.footer", "content.action.edit"], "search": "../assets/javascripts/workers/search.f8cc74c7.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.f1b6f286.min.js"></script>
+      <script src="../assets/javascripts/bundle.f1b6f286.min.js"></script>
       
-        <script src="../../search/main.js"></script>
+        <script src="../search/main.js"></script>
       
     
   </body>
