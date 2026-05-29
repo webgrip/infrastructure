@@ -103,7 +103,7 @@ runs:
         echo "Resolving digest for: ${IMAGE_REF}"
 
         if [[ "${DRY_RUN}" == "true" ]]; then
-          DIGEST="sha256:1111111111111111111111111111111111111111111111111111111111111111"
+          DIGEST="sha256:3d7c0e4f9ab1c2d45e6f708192a3b4c56d7e8f90123456789abcdef012345678"
           echo "ACT dry-run enabled; using synthetic digest: ${DIGEST}"
         else
           DIGEST=$(docker buildx imagetools inspect "${IMAGE_REF}" \
