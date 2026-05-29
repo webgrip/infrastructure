@@ -1,4 +1,4 @@
-FROM node:23-alpine3.20@sha256:78d6e102e0889545bcf80ded837034f485ba7f7ebe09211d0f2d383082a7a047 AS node
+FROM node:24-alpine3.20@sha256:8fe019e0d57dbdce5f5c27c0b63d2775cf34b00e3755a7dea969802d7e0c2b25 AS node
 
 RUN corepack enable && corepack prepare npm@latest --activate
 
