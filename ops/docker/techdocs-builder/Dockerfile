@@ -11,6 +11,7 @@ RUN npm install -g \
     @mermaid-js/mermaid-cli@11.4.2
 
 
+
 FROM python:3.13.3-alpine3.20@sha256:40a4559d3d6b2117b1fbe426f17d55b9100fa40609733a1d0c3f39e2151d4b33 AS python
 
 RUN apk add --no-cache graphviz
