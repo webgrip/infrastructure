@@ -19,9 +19,9 @@ RUN pip3 install --no-cache-dir \
     mkdocs-dracula-theme==1.0.7
 
 
-FROM openjdk:11.0.11-jre-slim@sha256:dfa2c54ed832658aa90da547bb1b8bd41e5d3fffcc0c89e6540dea586ccefdef AS openjdk
+FROM eclipse-temurin:11.0.31_11-jre-alpine@sha256:a83a14eeeee6151dfefea24b390f0190f25b7add6ff752e93757a39fb8378eb9 AS openjdk
 
-RUN apt-get update && apt-get install -y curl && apt-get clean
+RUN apk add --no-cache curl
 
 RUN curl -o /opt/plantuml.jar -L http://sourceforge.net/projects/plantuml/files/plantuml.1.2023.7.jar/download && \
     echo "93fe1101c59381e0b3af86262b844871ca0eb987  /opt/plantuml.jar" | sha1sum -c - && \
