@@ -4,6 +4,8 @@ FROM node:24-alpine3.20@sha256:8fe019e0d57dbdce5f5c27c0b63d2775cf34b00e3755a7dea
 
 RUN corepack enable && corepack prepare npm@latest --activate
 
+RUN apk add --no-cache python3 make g++
+
 RUN npm install -g \
     @techdocs/cli@1.9.0 \
     @mermaid-js/mermaid-cli@11.4.2
