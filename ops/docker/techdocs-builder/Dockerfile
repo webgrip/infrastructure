@@ -29,7 +29,13 @@ RUN curl -o /opt/plantuml.jar -L http://sourceforge.net/projects/plantuml/files/
     chmod +x /usr/local/bin/plantuml
 
 
-FROM alpine:3.23@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659 AS final
+ARG FINAL_BASE=alpine:3.23@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659
+FROM ${FINAL_BASE} AS final
+
+ARG FINAL_BASE
+ARG IMAGE_CREATED=1970-01-01T00:00:00Z
+ARG IMAGE_VERSION=dev
+ARG IMAGE_REVISION=unknown
 
 RUN apk add --no-cache \
     libstdc++ \
@@ -45,3 +51,16 @@ COPY --from=openjdk /opt/plantuml.jar /opt/plantuml.jar
 COPY --from=openjdk /usr/local/bin/plantuml /usr/local/bin/plantuml
 
 WORKDIR /docs
+
+LABEL org.opencontainers.image.title="WebGrip TechDocs Builder" \
+    org.opencontainers.image.description="TechDocs build image with MkDocs, PlantUML, Mermaid, and Chromium" \
+    org.opencontainers.image.source="https://github.com/webgrip/infrastructure" \
+    org.opencontainers.image.url="https://github.com/webgrip/infrastructure" \
+    org.opencontainers.image.documentation="https://github.com/webgrip/infrastructure/tree/main/docs/techdocs" \
+    org.opencontainers.image.vendor="WebGrip" \
+    org.opencontainers.image.authors="Ryan Grippeling <ryan@webgrip.nl>" \
+    org.opencontainers.image.licenses="MIT" \
+    org.opencontainers.image.base.name="${FINAL_BASE}" \
+    org.opencontainers.image.created="${IMAGE_CREATED}" \
+    org.opencontainers.image.version="${IMAGE_VERSION}" \
+    org.opencontainers.image.revision="${IMAGE_REVISION}"
