@@ -1,7 +1,8 @@
 name: '[Workflow] On Release Published'
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-${{ github.ref }}-${{ github.event.release.id }}
+  cancel-in-progress: true
 
 on:
   release:
