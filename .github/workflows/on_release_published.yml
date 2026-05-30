@@ -48,6 +48,11 @@ jobs:
     with:
       docker-context: "ops/docker/${{ needs.parse-release-tag.outputs.image }}"
       docker-file: "Dockerfile"
+      platforms: "linux/amd64,linux/arm64"
+      docker-build-args: |
+        IMAGE_CREATED=${{ github.event.release.published_at || github.event.release.created_at }}
+        IMAGE_VERSION=${{ needs.parse-release-tag.outputs.version }}
+        IMAGE_REVISION=${{ github.sha }}
       docker-tags: |
         ${{ github.repository_owner }}/${{ needs.parse-release-tag.outputs.image }}:${{ needs.parse-release-tag.outputs.version }}
         ${{ github.repository_owner }}/${{ needs.parse-release-tag.outputs.image }}:latest
@@ -64,6 +69,11 @@ jobs:
     with:
       docker-context: "ops/docker/${{ needs.parse-release-tag.outputs.image }}"
       docker-file: "Dockerfile"
+      platforms: "linux/amd64,linux/arm64"
+      docker-build-args: |
+        IMAGE_CREATED=${{ github.event.release.published_at || github.event.release.created_at }}
+        IMAGE_VERSION=${{ needs.parse-release-tag.outputs.version }}
+        IMAGE_REVISION=${{ github.sha }}
       docker-tags: |
         ${{ github.repository_owner }}/${{ needs.parse-release-tag.outputs.image }}:${{ needs.parse-release-tag.outputs.version }}
     secrets: inherit
