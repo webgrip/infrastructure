@@ -1,3 +1,5 @@
+ARG FINAL_BASE=alpine:3.23.3@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659
+
 FROM node:24-alpine3.20@sha256:8fe019e0d57dbdce5f5c27c0b63d2775cf34b00e3755a7dea969802d7e0c2b25 AS node
 
 RUN corepack enable && corepack prepare npm@latest --activate
@@ -29,7 +31,6 @@ RUN curl -o /opt/plantuml.jar -L http://sourceforge.net/projects/plantuml/files/
     chmod +x /usr/local/bin/plantuml
 
 
-ARG FINAL_BASE=alpine:3.23@sha256:25109184c71bdad752c8312a8623239686a9a2071e8825f20acb8f2198c3f659
 FROM ${FINAL_BASE} AS final
 
 ARG FINAL_BASE
