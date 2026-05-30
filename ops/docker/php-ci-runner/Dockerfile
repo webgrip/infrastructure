@@ -6,6 +6,9 @@ FROM ${PHP_IMAGE}
 
 ARG COMPOSER_IMAGE
 ARG PHP_IMAGE
+ARG IMAGE_CREATED=1970-01-01T00:00:00Z
+ARG IMAGE_VERSION=dev
+ARG IMAGE_REVISION=unknown
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -64,9 +67,17 @@ RUN apt-get update -yq \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
-LABEL org.opencontainers.image.source="https://github.com/webgrip/infrastructure" \
+LABEL org.opencontainers.image.title="WebGrip PHP CI Runner" \
     org.opencontainers.image.description="PHP CI runner with Composer and common extensions" \
-     org.opencontainers.image.base.name="${PHP_IMAGE}" \
-    org.opencontainers.image.licenses="MIT"
+    org.opencontainers.image.source="https://github.com/webgrip/infrastructure" \
+    org.opencontainers.image.url="https://github.com/webgrip/infrastructure" \
+    org.opencontainers.image.documentation="https://github.com/webgrip/infrastructure/tree/main/docs/techdocs" \
+    org.opencontainers.image.vendor="WebGrip" \
+    org.opencontainers.image.authors="Ryan Grippeling <ryan@webgrip.nl>" \
+    org.opencontainers.image.licenses="MIT" \
+    org.opencontainers.image.base.name="${PHP_IMAGE}" \
+    org.opencontainers.image.created="${IMAGE_CREATED}" \
+    org.opencontainers.image.version="${IMAGE_VERSION}" \
+    org.opencontainers.image.revision="${IMAGE_REVISION}"
 
 CMD ["bash"]

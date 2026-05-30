@@ -43,6 +43,10 @@ RUN rustup default ${RUST_VERSION} \
 ARG DEBIAN_BASE=debian:bookworm-slim@sha256:74d56e3931e0d5a1dd51f8c8a2466d21de84a271cd3b5a733b803aa91abf4421
 FROM ${DEBIAN_BASE} AS final
 
+ARG IMAGE_CREATED=1970-01-01T00:00:00Z
+ARG IMAGE_VERSION=dev
+ARG IMAGE_REVISION=unknown
+
 # 2.1 Runtime **and** build tools (gcc, make, pkg-config, OpenSSL headers)
 RUN apt-get update -qq \
  && apt-get install -y --no-install-recommends \
@@ -63,9 +67,17 @@ ENV \
   RUSTUP_HOME=/usr/local/rustup \
   PATH="/usr/local/cargo/bin:${PATH}"
 
-LABEL org.opencontainers.image.source="https://github.com/webgrip/infrastructure" \
-     org.opencontainers.image.description="Rust CI runner with auditing and testing tools" \
-     org.opencontainers.image.base.name="rust:${RUST_VERSION}-slim-bookworm" \
-     org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.title="WebGrip Rust CI Runner" \
+    org.opencontainers.image.description="Rust CI runner with auditing and testing tools" \
+    org.opencontainers.image.source="https://github.com/webgrip/infrastructure" \
+    org.opencontainers.image.url="https://github.com/webgrip/infrastructure" \
+    org.opencontainers.image.documentation="https://github.com/webgrip/infrastructure/tree/main/docs/techdocs" \
+    org.opencontainers.image.vendor="WebGrip" \
+    org.opencontainers.image.authors="Ryan Grippeling <ryan@webgrip.nl>" \
+    org.opencontainers.image.licenses="MIT" \
+    org.opencontainers.image.base.name="${DEBIAN_BASE}" \
+    org.opencontainers.image.created="${IMAGE_CREATED}" \
+    org.opencontainers.image.version="${IMAGE_VERSION}" \
+    org.opencontainers.image.revision="${IMAGE_REVISION}"
 
 ENTRYPOINT ["bash"]

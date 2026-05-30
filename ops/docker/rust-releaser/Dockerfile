@@ -5,6 +5,9 @@ ARG NODE_VERSION=22
 ARG DEBIAN_CODENAME=bookworm
 FROM node:${NODE_VERSION}-${DEBIAN_CODENAME}-slim
 
+ARG IMAGE_CREATED=1970-01-01T00:00:00Z
+ARG IMAGE_VERSION=dev
+ARG IMAGE_REVISION=unknown
 ENV DEBIAN_FRONTEND=noninteractive
 
 ###############################################################################
@@ -84,9 +87,17 @@ RUN if [ "${SEMREL_VERSION}" = "latest" ]; then \
 RUN mkdir -p /root/.cargo/bin && \
     ln -sf /usr/local/cargo/bin/{cargo,rustc,rustup} /root/.cargo/bin/
 
-LABEL org.opencontainers.image.source="https://github.com/webgrip/infrastructure" \
+LABEL org.opencontainers.image.title="WebGrip Rust Releaser" \
     org.opencontainers.image.description="Rust + Node release automation toolchain" \
+    org.opencontainers.image.source="https://github.com/webgrip/infrastructure" \
+    org.opencontainers.image.url="https://github.com/webgrip/infrastructure" \
+    org.opencontainers.image.documentation="https://github.com/webgrip/infrastructure/tree/main/docs/techdocs" \
+    org.opencontainers.image.vendor="WebGrip" \
+    org.opencontainers.image.authors="Ryan Grippeling <ryan@webgrip.nl>" \
+    org.opencontainers.image.licenses="MIT" \
     org.opencontainers.image.base.name="node:${NODE_VERSION}-${DEBIAN_CODENAME}-slim" \
-    org.opencontainers.image.licenses="MIT"
+    org.opencontainers.image.created="${IMAGE_CREATED}" \
+    org.opencontainers.image.version="${IMAGE_VERSION}" \
+    org.opencontainers.image.revision="${IMAGE_REVISION}"
 
 ENTRYPOINT ["bash"]

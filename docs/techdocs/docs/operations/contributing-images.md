@@ -151,21 +151,28 @@ RUN apt-get update && \
 ```dockerfile
 # Build-time configuration
 ARG NODE_VERSION=20
-ARG BUILD_DATE
-ARG VERSION
+ARG IMAGE_CREATED=1970-01-01T00:00:00Z
+ARG IMAGE_VERSION=dev
+ARG IMAGE_REVISION=unknown
 
 # Runtime environment
 ENV NODE_ENV=production \
     PORT=3000 \
     LOG_LEVEL=info
 
-# Labels for metadata
-LABEL maintainer="WebGrip Ops Team <ops@webgrip.nl>" \
-      org.opencontainers.image.title="My Tool" \
+# OCI image metadata
+LABEL org.opencontainers.image.title="My Tool" \
       org.opencontainers.image.description="Description of the tool" \
-      org.opencontainers.image.version="${VERSION}" \
-      org.opencontainers.image.created="${BUILD_DATE}" \
-      org.opencontainers.image.source="https://github.com/webgrip/infrastructure"
+      org.opencontainers.image.source="https://github.com/webgrip/infrastructure" \
+      org.opencontainers.image.url="https://github.com/webgrip/infrastructure" \
+      org.opencontainers.image.documentation="https://github.com/webgrip/infrastructure/tree/main/docs/techdocs" \
+      org.opencontainers.image.vendor="WebGrip" \
+      org.opencontainers.image.authors="WebGrip Ops Team" \
+      org.opencontainers.image.licenses="MIT" \
+      org.opencontainers.image.base.name="node:${NODE_VERSION}" \
+      org.opencontainers.image.version="${IMAGE_VERSION}" \
+      org.opencontainers.image.created="${IMAGE_CREATED}" \
+      org.opencontainers.image.revision="${IMAGE_REVISION}"
 ```
 
 ### Example: Creating a Python Tools Image
