@@ -1,4 +1,4 @@
-FROM ghcr.io/webgrip/techdocs-builder:latest AS techdocs
+FROM ghcr.io/webgrip/techdocs-builder:latest@sha256:ac891abd9e03fe3384b4d9d48f448f268aa7d8250ceb2a0c4a26029569df5632 AS techdocs
 
 ARG IMAGE_CREATED=1970-01-01T00:00:00Z
 ARG IMAGE_VERSION=dev
@@ -8,9 +8,9 @@ RUN apk add --no-cache \
     python3 \
     py3-pip
 
-COPY --from=ghcr.io/webgrip/techdocs-builder:latest /usr/local /usr/local
-COPY --from=ghcr.io/webgrip/techdocs-builder:latest /opt/plantuml.jar /opt/plantuml.jar
-COPY --from=ghcr.io/webgrip/techdocs-builder:latest /usr/local/bin/plantuml /usr/local/bin/plantuml
+COPY --from=ghcr.io/webgrip/techdocs-builder:latest@sha256:ac891abd9e03fe3384b4d9d48f448f268aa7d8250ceb2a0c4a26029569df5632 /usr/local /usr/local
+COPY --from=ghcr.io/webgrip/techdocs-builder:latest@sha256:ac891abd9e03fe3384b4d9d48f448f268aa7d8250ceb2a0c4a26029569df5632 /opt/plantuml.jar /opt/plantuml.jar
+COPY --from=ghcr.io/webgrip/techdocs-builder:latest@sha256:ac891abd9e03fe3384b4d9d48f448f268aa7d8250ceb2a0c4a26029569df5632 /usr/local/bin/plantuml /usr/local/bin/plantuml
 
 COPY ./ops/docker/techdocs-runner/docker-entrypoint.sh ./docker-entrypoint.sh
 
