@@ -1,0 +1,8 @@
+2026-05-30T22:22:55.3180000Z Job is waiting for a hosted runner to come online.
+2026-05-30T22:22:55.3190000Z Job is about to start running on the hosted runner: GitHub Actions 1000004449
+2026-05-30T22:22:55.3150000Z Requested labels: ubuntu-latest
+2026-05-30T22:22:55.3150000Z Job defined at: webgrip/infrastructure/.github/workflows/on_release_published.yml@refs/tags/github-runner-v1.3.1
+2026-05-30T22:22:55.3150000Z Waiting for a runner to pick up this job...
+2026-05-30T22:22:55.3150000Z Evaluating parse-release-tag.if
+2026-05-30T22:22:55.3150000Z Evaluating: success()
+2026-05-30T22:22:55.3150000Z Result: true

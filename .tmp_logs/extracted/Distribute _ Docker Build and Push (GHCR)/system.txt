@@ -1,0 +1,14 @@
+2026-05-30T22:22:59.8240000Z Requested labels: arc-runner-set
+2026-05-30T22:22:59.8240000Z Job defined at: webgrip/workflows/.github/workflows/docker-build-and-push-ghcr.yml@refs/heads/main
+2026-05-30T22:22:59.8240000Z Reusable workflow chain:
+2026-05-30T22:22:59.8240000Z webgrip/infrastructure/.github/workflows/on_release_published.yml@refs/tags/github-runner-v1.3.1 (b23b105320adec5f71b6fc11217803fdafbdd7c9)
+2026-05-30T22:22:59.8240000Z -> webgrip/workflows/.github/workflows/docker-build-and-push-ghcr.yml@refs/heads/main (0ba74cb9e99eef580e923699fdfb17b6b9c9aa27)
+2026-05-30T22:22:59.8240000Z Waiting for a runner to pick up this job...
+2026-05-30T22:22:59.8240000Z Evaluating release-distribute-ghcr.if
+2026-05-30T22:22:59.8240000Z Evaluating: (success() && ((needs.parse-release-tag.outputs.is_prerelease != 'true')))
+2026-05-30T22:22:59.8240000Z Expanded: (true && ('false' != 'true'))
+2026-05-30T22:22:59.8240000Z Result: true
+2026-05-30T22:22:59.8240000Z Evaluating release-distribute-ghcr.build.if
+2026-05-30T22:22:59.8240000Z Evaluating: success()
+2026-05-30T22:22:59.8240000Z Result: true
+2026-05-30T22:22:59.8250000Z Job is about to start running on the runner: arc-runner-set

@@ -1,0 +1,67 @@
+﻿2026-05-30T22:22:57.2341342Z Current runner version: '2.334.0'
+2026-05-30T22:22:57.2367781Z ##[group]Runner Image Provisioner
+2026-05-30T22:22:57.2368736Z Hosted Compute Agent
+2026-05-30T22:22:57.2369386Z Version: 20260520.533
+2026-05-30T22:22:57.2370014Z Commit: 189110e25284a9812c124fd27b339e2fb4f2f9db
+2026-05-30T22:22:57.2370851Z Build Date: 2026-05-20T17:44:04Z
+2026-05-30T22:22:57.2371555Z Worker ID: {3f2dc38d-abea-457b-9ece-3d6a49aff049}
+2026-05-30T22:22:57.2372339Z Azure Region: northcentralus
+2026-05-30T22:22:57.2373035Z ##[endgroup]
+2026-05-30T22:22:57.2374845Z ##[group]Operating System
+2026-05-30T22:22:57.2375597Z Ubuntu
+2026-05-30T22:22:57.2376154Z 24.04.4
+2026-05-30T22:22:57.2376671Z LTS
+2026-05-30T22:22:57.2377363Z ##[endgroup]
+2026-05-30T22:22:57.2378078Z ##[group]Runner Image
+2026-05-30T22:22:57.2378744Z Image: ubuntu-24.04
+2026-05-30T22:22:57.2379343Z Version: 20260525.161.1
+2026-05-30T22:22:57.2380727Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260525.161/images/ubuntu/Ubuntu2404-Readme.md
+2026-05-30T22:22:57.2382249Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260525.161
+2026-05-30T22:22:57.2383265Z ##[endgroup]
+2026-05-30T22:22:57.2386083Z ##[group]GITHUB_TOKEN Permissions
+2026-05-30T22:22:57.2389062Z Actions: write
+2026-05-30T22:22:57.2389698Z ArtifactMetadata: write
+2026-05-30T22:22:57.2390307Z Attestations: write
+2026-05-30T22:22:57.2391065Z Checks: write
+2026-05-30T22:22:57.2391645Z CodeQuality: write
+2026-05-30T22:22:57.2392582Z Contents: write
+2026-05-30T22:22:57.2393222Z Deployments: write
+2026-05-30T22:22:57.2393792Z Discussions: write
+2026-05-30T22:22:57.2394439Z Issues: write
+2026-05-30T22:22:57.2395012Z Metadata: read
+2026-05-30T22:22:57.2395640Z Models: read
+2026-05-30T22:22:57.2396219Z Packages: write
+2026-05-30T22:22:57.2396871Z Pages: write
+2026-05-30T22:22:57.2397759Z PullRequests: write
+2026-05-30T22:22:57.2398402Z RepositoryProjects: write
+2026-05-30T22:22:57.2399051Z SecurityEvents: write
+2026-05-30T22:22:57.2399731Z Statuses: write
+2026-05-30T22:22:57.2400323Z VulnerabilityAlerts: read
+2026-05-30T22:22:57.2401032Z ##[endgroup]
+2026-05-30T22:22:57.2403161Z Secret source: Actions
+2026-05-30T22:22:57.2404158Z Prepare workflow directory
+2026-05-30T22:22:57.2746232Z Prepare all required actions
+2026-05-30T22:22:57.2837372Z Complete job name: Parse tag
+2026-05-30T22:22:57.3577828Z ##[group]Run set -euo pipefail
+2026-05-30T22:22:57.3578663Z [36;1mset -euo pipefail[0m
+2026-05-30T22:22:57.3579464Z [36;1mtag='github-runner-v1.3.1'[0m
+2026-05-30T22:22:57.3580159Z [36;1m[0m
+2026-05-30T22:22:57.3580779Z [36;1mif [[ "$tag" =~ ^(.+)-v(.+)$ ]]; then[0m
+2026-05-30T22:22:57.3581593Z [36;1m  image="${BASH_REMATCH[1]}"[0m
+2026-05-30T22:22:57.3582306Z [36;1m  version="${BASH_REMATCH[2]}"[0m
+2026-05-30T22:22:57.3583015Z [36;1melse[0m
+2026-05-30T22:22:57.3583670Z [36;1m  echo "Unsupported tag format: $tag" >&2[0m
+2026-05-30T22:22:57.3584626Z [36;1m  echo "Expected: <image>-v<version> (e.g. helm-deploy-v1.2.3)" >&2[0m
+2026-05-30T22:22:57.3585561Z [36;1m  exit 1[0m
+2026-05-30T22:22:57.3586133Z [36;1mfi[0m
+2026-05-30T22:22:57.3586657Z [36;1m[0m
+2026-05-30T22:22:57.3587331Z [36;1mecho "image=$image" >> "$GITHUB_OUTPUT"[0m
+2026-05-30T22:22:57.3588328Z [36;1mecho "version=$version" >> "$GITHUB_OUTPUT"[0m
+2026-05-30T22:22:57.3589276Z [36;1mecho "is_prerelease=false" >> "$GITHUB_OUTPUT"[0m
+2026-05-30T22:22:57.3927749Z shell: /usr/bin/bash --noprofile --norc -e -o pipefail {0}
+2026-05-30T22:22:57.3929189Z ##[endgroup]
+2026-05-30T22:22:57.4254753Z Evaluate and set job outputs
+2026-05-30T22:22:57.4265532Z Set output 'image'
+2026-05-30T22:22:57.4267636Z Set output 'version'
+2026-05-30T22:22:57.4268897Z Set output 'is_prerelease'
+2026-05-30T22:22:57.4270254Z Cleaning up orphan processes
