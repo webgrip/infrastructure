@@ -1,4 +1,4 @@
-name: 'Supply Chain Security: Sign, Attest & Scan'
+name: "Supply Chain Security: Sign, Attest & Scan"
 description: >-
   Keyless-signs a container image with cosign using GitHub OIDC, generates
   CycloneDX and SPDX SBOMs with Syft, attests them in the OCI registry,
@@ -18,64 +18,63 @@ inputs:
       Used to construct the full image reference for signing.
     required: true
   registry:
-    description: 'Container registry hostname'
-    default: 'ghcr.io'
+    description: "Container registry hostname"
+    default: "ghcr.io"
   registry-username:
-    description: 'Registry username — pass github.actor'
+    description: "Registry username — pass github.actor"
     required: true
   registry-password:
-    description: 'Registry password/token — pass secrets.GITHUB_TOKEN'
+    description: "Registry password/token — pass secrets.GITHUB_TOKEN"
     required: true
   trivy-severity:
-    description: 'Comma-separated Trivy severities to include in SARIF report'
-    default: 'CRITICAL,HIGH,MEDIUM'
+    description: "Comma-separated Trivy severities to include in SARIF report"
+    default: "CRITICAL,HIGH,MEDIUM"
   upload-sarif:
-    description: 'Upload Trivy SARIF to GitHub Security tab (requires security-events: write)'
-    default: 'true'
+    description: "Upload Trivy SARIF to GitHub Security tab (requires security-events: write)"
+    default: "true"
   upload-sbom-artifact:
-    description: 'Upload CycloneDX and SPDX SBOMs as workflow artifacts'
-    default: 'true'
+    description: "Upload CycloneDX and SPDX SBOMs as workflow artifacts"
+    default: "true"
   sbom-retention-days:
-    description: 'Days to retain uploaded SBOM artifacts'
-    default: '90'
+    description: "Days to retain uploaded SBOM artifacts"
+    default: "90"
   dry-run:
-    description: 'Run ACT/local smoke mode (no registry mutation, no OIDC signing)'
-    default: 'false'
+    description: "Run ACT/local smoke mode (no registry mutation, no OIDC signing)"
+    default: "false"
 
 outputs:
   digest:
-    description: 'Resolved image digest (sha256:...)'
+    description: "Resolved image digest (sha256:...)"
     value: ${{ steps.resolve-digest.outputs.digest }}
   image-with-digest:
-    description: 'Full image reference using digest (ghcr.io/org/img@sha256:...)'
+    description: "Full image reference using digest (ghcr.io/org/img@sha256:...)"
     value: ${{ steps.resolve-digest.outputs.image-with-digest }}
   sbom-cdx-path:
-    description: 'Local filesystem path to the generated CycloneDX SBOM JSON'
+    description: "Local filesystem path to the generated CycloneDX SBOM JSON"
     value: ${{ steps.generate-sbom.outputs.sbom-cdx-path }}
   sbom-spdx-path:
-    description: 'Local filesystem path to the generated SPDX SBOM JSON'
+    description: "Local filesystem path to the generated SPDX SBOM JSON"
     value: ${{ steps.generate-sbom.outputs.sbom-spdx-path }}
   component-count:
-    description: 'Number of software components catalogued in the SBOM'
+    description: "Number of software components catalogued in the SBOM"
     value: ${{ steps.generate-sbom.outputs.component-count }}
 
 runs:
   using: composite
   steps:
-
     # ── Tool installation ──────────────────────────────────────────────────
 
     - name: Install cosign
       if: ${{ inputs.dry-run != 'true' }}
       uses: sigstore/cosign-installer@v3
       with:
-        cosign-release: 'v2.4.3'
+        cosign-release: "v2.4.3"
 
     - name: Install Syft (SBOM generator)
       if: ${{ inputs.dry-run != 'true' }}
       uses: anchore/sbom-action/download-syft@v0
       with:
-        syft-version: 'v1.21.0'
+        syft-version: "v1.21.0"
 
     # ── Registry authentication ────────────────────────────────────────────
 
@@ -252,7 +251,7 @@ runs:
         severity: ${{ inputs.trivy-severity }}
         ignore-unfixed: true
         vuln-type: os,library
-        exit-code: '0'
+        exit-code: "0"
 
     - name: Upload Trivy SARIF to GitHub Security tab
       if: ${{ inputs.dry-run != 'true' && inputs.upload-sarif == 'true' && always() }}
@@ -269,7 +268,7 @@ runs:
         format: table
         severity: ${{ inputs.trivy-severity }}
         ignore-unfixed: true
-        exit-code: '0'
+        exit-code: "0"
 
     # ── Artifact upload ────────────────────────────────────────────────────
 
@@ -301,46 +300,57 @@ runs:
         DRY_RUN: ${{ inputs.dry-run }}
       run: |
         if [[ "${DRY_RUN}" == "true" ]]; then
-          SIGN_STATUS="🟡 (dry-run)"
-          ATTEST_STATUS="🟡 (dry-run)"
-          PROVENANCE_STATUS="🟡 (dry-run)"
-          TRIVY_STATUS="🟡 (dry-run)"
+          SIGN_STATUS="🟡 DRY-RUN"
+          ATTEST_STATUS="🟡 DRY-RUN"
+          PROVENANCE_STATUS="🟡 DRY-RUN"
+          SBOM_STATUS="🟡 DRY-RUN"
+          TRIVY_STATUS="🟡 DRY-RUN"
         else
-          SIGN_STATUS="✅"
-          ATTEST_STATUS="✅"
-          PROVENANCE_STATUS="✅"
-          TRIVY_STATUS="✅"
+          SIGN_STATUS="✅ Signed"
+          ATTEST_STATUS="✅ Attested"
+          PROVENANCE_STATUS="✅ Verified"
+          SBOM_STATUS="✅ Generated"
+          TRIVY_STATUS="✅ Scanned"
         fi
         {
-          echo "## \U0001F510 Supply Chain Security Report"
+          echo "## 🔐 Supply Chain Security Report"
           echo ""
           echo "| Check | Status |"
           echo "|-------|--------|"
-          echo "| Image signed (cosign keyless OIDC) | ${SIGN_STATUS} |"
-          echo "| CycloneDX SBOM generated (Syft) | \u2705 |"
-          echo "| SBOM attested (cosign in-toto) | ${ATTEST_STATUS} |"
-          echo "| SLSA Build Provenance (GitHub native) | ${PROVENANCE_STATUS} |"
-          echo "| Vulnerability scan (Trivy) | ${TRIVY_STATUS} |"
+          echo "| 🔑 Image signed (cosign keyless OIDC) | ${SIGN_STATUS} |"
+          echo "| 📦 CycloneDX SBOM generated (Syft) | ${SBOM_STATUS} |"
+          echo "| 📋 SBOM attested (cosign in-toto) | ${ATTEST_STATUS} |"
+          echo "| 🏛️ SLSA Build Provenance (GitHub native) | ${PROVENANCE_STATUS} |"
+          echo "| 🔍 Vulnerability scan (Trivy) | ${TRIVY_STATUS} |"
           echo ""
           echo "**Signed image:** \`${IMAGE_WITH_DIGEST}\`"
           echo ""
           echo "**SBOM components catalogued:** ${COMPONENT_COUNT}"
           echo ""
-          echo "### Verification commands"
+          echo "<details><summary>🔎 <b>Verification commands</b></summary>"
+          echo ""
+          echo "#### Verify cosign signature"
           echo ""
           echo '```bash'
-          echo "# Verify cosign signature"
           echo "cosign verify \\"
           echo "  --certificate-identity '${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/.github/workflows/on_release_published.yml@${GITHUB_REF}' \\"
           echo "  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \\"
           echo "  '${IMAGE_WITH_DIGEST}'"
+          echo '```'
           echo ""
-          echo "# Download and inspect the attested SBOM"
+          echo "#### Download and inspect the attested SBOM"
+          echo ""
+          echo '```bash'
           echo "cosign download attestation '${IMAGE_WITH_DIGEST}' \\"
           echo "  | jq -r 'select(.payload) | .payload' | base64 -d \\"
           echo "  | jq '.predicate'"
+          echo '```'
           echo ""
-          echo "# Verify SLSA provenance via GitHub CLI"
+          echo "#### Verify SLSA provenance via GitHub CLI"
+          echo ""
+          echo '```bash'
           echo "gh attestation verify oci://${IMAGE_WITH_DIGEST} --owner ${GITHUB_REPOSITORY_OWNER}"
           echo '```'
+          echo ""
+          echo "</details>"
         } >> "$GITHUB_STEP_SUMMARY"
