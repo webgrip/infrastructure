@@ -7,7 +7,7 @@ ARG IMAGE_VERSION=dev
 ARG IMAGE_REVISION=unknown
 
 LABEL org.opencontainers.image.title="WebGrip GitHub Runner" \
-    org.opencontainers.image.description="Customized GitHub Actions self-hosted runner with PHP tooling" \
+    org.opencontainers.image.description="Customized GitHub Actions self-hosted runner with PHP and .NET tooling" \
     org.opencontainers.image.source="https://github.com/webgrip/infrastructure" \
     org.opencontainers.image.url="https://github.com/webgrip/infrastructure" \
     org.opencontainers.image.documentation="https://github.com/webgrip/infrastructure/tree/main/docs/techdocs" \
