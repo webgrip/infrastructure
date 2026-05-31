@@ -1,4 +1,4 @@
-FROM ghcr.io/webgrip/techdocs-builder:latest AS mkdocs
+FROM ghcr.io/webgrip/techdocs-builder:latest@sha256:ac891abd9e03fe3384b4d9d48f448f268aa7d8250ceb2a0c4a26029569df5632 AS mkdocs
 
 ARG IMAGE_CREATED=1970-01-01T00:00:00Z
 ARG IMAGE_VERSION=dev
