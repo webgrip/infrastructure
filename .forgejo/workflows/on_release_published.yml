@@ -1,0 +1,144 @@
+name: '[Workflow] On Release Published'
+
+# Forgejo mirror of .github/workflows/on_release_published.yml. Adaptations:
+#   - publishes to the in-cluster Harbor (harbor.webgrip.dev, LAN-only) instead of
+#     GHCR, via the Forgejo-only reusable workflow docker-build-and-push-harbor.yml
+#     which pins runs-on: docker (the in-cluster runner is the only one that reaches Harbor).
+#   - supply chain: cosign signs + attests via a KEYED key (vaulted in OpenBao, no
+#     GitHub OIDC/Fulcio) and uploads the SBOM to Dependency-Track — see the local
+#     .forgejo/actions/cosign-sign-attest. GitHub-only bits (SLSA build provenance,
+#     Trivy SARIF -> GitHub Security tab) have no Forgejo analog and are omitted.
+# Dual-publish: the .github/ pipeline keeps pushing to GHCR, untouched.
+
+concurrency:
+  group: release-${{ github.ref }}-${{ github.event.release.id }}
+  cancel-in-progress: true
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  parse-release-tag:
+    name: 'Parse tag'
+    runs-on: arc-runner-set
+    outputs:
+      image: ${{ steps.parse.outputs.image }}
+      version: ${{ steps.parse.outputs.version }}
+      is_prerelease: ${{ steps.parse.outputs.is_prerelease }}
+    steps:
+      - id: parse
+        name: Extract image + version
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag='${{ github.event.release.tag_name }}'
+
+          if [[ "$tag" =~ ^(.+)-v(.+)$ ]]; then
+            image="${BASH_REMATCH[1]}"
+            version="${BASH_REMATCH[2]}"
+          else
+            echo "Unsupported tag format: $tag" >&2
+            echo "Expected: <image>-v<version> (e.g. helm-deploy-v1.2.3)" >&2
+            exit 1
+          fi
+
+          echo "image=$image" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "is_prerelease=${{ github.event.release.prerelease }}" >> "$GITHUB_OUTPUT"
+
+  release-distribute-harbor:
+    name: 'Distribute'
+    needs: [parse-release-tag]
+    if: ${{ needs.parse-release-tag.outputs.is_prerelease != 'true' }}
+    permissions:
+      contents: read
+    uses: webgrip/workflows/.forgejo/workflows/docker-build-and-push-harbor.yml@main
+    with:
+      registry: harbor.webgrip.dev
+      docker-context: "ops/docker/${{ needs.parse-release-tag.outputs.image }}"
+      docker-file: "Dockerfile"
+      platforms: "linux/amd64,linux/arm64"
+      docker-build-args: |
+        IMAGE_CREATED=${{ github.event.release.published_at || github.event.release.created_at }}
+        IMAGE_VERSION=${{ needs.parse-release-tag.outputs.version }}
+        IMAGE_REVISION=${{ github.sha }}
+      # Bare OWNER/IMAGE[:TAG]; the Harbor workflow prefixes the registry, e.g.
+      # webgrip/<image>:<version> -> harbor.webgrip.dev/webgrip/<image>:<version>.
+      docker-tags: |
+        ${{ github.repository_owner }}/${{ needs.parse-release-tag.outputs.image }}:${{ needs.parse-release-tag.outputs.version }}
+        ${{ github.repository_owner }}/${{ needs.parse-release-tag.outputs.image }}:latest
+    secrets:
+      HARBOR_ROBOT_USER: ${{ secrets.HARBOR_ROBOT_USER }}
+      HARBOR_ROBOT_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
+
+  release-distribute-harbor-prerelease:
+    name: 'Distribute (prerelease)'
+    needs: [parse-release-tag]
+    if: ${{ needs.parse-release-tag.outputs.is_prerelease == 'true' }}
+    permissions:
+      contents: read
+    uses: webgrip/workflows/.forgejo/workflows/docker-build-and-push-harbor.yml@main
+    with:
+      registry: harbor.webgrip.dev
+      docker-context: "ops/docker/${{ needs.parse-release-tag.outputs.image }}"
+      docker-file: "Dockerfile"
+      platforms: "linux/amd64,linux/arm64"
+      docker-build-args: |
+        IMAGE_CREATED=${{ github.event.release.published_at || github.event.release.created_at }}
+        IMAGE_VERSION=${{ needs.parse-release-tag.outputs.version }}
+        IMAGE_REVISION=${{ github.sha }}
+      docker-tags: |
+        ${{ github.repository_owner }}/${{ needs.parse-release-tag.outputs.image }}:${{ needs.parse-release-tag.outputs.version }}
+    secrets:
+      HARBOR_ROBOT_USER: ${{ secrets.HARBOR_ROBOT_USER }}
+      HARBOR_ROBOT_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
+
+  # ── Supply chain security ──────────────────────────────────────────────────
+  # Keyed cosign signing + CycloneDX SBOM attestation (key vaulted in OpenBao,
+  # delivered via the COSIGN_* org secrets) + Dependency-Track upload. Runs on the
+  # in-cluster runner so it can reach Harbor (LAN-only) and Dependency-Track.
+  release-sign-and-attest:
+    name: 'Sign & Attest'
+    needs: [parse-release-tag, release-distribute-harbor]
+    if: ${{ needs.parse-release-tag.outputs.is_prerelease != 'true' }}
+    runs-on: docker
+    permissions:
+      contents: read
+    steps:
+      # Local composite action — requires the repo checked out (checkout@v5, not v6).
+      - uses: actions/checkout@v5
+      - name: Sign, attest and SBOM
+        uses: ./.forgejo/actions/cosign-sign-attest
+        with:
+          registry: harbor.webgrip.dev
+          image-name: harbor.webgrip.dev/${{ github.repository_owner }}/${{ needs.parse-release-tag.outputs.image }}
+          image-version: ${{ needs.parse-release-tag.outputs.version }}
+        env:
+          HARBOR_ROBOT_USER: ${{ secrets.HARBOR_ROBOT_USER }}
+          HARBOR_ROBOT_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+          DT_API_KEY: ${{ secrets.DT_API_KEY }}
+
+  release-sign-and-attest-prerelease:
+    name: 'Sign & Attest (prerelease)'
+    needs: [parse-release-tag, release-distribute-harbor-prerelease]
+    if: ${{ needs.parse-release-tag.outputs.is_prerelease == 'true' }}
+    runs-on: docker
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+      - name: Sign, attest and SBOM (prerelease)
+        uses: ./.forgejo/actions/cosign-sign-attest
+        with:
+          registry: harbor.webgrip.dev
+          image-name: harbor.webgrip.dev/${{ github.repository_owner }}/${{ needs.parse-release-tag.outputs.image }}
+          image-version: ${{ needs.parse-release-tag.outputs.version }}
+        env:
+          HARBOR_ROBOT_USER: ${{ secrets.HARBOR_ROBOT_USER }}
+          HARBOR_ROBOT_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+          DT_API_KEY: ${{ secrets.DT_API_KEY }}

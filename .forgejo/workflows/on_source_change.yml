@@ -1,0 +1,52 @@
+name: '[Workflow] On Source Change'
+
+# Forgejo mirror of .github/workflows/on_source_change.yml. Adaptations:
+#   - determine-changed-directories + semantic-release resolve against the .forgejo/ tree
+#   - GitHub App token minting is dropped; the CI bot's FORGEJO_TOKEN is used instead
+#   - semantic-release publishes via the Gitea/Forgejo plugin (see .releaserc.forgejo.js)
+# Releases created here trigger .forgejo/workflows/on_release_published.yml, which builds
+# and pushes the image to the in-cluster Harbor.
+
+concurrency:
+  group: push-${{ github.ref_name }}
+
+on:
+  push:
+    branches:
+      - '**'
+    paths:
+      - 'ops/docker/**'
+      - '.releaserc.forgejo.js'
+      - '.forgejo/actions/semantic-release-monorepo/action.yml'
+      - '.forgejo/workflows/on_source_change.yml'
+      - '.forgejo/workflows/on_release_published.yml'
+
+jobs:
+  determine-changed-directories:
+    name: 'Determine changed images'
+    uses: webgrip/workflows/.forgejo/workflows/determine-changed-directories.yml@main
+    with:
+      inside-dir: 'ops/docker'
+
+  release-per-image:
+    name: 'Release'
+    needs: [determine-changed-directories]
+    if: >
+      always()
+      && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/'))
+      && needs.determine-changed-directories.result == 'success'
+      && needs.determine-changed-directories.outputs.matrix != '[]'
+    permissions:
+      contents: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJson(needs.determine-changed-directories.outputs.matrix) }}
+    runs-on: arc-runner-set
+    steps:
+      - name: Semantic Release (image)
+        uses: ./.forgejo/actions/semantic-release-monorepo
+        with:
+          package-path: ${{ matrix.path }}
+          package-name: ${{ matrix.basename }}
+          token: ${{ secrets.FORGEJO_TOKEN }}

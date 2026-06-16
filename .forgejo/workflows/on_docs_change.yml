@@ -1,0 +1,37 @@
+name: '[Workflow] On Documentation Change'
+
+# Forgejo mirror of .github/workflows/on_docs_change.yml.
+#   - generate + deploy resolve against the .forgejo/ tree
+#   - Forgejo has no native Pages: the deploy workflow pushes the built site to a
+#     `pages` branch using FORGEJO_TOKEN, and reads the repo/org variables
+#     FORGEJO_INSTANCE_URL and WEBGRIP_CI_BOT_NAME.
+
+on:
+  push:
+    branches:
+      - '*'
+    paths:
+      - 'docs/techdocs/**'
+      - '.forgejo/workflows/on_docs_change.yml'
+  workflow_dispatch:
+    inputs:
+      source-dir:
+        type: string
+        description: 'The directory containing the techdocs files'
+        required: false
+        default: 'docs/techdocs'
+
+jobs:
+  generate-documentation:
+    name: 'Generate'
+    uses: webgrip/workflows/.forgejo/workflows/techdocs-generate.yml@main
+    with:
+      source-dir: ${{ github.event.inputs.source-dir || 'docs/techdocs' }}
+
+  deploy-documentation:
+    name: 'Deploy'
+    uses: webgrip/workflows/.forgejo/workflows/techdocs-deploy-gh-pages.yml@main
+    needs: generate-documentation
+    if: github.ref == 'refs/heads/main'
+    secrets:
+      FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
