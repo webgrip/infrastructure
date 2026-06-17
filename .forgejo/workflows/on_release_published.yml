@@ -4,8 +4,9 @@ name: '[Workflow] On Release Published'
 #   - publishes to the in-cluster Harbor (harbor.webgrip.dev, LAN-only) instead of
 #     GHCR, via the Forgejo-only reusable workflow docker-build-and-push-harbor.yml
 #     which pins runs-on: docker (the in-cluster runner is the only one that reaches Harbor).
-#   - supply chain: cosign signs + attests via a KEYED key (vaulted in OpenBao, no
-#     GitHub OIDC/Fulcio) and uploads the SBOM to Dependency-Track — see the local
+#   - supply chain: cosign signs + attests via OpenBao Transit (the key never leaves
+#     OpenBao; the runner authenticates with its k8s ServiceAccount — no GitHub OIDC/Fulcio)
+#     and uploads the SBOM to Dependency-Track — see the local
 #     .forgejo/actions/cosign-sign-attest. GitHub-only bits (SLSA build provenance,
 #     Trivy SARIF -> GitHub Security tab) have no Forgejo analog and are omitted.
 # Dual-publish: the .github/ pipeline keeps pushing to GHCR, untouched.
@@ -95,14 +96,18 @@ jobs:
       HARBOR_ROBOT_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
 
   # ── Supply chain security ──────────────────────────────────────────────────
-  # Keyed cosign signing + CycloneDX SBOM attestation (key vaulted in OpenBao,
-  # delivered via the COSIGN_* org secrets) + Dependency-Track upload. Runs on the
-  # in-cluster runner so it can reach Harbor (LAN-only) and Dependency-Track.
+  # cosign signing + CycloneDX SBOM attestation via OpenBao Transit (the key never
+  # leaves OpenBao; the runner authenticates with its k8s ServiceAccount) + a
+  # Dependency-Track upload. Runs on the in-cluster runner so it can reach Harbor
+  # (LAN-only), OpenBao, and Dependency-Track.
   release-sign-and-attest:
     name: 'Sign & Attest'
     needs: [parse-release-tag, release-distribute-harbor]
     if: ${{ needs.parse-release-tag.outputs.is_prerelease != 'true' }}
     runs-on: docker
+    # Forgejo: mint a per-job OIDC token (claims: repository/event_name/ref) so the action can
+    # authenticate to OpenBao's JWT auth for signing. (permissions: is ignored by Forgejo.)
+    enable-openid-connect: true
     permissions:
       contents: read
     steps:
@@ -117,8 +122,6 @@ jobs:
         env:
           HARBOR_ROBOT_USER: ${{ secrets.HARBOR_ROBOT_USER }}
           HARBOR_ROBOT_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
-          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
-          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
           DT_API_KEY: ${{ secrets.DT_API_KEY }}
 
   release-sign-and-attest-prerelease:
@@ -126,6 +129,9 @@ jobs:
     needs: [parse-release-tag, release-distribute-harbor-prerelease]
     if: ${{ needs.parse-release-tag.outputs.is_prerelease == 'true' }}
     runs-on: docker
+    # Forgejo: mint a per-job OIDC token (claims: repository/event_name/ref) so the action can
+    # authenticate to OpenBao's JWT auth for signing. (permissions: is ignored by Forgejo.)
+    enable-openid-connect: true
     permissions:
       contents: read
     steps:
@@ -139,6 +145,4 @@ jobs:
         env:
           HARBOR_ROBOT_USER: ${{ secrets.HARBOR_ROBOT_USER }}
           HARBOR_ROBOT_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
-          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
-          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
           DT_API_KEY: ${{ secrets.DT_API_KEY }}
