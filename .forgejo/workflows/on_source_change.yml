@@ -52,6 +52,14 @@ jobs:
     # (semantic-release's verifyReleaseCmd runs `docker build`, so it needs the DinD backend.)
     runs-on: docker
     steps:
+      # Local `uses: ./…` actions require the repo on disk first; without this the runner
+      # cannot read the action ("failed to read action … no files found … action.yml").
+      # Mirrors the .github job's checkout (adapted: checkout v5, since v6 is broken on
+      # non-GitHub runners, and the CI bot's FORGEJO_TOKEN instead of a GitHub App token).
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # semantic-release requires all commits/tags
+          token: ${{ secrets.FORGEJO_TOKEN }}
       - name: Semantic Release (image)
         uses: ./.forgejo/actions/semantic-release-monorepo
         with:
