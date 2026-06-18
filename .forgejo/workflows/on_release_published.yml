@@ -22,7 +22,8 @@ on:
 jobs:
   parse-release-tag:
     name: 'Parse tag'
-    runs-on: arc-runner-set
+    # In-cluster Forgejo has a single ephemeral runner pool advertising `docker`.
+    runs-on: docker
     outputs:
       image: ${{ steps.parse.outputs.image }}
       version: ${{ steps.parse.outputs.version }}
