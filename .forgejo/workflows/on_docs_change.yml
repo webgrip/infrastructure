@@ -1,10 +1,10 @@
 name: '[Workflow] On Documentation Change'
 
-# Forgejo mirror of .github/workflows/on_docs_change.yml.
-#   - generate + deploy resolve against the .forgejo/ tree
-#   - Forgejo has no native Pages: the deploy workflow pushes the built site to a
-#     `pages` branch using FORGEJO_TOKEN, and reads the repo/org variables
-#     FORGEJO_INSTANCE_URL and WEBGRIP_CI_BOT_NAME.
+# Forgejo mirror of .github/workflows/on_docs_change.yml. GitHub deploys to GitHub Pages; the
+# Forgejo path has no native Pages, so it publishes the built site to Codeberg Pages — the interim,
+# off-site host (ADR-0022). The deploy reusable force-pushes the site to a Codeberg repo's `pages`
+# branch using a scoped CODEBERG_TOKEN (provisioned as an org Actions secret from OpenBao). The
+# in-cluster Backstage TechDocs surface is the later target (ADR-0023).
 
 on:
   push:
@@ -29,9 +29,14 @@ jobs:
       source-dir: ${{ github.event.inputs.source-dir || 'docs/techdocs' }}
 
   deploy-documentation:
-    name: 'Deploy'
-    uses: webgrip/workflows/.forgejo/workflows/techdocs-deploy-gh-pages.yml@main
+    name: 'Deploy (Codeberg Pages)'
+    uses: webgrip/workflows/.forgejo/workflows/techdocs-deploy-codeberg.yml@main
     needs: generate-documentation
     if: github.ref == 'refs/heads/main'
+    with:
+      # Handoff: create this NON-mirror Codeberg repo (a pull-mirror's pages branch can't be pushed),
+      # set DNS `docs.webgrip.dev CNAME webgrip.codeberg.page`, and seed the token (see ADR-0022 §Ops).
+      codeberg-repo: infrastructure-techdocs
+      domain: docs.webgrip.dev
     secrets:
-      FORGEJO_TOKEN: ${{ secrets.FORGEJO_TOKEN }}
+      CODEBERG_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
