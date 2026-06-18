@@ -42,7 +42,9 @@ jobs:
       fail-fast: false
       matrix:
         include: ${{ fromJson(needs.determine-changed-directories.outputs.matrix) }}
-    runs-on: arc-runner-set
+    # In-cluster Forgejo has a single ephemeral DinD runner pool advertising `docker`.
+    # (semantic-release's verifyReleaseCmd runs `docker build`, so it needs the DinD backend.)
+    runs-on: docker
     steps:
       - name: Semantic Release (image)
         uses: ./.forgejo/actions/semantic-release-monorepo

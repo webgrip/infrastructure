@@ -1,8 +1,11 @@
 name: "Supply Chain Security: Sign, Attest & SBOM (Harbor)"
 description: >-
   Forgejo/Harbor analog of .github/actions/cosign-sign-attest. Signs the pushed image
-  with cosign using a KEYED signature (the key is generated in-cluster and vaulted in
-  OpenBao, delivered as the COSIGN_PRIVATE_KEY secret — no GitHub OIDC / Fulcio), then
+  with cosign via OpenBao Transit — the signing key is generated in OpenBao and NEVER
+  leaves it. The job authenticates with a per-job Forgejo Actions OIDC token (requires
+  enable-openid-connect) exchanged at OpenBao's JWT auth, whose role is bound to this
+  repo + event=release + ref=refs/tags/* — so ONLY the release workflow on a tag can sign
+  (no Fulcio, no private key in Forgejo secrets, no shared runner ServiceAccount), then
   generates a CycloneDX + SPDX SBOM with Syft, attests the CycloneDX SBOM into Harbor,
   and uploads it to Dependency-Track. Verified at admission by the Kyverno
   image-verify-harbor-audit policy using the matching public key.
@@ -34,6 +37,22 @@ inputs:
     description: "Syft release to install"
     required: false
     default: "v1.21.0"
+  openbao-addr:
+    description: "In-cluster OpenBao address (Vault-compatible API)"
+    required: false
+    default: "http://openbao.security.svc.cluster.local:8200"
+  openbao-role:
+    description: "OpenBao JWT-auth role (auth/forgejo) granting Transit sign-only on the cosign key"
+    required: false
+    default: "cosign-signer"
+  oidc-audience:
+    description: "Audience to request for the Forgejo OIDC token; must match the role's bound_audiences"
+    required: false
+    default: "openbao-cosign"
+  transit-key:
+    description: "OpenBao Transit key name used to sign"
+    required: false
+    default: "cosign-webgrip"
 
 runs:
   using: composite
@@ -74,17 +93,6 @@ runs:
         [[ "$DIGEST" == sha256:* ]] || { echo "::error::could not resolve digest for $IMAGE_REF"; exit 1; }
         echo "image-with-digest=${IMAGE_NAME}@${DIGEST}" >> "$GITHUB_OUTPUT"
 
-    - name: Sign image (keyed cosign)
-      shell: bash
-      env:
-        COSIGN_PRIVATE_KEY: ${{ env.COSIGN_PRIVATE_KEY }}
-        COSIGN_PASSWORD: ${{ env.COSIGN_PASSWORD }}
-        IMAGE: ${{ steps.digest.outputs.image-with-digest }}
-      run: |
-        set -euo pipefail
-        # Key is read from the env var (never written to disk); password decrypts it.
-        cosign sign --yes --key env://COSIGN_PRIVATE_KEY "$IMAGE"
-
     - name: "Generate SBOM (Syft: CycloneDX + SPDX)"
       id: sbom
       shell: bash
@@ -95,15 +103,32 @@ runs:
         syft "$IMAGE" -o "cyclonedx-json=sbom.cdx.json" -o "spdx-json=sbom.spdx.json"
         echo "components=$(jq '.components | length' sbom.cdx.json)" >> "$GITHUB_OUTPUT"
 
-    - name: Attest CycloneDX SBOM (keyed cosign)
+    - name: Sign & attest via Forgejo OIDC -> OpenBao Transit
       shell: bash
       env:
-        COSIGN_PRIVATE_KEY: ${{ env.COSIGN_PRIVATE_KEY }}
-        COSIGN_PASSWORD: ${{ env.COSIGN_PASSWORD }}
+        VAULT_ADDR: ${{ inputs.openbao-addr }}
+        OPENBAO_ROLE: ${{ inputs.openbao-role }}
+        OIDC_AUDIENCE: ${{ inputs.oidc-audience }}
+        TRANSIT_KEY: ${{ inputs.transit-key }}
         IMAGE: ${{ steps.digest.outputs.image-with-digest }}
       run: |
         set -euo pipefail
-        cosign attest --yes --key env://COSIGN_PRIVATE_KEY \
+        # 1) Fetch this job's Forgejo OIDC token (requires enable-openid-connect on the job).
+        #    Its claims (repository, event_name=release, ref=refs/tags/*) are exactly what the
+        #    OpenBao role binds to, so only the release workflow on a tag can mint a signer token.
+        [ -n "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" ] || { echo "::error::no OIDC token endpoint — is enable-openid-connect set on this job?"; exit 1; }
+        oidc="$(curl -fsS -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+          "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -r '.value')"
+        [ -n "$oidc" ] && [ "$oidc" != "null" ] || { echo "::error::failed to obtain Forgejo OIDC token"; exit 1; }
+        # 2) Exchange it for a short-lived OpenBao token scoped to Transit sign-only.
+        VAULT_TOKEN="$(curl -fsS --request POST \
+          --data "$(jq -nc --arg jwt "$oidc" --arg role "$OPENBAO_ROLE" '{jwt:$jwt, role:$role}')" \
+          "${VAULT_ADDR}/v1/auth/forgejo/login" | jq -r '.auth.client_token')"
+        [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "::error::OpenBao JWT login failed"; exit 1; }
+        export VAULT_ADDR VAULT_TOKEN
+        # 3) The signing key never leaves OpenBao: cosign calls transit/sign over the API.
+        cosign sign   --yes --key "hashivault://${TRANSIT_KEY}" "$IMAGE"
+        cosign attest --yes --key "hashivault://${TRANSIT_KEY}" \
           --predicate sbom.cdx.json --type cyclonedx "$IMAGE"
 
     - name: Upload SBOM to Dependency-Track (fail-soft)
@@ -142,6 +167,6 @@ runs:
         {
           echo "## 🔐 Supply chain (Harbor)"
           echo ""
-          echo "- Signed (keyed cosign): \`${IMAGE}\`"
+          echo "- Signed (cosign via OpenBao Transit): \`${IMAGE}\`"
           echo "- CycloneDX SBOM attested in Harbor + uploaded to Dependency-Track (${COMPONENTS:-?} components)"
         } >> "$GITHUB_STEP_SUMMARY"
