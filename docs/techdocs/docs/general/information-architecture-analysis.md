@@ -5,10 +5,10 @@
 The `webgrip/infrastructure` repository serves as a centralized CI/CD infrastructure provider, containing Docker images and automation tooling that supports WebGrip's development and deployment workflows.
 
 **Key Components Identified**:
-- 6 specialized Docker images in [`ops/docker/`](../../ops/docker/)
-- GitHub Actions automation in [`.github/workflows/`](../../.github/workflows/)
-- Playwright testing infrastructure in [`tests/playwright-runner/`](../../tests/playwright-runner/)
-- Backstage catalog integration via [`catalog-info.yml`](../../catalog-info.yml)
+- 6 specialized Docker images in [`ops/docker/`](../../../../ops/docker)
+- GitHub Actions automation in [`.github/workflows/`](../../../../.github/workflows)
+- Playwright testing infrastructure in [`tests/playwright-runner/`](../../../../tests/playwright-runner)
+- Backstage catalog integration via [`catalog-info.yml`](../../../../catalog-info.yml)
 
 ## Proposed Information Architecture Alternatives
 

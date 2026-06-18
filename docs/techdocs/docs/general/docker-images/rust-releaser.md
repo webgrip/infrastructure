@@ -21,7 +21,7 @@ The Rust Releaser provides **automated release management** for Rust projects by
 | **Size** | ~2GB (includes Rust toolchains + cross-compilation targets) |
 | **Architecture** | AMD64 (with cross-compilation support) |
 | **Registry** | `webgrip/rust-releaser` |
-| **Dockerfile** | [`ops/docker/rust-releaser/Dockerfile`](../../../ops/docker/rust-releaser/Dockerfile) |
+| **Dockerfile** | [`ops/docker/rust-releaser/Dockerfile`](../../../../../ops/docker/rust-releaser/Dockerfile) |
 
 ## Installed Tools & Software
 
@@ -635,5 +635,5 @@ RUN apt-get update && apt-get install -y \
 > **Assumption**: Release workflows primarily target GitHub and crates.io. Support for additional registries (private registries, alternative Git providers) may require additional configuration. Validation needed: Confirm release target requirements with development teams.
 
 **Maintainer**: [WebGrip Ops Team](https://github.com/orgs/webgrip/teams/ops)  
-**Source**: [`ops/docker/rust-releaser/Dockerfile`](../../../ops/docker/rust-releaser/Dockerfile)  
+**Source**: [`ops/docker/rust-releaser/Dockerfile`](../../../../../ops/docker/rust-releaser/Dockerfile)  
 **Registry**: [webgrip/rust-releaser](https://hub.docker.com/r/webgrip/rust-releaser)

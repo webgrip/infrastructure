@@ -10,7 +10,7 @@ The PHP CI Runner provides a lightweight, reproducible container environment for
 | **PHP Version** | 8.4 (currently resolves to `8.4.18-cli-trixie`) |
 | **Composer** | 2.x (currently resolves to `2.9.5`) |
 | **Registry** | `webgrip/php-ci-runner` |
-| **Dockerfile** | [`ops/docker/php-ci-runner/Dockerfile`](../../../ops/docker/php-ci-runner/Dockerfile) |
+| **Dockerfile** | [`ops/docker/php-ci-runner/Dockerfile`](../../../../../ops/docker/php-ci-runner/Dockerfile) |
 
 ## Included Tooling
 

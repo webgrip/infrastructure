@@ -20,7 +20,7 @@ The Helm Deploy image serves as a **specialized deployment environment** for Kub
 | **Size** | ~150MB (minimal Alpine + tools) |
 | **Architecture** | AMD64 |
 | **Registry** | `webgrip/helm-deploy` |
-| **Dockerfile** | [`ops/docker/helm-deploy/Dockerfile`](../../../ops/docker/helm-deploy/Dockerfile) |
+| **Dockerfile** | [`ops/docker/helm-deploy/Dockerfile`](../../../../../ops/docker/helm-deploy/Dockerfile) |
 
 ## Installed Tools & Versions
 
@@ -511,5 +511,5 @@ RUN helm plugin install https://github.com/jkroepke/helm-secrets
 > **Assumption**: Deployments primarily target DigitalOcean Kubernetes clusters. Support for other cloud providers (AWS EKS, GCP GKE, Azure AKS) may require additional CLI tools. Validation needed: Confirm cloud provider requirements with infrastructure team.
 
 **Maintainer**: [WebGrip Ops Team](https://github.com/orgs/webgrip/teams/ops)  
-**Source**: [`ops/docker/helm-deploy/Dockerfile`](../../../ops/docker/helm-deploy/Dockerfile)  
+**Source**: [`ops/docker/helm-deploy/Dockerfile`](../../../../../ops/docker/helm-deploy/Dockerfile)  
 **Registry**: [webgrip/helm-deploy](https://hub.docker.com/r/webgrip/helm-deploy)

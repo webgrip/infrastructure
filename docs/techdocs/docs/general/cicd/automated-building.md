@@ -74,7 +74,7 @@ flowchart LR
 
 ### Main Workflow: `on_dockerfile_change.yml`
 
-Located at [`.github/workflows/on_dockerfile_change.yml`](../../../.github/workflows/on_dockerfile_change.yml), this workflow:
+Located at `.github/workflows/on_dockerfile_change.yml`, this workflow:
 
 1. **Triggers** on pushes to `main` branch affecting `ops/docker/**` paths
 2. **Detects** changed directories using a reusable workflow
@@ -439,5 +439,5 @@ Required secrets for the pipeline:
 > **Assumption**: Builds primarily target x86_64 architecture. Multi-architecture builds (ARM64, etc.) may require additional configuration in the reusable workflows. Validation needed: Confirm architecture requirements with development teams.
 
 **Maintainer**: [WebGrip Ops Team](https://github.com/orgs/webgrip/teams/ops)  
-**Source**: [`.github/workflows/on_dockerfile_change.yml`](../../../.github/workflows/on_dockerfile_change.yml)  
+**Source**: `.github/workflows/on_dockerfile_change.yml`  
 **Dependencies**: [`webgrip/workflows`](https://github.com/webgrip/workflows)

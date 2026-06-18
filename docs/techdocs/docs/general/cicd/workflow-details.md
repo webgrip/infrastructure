@@ -501,5 +501,5 @@ flowchart TD
 > **Assumption**: Reusable workflows from webgrip/workflows repository remain stable and backward-compatible. Major changes should be coordinated across all consuming repositories. Validation needed: Establish workflow versioning and compatibility policies.
 
 **Maintainer**: [WebGrip Ops Team](https://github.com/orgs/webgrip/teams/ops)  
-**Source**: [`.github/workflows/on_dockerfile_change.yml`](../../../.github/workflows/on_dockerfile_change.yml)  
+**Source**: `.github/workflows/on_dockerfile_change.yml`  
 **Dependencies**: [`webgrip/workflows`](https://github.com/webgrip/workflows)

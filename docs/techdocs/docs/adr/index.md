@@ -67,25 +67,25 @@ Chosen option: "[option 1]", because [justification. e.g., only option, which me
 
 | ADR | Title | Status | Date |
 |-----|-------|---------|------|
-| [ADR-0001](0001-docker-image-architecture.md) | Docker Image Architecture and Organization | Accepted | 2024-01-15 |
-| [ADR-0002](0002-ci-cd-workflow-strategy.md) | CI/CD Workflow Strategy with Reusable Components | Accepted | 2024-01-20 |
-| [ADR-0003](0003-documentation-platform.md) | Documentation Platform Selection (TechDocs) | Accepted | 2024-01-25 |
+| ADR-0001 | Docker Image Architecture and Organization | Accepted | 2024-01-15 |
+| ADR-0002 | CI/CD Workflow Strategy with Reusable Components | Accepted | 2024-01-20 |
+| ADR-0003 | Documentation Platform Selection (TechDocs) | Accepted | 2024-01-25 |
 
 ### Image Design Decisions
 
 | ADR | Title | Status | Date |
 |-----|-------|---------|------|
-| [ADR-0004](0004-base-image-selection.md) | Base Image Selection Strategy | Accepted | 2024-02-01 |
-| [ADR-0005](0005-multi-stage-builds.md) | Multi-stage Build Pattern Adoption | Accepted | 2024-02-05 |
-| [ADR-0006](0006-security-hardening.md) | Container Security Hardening Standards | Accepted | 2024-02-10 |
+| ADR-0004 | Base Image Selection Strategy | Accepted | 2024-02-01 |
+| ADR-0005 | Multi-stage Build Pattern Adoption | Accepted | 2024-02-05 |
+| ADR-0006 | Container Security Hardening Standards | Accepted | 2024-02-10 |
 
 ### Operational Decisions
 
 | ADR | Title | Status | Date |
 |-----|-------|---------|------|
-| [ADR-0007](0007-registry-strategy.md) | Docker Registry Strategy and Management | Accepted | 2024-02-15 |
-| [ADR-0008](0008-testing-approach.md) | Testing Strategy for Infrastructure Images | Accepted | 2024-02-20 |
-| [ADR-0009](0009-maintenance-automation.md) | Maintenance and Update Automation | Proposed | 2024-02-25 |
+| ADR-0007 | Docker Registry Strategy and Management | Accepted | 2024-02-15 |
+| ADR-0008 | Testing Strategy for Infrastructure Images | Accepted | 2024-02-20 |
+| ADR-0009 | Maintenance and Update Automation | Proposed | 2024-02-25 |
 
 ## Creating New ADRs
 
@@ -123,7 +123,7 @@ Examples:
 
 ### File Location
 
-ADRs are stored in the [`docs/adrs/`](../../adrs/) directory:
+ADRs are stored in the [`docs/adrs/`](../adrs) directory:
 
 ```
 docs/adrs/
@@ -339,14 +339,14 @@ jobs:
 
 ## Related Documentation
 
-- [Architecture Overview](../overview/architecture.md) - High-level architectural context
-- [Contributing Images](../operations/contributing-images.md) - How architectural decisions affect contributions
-- [Maintenance](../operations/maintenance.md) - How ADRs guide maintenance decisions
+- [Architecture Overview](../general/overview/architecture.md) - High-level architectural context
+- [Contributing Images](../general/operations/contributing-images.md) - How architectural decisions affect contributions
+- [Maintenance](../general/operations/maintenance.md) - How ADRs guide maintenance decisions
 
 ## Templates and Examples
 
-- [ADR Template](../../adrs/template.md) - Standard template for new ADRs
-- [Example ADRs](../../adrs/) - Real examples from this project
+- ADR Template - Standard template for new ADRs
+- [Example ADRs](../adrs) - Real examples from this project
 - [MADR Documentation](https://adr.github.io/madr/) - Detailed format specification
 
 ---
@@ -354,5 +354,5 @@ jobs:
 > **Note**: ADRs are living documents that should evolve with the project. Regular review and updates ensure they remain valuable for decision-making and knowledge sharing.
 
 **Maintainer**: [WebGrip Ops Team](https://github.com/orgs/webgrip/teams/ops)  
-**Location**: [`docs/adrs/`](../../adrs/)  
+**Location**: [`docs/adrs/`](../adrs)  
 **Format**: [MADR (Markdown ADR)](https://adr.github.io/madr/)

@@ -21,6 +21,7 @@ RUN pip3 install --no-cache-dir \
     markdown-inline-mermaid==1.0.4 \
     mkdocs-mermaid2-plugin==1.2.1 \
     mkdocs-macros-plugin==1.3.7 \
+    mkdocs-redirects==1.2.2 \
     mkdocs-dracula-theme==1.0.7
 
 

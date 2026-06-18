@@ -262,7 +262,7 @@ docker run -it --entrypoint=/bin/bash webgrip/rust-ci-runner:latest
 
 Now that you're up and running:
 
-1. **Explore individual images**: Check out detailed documentation for each [Docker image](../docker-images/)
+1. **Explore individual images**: Check out detailed documentation for each [Docker image](../../docker-images)
 2. **Understand the CI/CD pipeline**: Learn about our [automated building process](../cicd/automated-building.md)
 3. **Contribute improvements**: Read our [contributing guide](../operations/contributing-images.md)
 4. **Set up testing**: Configure [Playwright testing](../testing/playwright-setup.md) for your projects

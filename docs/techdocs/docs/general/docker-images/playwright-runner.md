@@ -21,7 +21,7 @@ The Playwright Runner provides a **complete browser testing environment** that s
 | **PHP Version** | 8.3 with common extensions |
 | **Browsers** | Chromium, Firefox, WebKit (pre-installed) |
 | **Registry** | `webgrip/playwright-runner` |
-| **Dockerfile** | [`ops/docker/playwright-runner/Dockerfile`](../../../ops/docker/playwright-runner/Dockerfile) |
+| **Dockerfile** | [`ops/docker/playwright-runner/Dockerfile`](../../../../../ops/docker/playwright-runner/Dockerfile) |
 
 ## Installed Tools & Software
 
@@ -326,7 +326,7 @@ module.exports = {
 
 ### Security Configuration
 
-The image includes a custom seccomp profile ([`seccomp_profile.json`](../../../ops/docker/playwright-runner/seccomp_profile.json)) that allows user namespaces required for browser sandboxing:
+The image includes a custom seccomp profile ([`seccomp_profile.json`](../../../../../ops/docker/playwright-runner/seccomp_profile.json)) that allows user namespaces required for browser sandboxing:
 
 ```json
 {
@@ -562,5 +562,5 @@ USER playwright
 > **Assumption**: Tests primarily target web applications with PHP backends. Support for other backend technologies (Python, Ruby, etc.) may require additional runtime dependencies. Validation needed: Confirm backend technology requirements with development teams.
 
 **Maintainer**: [WebGrip Ops Team](https://github.com/orgs/webgrip/teams/ops)  
-**Source**: [`ops/docker/playwright-runner/Dockerfile`](../../../ops/docker/playwright-runner/Dockerfile)  
+**Source**: [`ops/docker/playwright-runner/Dockerfile`](../../../../../ops/docker/playwright-runner/Dockerfile)  
 **Registry**: [webgrip/playwright-runner](https://hub.docker.com/r/webgrip/playwright-runner)

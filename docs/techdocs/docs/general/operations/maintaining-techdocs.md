@@ -350,12 +350,12 @@ Automated workflows handle:
 
 - [Contributing Images](contributing-images.md) - How to document new images
 - [Maintenance](maintenance.md) - Overall repository maintenance procedures
-- [ADRs](../adrs/index.md) - Architectural decisions affecting documentation
+- [ADRs](../../adr/index.md) - Architectural decisions affecting documentation
 
 ---
 
 > **Maintenance Schedule**: Documentation should be reviewed quarterly and updated whenever infrastructure changes. Use this guide to ensure consistency and quality across all TechDocs content.
 
 **Maintainer**: [WebGrip Ops Team](https://github.com/orgs/webgrip/teams/ops)  
-**Source**: [`docs/techdocs/`](../../../techdocs/)  
+**Source**: `docs/techdocs/`  
 **Support**: [GitHub Issues](https://github.com/webgrip/infrastructure/issues) with `documentation` label

@@ -5,39 +5,68 @@ site_url: "https://webgrip.github.io/infrastructure"
 nav:
   - Home: index.md
   - Overview:
-      - Purpose & Scope: overview/purpose.md
-      - Architecture: overview/architecture.md
-      - Quick Start: overview/quick-start.md
+      - Purpose & Scope: general/overview/purpose.md
+      - Architecture: general/overview/architecture.md
+      - Quick Start: general/overview/quick-start.md
   - Docker Images:
-      - Rust CI Runner: docker-images/rust-ci-runner.md
-      - PHP CI Runner: docker-images/php-ci-runner.md
-      - GitHub Actions Runner: docker-images/github-runner.md
-      - Helm Deploy: docker-images/helm-deploy.md
-      - Playwright Runner: docker-images/playwright-runner.md
-      - ACT Runner: docker-images/act-runner.md
-      - Rust Releaser: docker-images/rust-releaser.md
+      - Rust CI Runner: general/docker-images/rust-ci-runner.md
+      - PHP CI Runner: general/docker-images/php-ci-runner.md
+      - GitHub Actions Runner: general/docker-images/github-runner.md
+      - Helm Deploy: general/docker-images/helm-deploy.md
+      - Playwright Runner: general/docker-images/playwright-runner.md
+      - ACT Runner: general/docker-images/act-runner.md
+      - Rust Releaser: general/docker-images/rust-releaser.md
   - CI/CD Pipeline:
-      - Automated Building: cicd/automated-building.md
-      - Docker Registry: cicd/docker-registry.md
-      - Workflow Details: cicd/workflow-details.md
+      - Automated Building: general/cicd/automated-building.md
+      - Docker Registry: general/cicd/docker-registry.md
+      - Workflow Details: general/cicd/workflow-details.md
   - Security:
-      - Overview: security/index.md
-      - Supply Chain Security: security/supply-chain-security.md
-      - Image Signing: security/image-signing.md
-      - SBOM & Attestations: security/sbom-attestations.md
-      - Vulnerability Scanning: security/vulnerability-scanning.md
-      - Kyverno Enforcement: security/kyverno-enforcement.md
+      - Overview: general/security/index.md
+      - Supply Chain Security: general/security/supply-chain-security.md
+      - Image Signing: general/security/image-signing.md
+      - SBOM & Attestations: general/security/sbom-attestations.md
+      - Vulnerability Scanning: general/security/vulnerability-scanning.md
+      - Kyverno Enforcement: general/security/kyverno-enforcement.md
   - Testing:
-      - Playwright Setup: testing/playwright-setup.md
-      - Test Execution: testing/test-execution.md
+      - Playwright Setup: general/testing/playwright-setup.md
+      - Test Execution: general/testing/test-execution.md
   - Operations:
-      - Building Locally: operations/building-locally.md
-      - Contributing Images: operations/contributing-images.md
-      - Maintenance: operations/maintenance.md
-      - Maintaining TechDocs: operations/maintaining-techdocs.md
-  - ADRs: adrs/index.md
+      - Building Locally: general/operations/building-locally.md
+      - Contributing Images: general/operations/contributing-images.md
+      - Maintenance: general/operations/maintenance.md
+      - Maintaining TechDocs: general/operations/maintaining-techdocs.md
+  - ADRs: adr/index.md
 
 plugins:
+  - redirects:
+      redirect_maps:
+        'adrs/index.md': 'adr/index.md'
+        'cicd/automated-building.md': 'general/cicd/automated-building.md'
+        'cicd/docker-registry.md': 'general/cicd/docker-registry.md'
+        'cicd/workflow-details.md': 'general/cicd/workflow-details.md'
+        'docker-images/act-runner.md': 'general/docker-images/act-runner.md'
+        'docker-images/github-runner.md': 'general/docker-images/github-runner.md'
+        'docker-images/helm-deploy.md': 'general/docker-images/helm-deploy.md'
+        'docker-images/php-ci-runner.md': 'general/docker-images/php-ci-runner.md'
+        'docker-images/playwright-runner.md': 'general/docker-images/playwright-runner.md'
+        'docker-images/rust-ci-runner.md': 'general/docker-images/rust-ci-runner.md'
+        'docker-images/rust-releaser.md': 'general/docker-images/rust-releaser.md'
+        'information-architecture-analysis.md': 'general/information-architecture-analysis.md'
+        'operations/building-locally.md': 'general/operations/building-locally.md'
+        'operations/contributing-images.md': 'general/operations/contributing-images.md'
+        'operations/maintaining-techdocs.md': 'general/operations/maintaining-techdocs.md'
+        'operations/maintenance.md': 'general/operations/maintenance.md'
+        'overview/architecture.md': 'general/overview/architecture.md'
+        'overview/purpose.md': 'general/overview/purpose.md'
+        'overview/quick-start.md': 'general/overview/quick-start.md'
+        'security/image-signing.md': 'general/security/image-signing.md'
+        'security/index.md': 'general/security/index.md'
+        'security/kyverno-enforcement.md': 'general/security/kyverno-enforcement.md'
+        'security/sbom-attestations.md': 'general/security/sbom-attestations.md'
+        'security/supply-chain-security.md': 'general/security/supply-chain-security.md'
+        'security/vulnerability-scanning.md': 'general/security/vulnerability-scanning.md'
+        'testing/playwright-setup.md': 'general/testing/playwright-setup.md'
+        'testing/test-execution.md': 'general/testing/test-execution.md'
   - techdocs-core
 
 theme:

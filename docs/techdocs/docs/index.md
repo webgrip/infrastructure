@@ -14,26 +14,26 @@ This repository contains the foundational infrastructure components that power W
 ## Quick Navigation
 
 ### 🚀 **Getting Started**
-- [Purpose & Scope](overview/purpose.md) - Understand what this repository provides
-- [Architecture Overview](overview/architecture.md) - High-level system design
-- [Quick Start Guide](overview/quick-start.md) - Get up and running quickly
+- [Purpose & Scope](general/overview/purpose.md) - Understand what this repository provides
+- [Architecture Overview](general/overview/architecture.md) - High-level system design
+- [Quick Start Guide](general/overview/quick-start.md) - Get up and running quickly
 
 ### 🐳 **Docker Images**
 Our specialized container images for different purposes:
 
 | Image | Purpose | Documentation |
 |-------|---------|---------------|
-| [Rust CI Runner](docker-images/rust-ci-runner.md) | Rust development and CI environment | Complete Rust toolchain + utilities |
-| [GitHub Actions Runner](docker-images/github-runner.md) | Self-hosted GitHub Actions runner | Custom runner with additional tools |
-| [Helm Deploy](docker-images/helm-deploy.md) | Kubernetes deployment via Helm | Alpine-based deployment image |
-| [Playwright Runner](docker-images/playwright-runner.md) | End-to-end testing environment | Browser testing infrastructure |
-| [ACT Runner](docker-images/act-runner.md) | Local GitHub Actions testing | Run workflows locally with ACT |
-| [Rust Releaser](docker-images/rust-releaser.md) | Release automation for Rust projects | Node.js + Rust release tooling |
+| [Rust CI Runner](general/docker-images/rust-ci-runner.md) | Rust development and CI environment | Complete Rust toolchain + utilities |
+| [GitHub Actions Runner](general/docker-images/github-runner.md) | Self-hosted GitHub Actions runner | Custom runner with additional tools |
+| [Helm Deploy](general/docker-images/helm-deploy.md) | Kubernetes deployment via Helm | Alpine-based deployment image |
+| [Playwright Runner](general/docker-images/playwright-runner.md) | End-to-end testing environment | Browser testing infrastructure |
+| [ACT Runner](general/docker-images/act-runner.md) | Local GitHub Actions testing | Run workflows locally with ACT |
+| [Rust Releaser](general/docker-images/rust-releaser.md) | Release automation for Rust projects | Node.js + Rust release tooling |
 
 ### ⚙️ **Operations**
-- [CI/CD Pipeline](cicd/automated-building.md) - How our automation works
-- [Testing](testing/playwright-setup.md) - End-to-end test infrastructure
-- [Contributing](operations/contributing-images.md) - Add new images or improve existing ones
+- [CI/CD Pipeline](general/cicd/automated-building.md) - How our automation works
+- [Testing](general/testing/playwright-setup.md) - End-to-end test infrastructure
+- [Contributing](general/operations/contributing-images.md) - Add new images or improve existing ones
 
 ## Repository Structure
 
@@ -68,8 +68,8 @@ infrastructure/
 
 ---
 
-> **Note**: This documentation is automatically maintained. See our [Maintenance Guide](operations/maintenance.md) for details on keeping it current.
+> **Note**: This documentation is automatically maintained. See our [Maintenance Guide](general/operations/maintenance.md) for details on keeping it current.
 
 ## Recent Updates
 
-Check the [ADRs section](adrs/index.md) for recent architectural decisions and changes to our infrastructure approach.
+Check the [ADRs section](adr/index.md) for recent architectural decisions and changes to our infrastructure approach.

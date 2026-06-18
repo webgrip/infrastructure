@@ -19,7 +19,7 @@ This image serves as the primary development and CI environment for Rust project
 | **Architecture** | Multi-platform (AMD64, ARM64) |
 | **Size** | ~800MB (optimized via multi-stage build) |
 | **Registry** | `webgrip/rust-ci-runner` |
-| **Dockerfile** | [`ops/docker/rust-ci-runner/Dockerfile`](../../../ops/docker/rust-ci-runner/Dockerfile) |
+| **Dockerfile** | [`ops/docker/rust-ci-runner/Dockerfile`](../../../../../ops/docker/rust-ci-runner/Dockerfile) |
 
 ## Installed Tools
 
@@ -325,5 +325,5 @@ docker rm rust-dev
 ---
 
 **Maintainer**: [WebGrip Ops Team](https://github.com/orgs/webgrip/teams/ops)  
-**Source**: [`ops/docker/rust-ci-runner/Dockerfile`](../../../ops/docker/rust-ci-runner/Dockerfile)  
+**Source**: [`ops/docker/rust-ci-runner/Dockerfile`](../../../../../ops/docker/rust-ci-runner/Dockerfile)  
 **Registry**: [webgrip/rust-ci-runner](https://hub.docker.com/r/webgrip/rust-ci-runner)

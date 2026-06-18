@@ -733,7 +733,7 @@ Most IDEs support Docker plugins for:
 
 - [Contributing Images](contributing-images.md) - How to contribute new images
 - [Maintenance](maintenance.md) - Ongoing maintenance procedures
-- [Docker Images](../docker-images/) - Individual image documentation
+- [Docker Images](../../docker-images) - Individual image documentation
 - [CI/CD Pipeline](../cicd/automated-building.md) - Automated building process
 
 ---

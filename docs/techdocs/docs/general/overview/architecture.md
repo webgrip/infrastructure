@@ -230,7 +230,7 @@ flowchart LR
 
 - **Base Images**: Official Docker images (Alpine, Rust, Node.js, etc.)
 - **Shared Workflows**: Reusable workflows from [`webgrip/workflows`](https://github.com/webgrip/workflows)
-- **Configuration**: Settings from [`catalog-info.yml`](../../../catalog-info.yml)
+- **Configuration**: Settings from [`catalog-info.yml`](../../../../../catalog-info.yml)
 
 ## Operational Architecture
 
@@ -262,5 +262,5 @@ In case of image unavailability:
 
 - [Purpose & Scope](purpose.md) - Why this architecture was chosen
 - [Quick Start Guide](quick-start.md) - How to use this architecture
-- [Docker Images](../docker-images/) - Detailed documentation for each component
-- [Operations](../operations/) - Maintenance and operational procedures
+- [Docker Images](../../docker-images) - Detailed documentation for each component
+- [Operations](../../operations) - Maintenance and operational procedures

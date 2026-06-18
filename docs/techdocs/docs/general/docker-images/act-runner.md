@@ -20,7 +20,7 @@ The ACT Runner enables **local GitHub Actions testing** by providing:
 | **Size** | ~100MB (minimal Alpine + ACT + Docker CLI) |
 | **Architecture** | AMD64 |
 | **Registry** | `webgrip/act-runner` |
-| **Dockerfile** | [`ops/docker/act-runner/Dockerfile`](../../../ops/docker/act-runner/Dockerfile) |
+| **Dockerfile** | [`ops/docker/act-runner/Dockerfile`](../../../../../ops/docker/act-runner/Dockerfile) |
 
 ## Installed Tools
 
@@ -621,5 +621,5 @@ ENTRYPOINT ["/usr/local/bin/act-entrypoint.sh"]
 > **Assumption**: Developers have Docker installed locally and are comfortable with command-line tools. ACT runner is primarily for development/testing, not production CI/CD. Validation needed: Confirm developer tooling standards and local development practices.
 
 **Maintainer**: [WebGrip Ops Team](https://github.com/orgs/webgrip/teams/ops)  
-**Source**: [`ops/docker/act-runner/Dockerfile`](../../../ops/docker/act-runner/Dockerfile)  
+**Source**: [`ops/docker/act-runner/Dockerfile`](../../../../../ops/docker/act-runner/Dockerfile)  
 **Registry**: [webgrip/act-runner](https://hub.docker.com/r/webgrip/act-runner)

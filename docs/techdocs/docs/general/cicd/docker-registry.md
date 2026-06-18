@@ -466,7 +466,7 @@ curl -s -H "Authorization: Bearer $DOCKER_TOKEN" \
 - [Automated Building](automated-building.md) - How images are built and pushed
 - [Workflow Details](workflow-details.md) - Detailed CI/CD workflow information
 - [Architecture Overview](../overview/architecture.md) - Registry role in infrastructure
-- [Docker Images](../docker-images/) - Individual image documentation
+- [Docker Images](../../docker-images) - Individual image documentation
 
 ---
 

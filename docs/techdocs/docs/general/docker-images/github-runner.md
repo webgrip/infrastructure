@@ -19,7 +19,7 @@ This image provides a **self-hosted GitHub Actions runner** that extends the off
 | **PHP Version** | 8.3 with common extensions |
 | **Architecture** | AMD64 |
 | **Registry** | `webgrip/github-runner` |
-| **Dockerfile** | [`ops/docker/github-runner/Dockerfile`](../../../ops/docker/github-runner/Dockerfile) |
+| **Dockerfile** | [`ops/docker/github-runner/Dockerfile`](../../../../../ops/docker/github-runner/Dockerfile) |
 
 ## Installed Tools & Software
 
@@ -411,5 +411,5 @@ jobs:
 > **Assumption**: Self-hosted runners are deployed in secure, managed environments with proper network isolation and monitoring. Validation needed: Confirm runner deployment strategy and security requirements with ops team.
 
 **Maintainer**: [WebGrip Ops Team](https://github.com/orgs/webgrip/teams/ops)  
-**Source**: [`ops/docker/github-runner/Dockerfile`](../../../ops/docker/github-runner/Dockerfile)  
+**Source**: [`ops/docker/github-runner/Dockerfile`](../../../../../ops/docker/github-runner/Dockerfile)  
 **Registry**: [webgrip/github-runner](https://hub.docker.com/r/webgrip/github-runner)

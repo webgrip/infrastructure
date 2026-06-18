@@ -50,4 +50,4 @@ graph LR
 - [SBOM & Attestations](sbom-attestations.md) — what SBOMs contain, how to inspect them
 - [Vulnerability Scanning](vulnerability-scanning.md) — Trivy, GitHub Security tab, triage
 - [Kyverno Enforcement](kyverno-enforcement.md) — cluster-side policy enforcement
-- [ADR-0002](../../adrs/0002-supply-chain-security.md) — decision record for this approach
+- ADR-0002 — decision record for this approach
