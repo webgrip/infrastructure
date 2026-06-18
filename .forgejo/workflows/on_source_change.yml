@@ -22,7 +22,13 @@ on:
       - '.forgejo/workflows/on_release_published.yml'
 
 jobs:
-  determine-changed-directories:
+  # NB: the caller job id must NOT equal the reusable workflow's inner job id. Forgejo v15
+  # flattens an expanded reusable workflow's inner jobs into the caller's graph; when the ids
+  # collide the resulting plan has no dependency-free job and Forgejo rejects the workflow with
+  # "the workflow must contain at least one job without dependencies". The reusable's inner job is
+  # `determine-changed-directories`, so this caller job is named `changed-images`. (GitHub
+  # namespaces inner jobs under the caller, so the same file is fine on the .github side.)
+  changed-images:
     name: 'Determine changed images'
     uses: webgrip/workflows/.forgejo/workflows/determine-changed-directories.yml@main
     with:
@@ -30,18 +36,18 @@ jobs:
 
   release-per-image:
     name: 'Release'
-    needs: [determine-changed-directories]
+    needs: [changed-images]
     if: >
       always()
       && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/'))
-      && needs.determine-changed-directories.result == 'success'
-      && needs.determine-changed-directories.outputs.matrix != '[]'
+      && needs.changed-images.result == 'success'
+      && needs.changed-images.outputs.matrix != '[]'
     permissions:
       contents: write
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJson(needs.determine-changed-directories.outputs.matrix) }}
+        include: ${{ fromJson(needs.changed-images.outputs.matrix) }}
     # In-cluster Forgejo has a single ephemeral DinD runner pool advertising `docker`.
     # (semantic-release's verifyReleaseCmd runs `docker build`, so it needs the DinD backend.)
     runs-on: docker
