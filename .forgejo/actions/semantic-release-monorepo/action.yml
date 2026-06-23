@@ -4,8 +4,8 @@ description: "Forgejo: run semantic-release for a single monorepo package path (
 # Forgejo mirror of .github/actions/semantic-release-monorepo/action.yml. Adaptations:
 #   - checkout v6 -> v5 (v6 is broken on non-GitHub runners)
 #   - GITHUB_TOKEN auth -> GITEA_URL/GITEA_TOKEN for @saithodev/semantic-release-gitea
-#   - drops the GitHub semantic-release plugin in favour of the Gitea/Forgejo plugin
-#   - uses .releaserc.forgejo.js so .releaserc.js (GitHub) stays untouched
+#   - sets GITEA_URL below, which makes the shared .releaserc.js select the Gitea/Forgejo publish
+#     plugin (@saithodev/semantic-release-gitea) instead of @semantic-release/github
 
 inputs:
   release-type:
@@ -85,4 +85,8 @@ runs:
           @semantic-release/release-notes-generator@14.0.0 \
           conventional-changelog-conventionalcommits@7.0.2
 
-        npx semantic-release --config "${GITHUB_WORKSPACE}/.releaserc.forgejo.js"
+        # cwd is the package dir, so semantic-release discovers ops/docker/<image>/.releaserc.cjs
+        # (which spreads the shared .releaserc.js). GITEA_URL is set above, so that config selects
+        # the Gitea/Forgejo publish plugin. (semantic-release has no --config flag; the package
+        # config always wins via cosmiconfig regardless, so plugin selection lives in the config.)
+        npx semantic-release

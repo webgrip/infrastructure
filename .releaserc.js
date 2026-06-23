@@ -51,11 +51,19 @@ const execConfig = [
     },
 ];
 
+// Forgejo CI sets GITEA_URL (consumed by @saithodev/semantic-release-gitea); publish via the
+// Gitea/Forgejo API there. GitHub CI leaves GITEA_URL unset, so publish via @semantic-release/github.
+// Forgejo has no GitHub GraphQL endpoint, so @semantic-release/github's success step 404s on
+// POST /api/v1/graphql (getAssociatedPRs) — hence the env-gated plugin instead of one frozen config.
+const publishPlugin = process.env.GITEA_URL
+    ? '@saithodev/semantic-release-gitea'
+    : '@semantic-release/github';
+
 const plugins = [
     commitAnalyzerConfig,
     releaseNotesGeneratorConfig,
     execConfig,
-    '@semantic-release/github',
+    publishPlugin,
 ];
 
 module.exports = {

@@ -3,7 +3,8 @@ name: '[Workflow] On Source Change'
 # Forgejo mirror of .github/workflows/on_source_change.yml. Adaptations:
 #   - determine-changed-directories + semantic-release resolve against the .forgejo/ tree
 #   - GitHub App token minting is dropped; the CI bot's FORGEJO_TOKEN is used instead
-#   - semantic-release publishes via the Gitea/Forgejo plugin (see .releaserc.forgejo.js)
+#   - semantic-release publishes via the Gitea/Forgejo plugin (the action sets GITEA_URL, so the
+#     shared .releaserc.js selects @saithodev/semantic-release-gitea over @semantic-release/github)
 # Releases created here trigger .forgejo/workflows/on_release_published.yml, which builds
 # and pushes the image to the in-cluster Harbor.
 
@@ -16,7 +17,7 @@ on:
       - '**'
     paths:
       - 'ops/docker/**'
-      - '.releaserc.forgejo.js'
+      - '.releaserc.js'
       - '.forgejo/actions/semantic-release-monorepo/action.yml'
       - '.forgejo/workflows/on_source_change.yml'
       - '.forgejo/workflows/on_release_published.yml'
