@@ -46,8 +46,12 @@ runs:
       id: semantic-release
       env:
         GITHUB_OUTPUT: $GITHUB_OUTPUT
-        # Forgejo: @saithodev/semantic-release-gitea targets the Gitea-compatible API.
-        GITEA_URL: ${{ vars.FORGEJO_INSTANCE_URL }}
+        # Literal flag (NOT a vars.* lookup, which is empty when the repo var is unset) that
+        # .releaserc.js keys on to select @saithodev/semantic-release-gitea over @semantic-release/github.
+        SEMANTIC_RELEASE_GITEA: "true"
+        # Forgejo: @saithodev/semantic-release-gitea targets the Gitea-compatible API. Fall back to the
+        # runner's instance URL (github.server_url) when the FORGEJO_INSTANCE_URL repo var is unset.
+        GITEA_URL: ${{ vars.FORGEJO_INSTANCE_URL || github.server_url }}
         GITEA_TOKEN: ${{ inputs.token || github.token }}
       run: |
         set -euo pipefail
