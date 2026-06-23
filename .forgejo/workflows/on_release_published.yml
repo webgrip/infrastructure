@@ -27,10 +27,12 @@ on:
       tag:
         description: 'Release tag, e.g. techdocs-builder-v1.2.3'
         required: true
+        type: string
       is_prerelease:
         description: 'Whether this is a prerelease'
         required: false
         default: 'false'
+        type: string
 
 jobs:
   parse-release-tag:
