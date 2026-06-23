@@ -94,3 +94,26 @@ runs:
         # the Gitea/Forgejo publish plugin. (semantic-release has no --config flag; the package
         # config always wins via cosmiconfig regardless, so plugin selection lives in the config.)
         npx semantic-release
+
+    # Forgejo does NOT emit a `release` Actions event for a release created inside a CI job
+    # (loop-prevention), so on_release_published.yml never auto-fires here. Dispatch it explicitly
+    # for the tag we just cut. steps.semantic-release.outputs.version is "<image>-v<version>" (the
+    # exec successCmd) and empty when no release happened, so this no-ops on a non-releasing run.
+    - name: Trigger image build + sign (on_release_published)
+      if: ${{ steps.semantic-release.outputs.version != '' }}
+      shell: bash
+      env:
+        GITEA_URL: ${{ vars.FORGEJO_INSTANCE_URL || github.server_url }}
+        GITEA_TOKEN: ${{ inputs.token || github.token }}
+        TAG: ${{ steps.semantic-release.outputs.version }}
+        REF: ${{ github.ref_name }}
+        REPO: ${{ github.repository }}
+        IS_PRERELEASE: ${{ startsWith(github.ref, 'refs/heads/release/') && 'true' || 'false' }}
+      run: |
+        set -euo pipefail
+        echo "Dispatching on_release_published.yml for tag=${TAG} ref=${REF} prerelease=${IS_PRERELEASE}"
+        curl -fsS -X POST \
+          -H "Authorization: token ${GITEA_TOKEN}" \
+          -H "Content-Type: application/json" \
+          "${GITEA_URL%/}/api/v1/repos/${REPO}/actions/workflows/on_release_published.yml/dispatches" \
+          -d "{\"ref\":\"${REF}\",\"inputs\":{\"tag\":\"${TAG}\",\"is_prerelease\":\"${IS_PRERELEASE}\"}}"

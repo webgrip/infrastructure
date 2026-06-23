@@ -12,12 +12,25 @@ name: '[Workflow] On Release Published'
 # Dual-publish: the .github/ pipeline keeps pushing to GHCR, untouched.
 
 concurrency:
-  group: release-${{ github.ref }}-${{ github.event.release.id }}
+  group: release-${{ github.ref }}-${{ github.event.release.id || inputs.tag }}
   cancel-in-progress: true
 
 on:
   release:
     types: [published]
+  # Forgejo adaptation: a release created from inside a CI job does NOT emit a `release`
+  # Actions event (loop-prevention), so the .forgejo semantic-release action dispatches this
+  # workflow explicitly after cutting a release. The `release` trigger still serves manual UI
+  # releases. (The .github side needs no dispatch — its App-token release does fire the event.)
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag, e.g. techdocs-builder-v1.2.3'
+        required: true
+      is_prerelease:
+        description: 'Whether this is a prerelease'
+        required: false
+        default: 'false'
 
 jobs:
   parse-release-tag:
@@ -28,13 +41,16 @@ jobs:
       image: ${{ steps.parse.outputs.image }}
       version: ${{ steps.parse.outputs.version }}
       is_prerelease: ${{ steps.parse.outputs.is_prerelease }}
+      created: ${{ steps.parse.outputs.created }}
     steps:
       - id: parse
         name: Extract image + version
         shell: bash
         run: |
           set -euo pipefail
-          tag='${{ github.event.release.tag_name }}'
+          # workflow_dispatch (Forgejo CI path) passes the tag as an input; the release event
+          # supplies it via github.event.release.tag_name.
+          tag='${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}'
 
           if [[ "$tag" =~ ^(.+)-v(.+)$ ]]; then
             image="${BASH_REMATCH[1]}"
@@ -45,9 +61,14 @@ jobs:
             exit 1
           fi
 
+          # Release event carries a publish timestamp; a dispatch does not, so stamp now.
+          created='${{ github.event.release.published_at || github.event.release.created_at }}'
+          if [[ -z "$created" ]]; then created="$(date -u +%Y-%m-%dT%H:%M:%SZ)"; fi
+
           echo "image=$image" >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
-          echo "is_prerelease=${{ github.event.release.prerelease }}" >> "$GITHUB_OUTPUT"
+          echo "is_prerelease=${{ github.event_name == 'workflow_dispatch' && inputs.is_prerelease || github.event.release.prerelease }}" >> "$GITHUB_OUTPUT"
+          echo "created=$created" >> "$GITHUB_OUTPUT"
 
   release-distribute-harbor:
     name: 'Distribute'
@@ -62,7 +83,7 @@ jobs:
       docker-file: "Dockerfile"
       platforms: "linux/amd64,linux/arm64"
       docker-build-args: |
-        IMAGE_CREATED=${{ github.event.release.published_at || github.event.release.created_at }}
+        IMAGE_CREATED=${{ needs.parse-release-tag.outputs.created }}
         IMAGE_VERSION=${{ needs.parse-release-tag.outputs.version }}
         IMAGE_REVISION=${{ github.sha }}
       # Bare OWNER/IMAGE[:TAG]; the Harbor workflow prefixes the registry, e.g.
@@ -87,7 +108,7 @@ jobs:
       docker-file: "Dockerfile"
       platforms: "linux/amd64,linux/arm64"
       docker-build-args: |
-        IMAGE_CREATED=${{ github.event.release.published_at || github.event.release.created_at }}
+        IMAGE_CREATED=${{ needs.parse-release-tag.outputs.created }}
         IMAGE_VERSION=${{ needs.parse-release-tag.outputs.version }}
         IMAGE_REVISION=${{ github.sha }}
       docker-tags: |
