@@ -1,3 +1,4 @@
+# Trivial change to trigger a techdocs-builder release exercising the Forgejo Gitea publish path.
 ARG FINAL_BASE=alpine:3.23.4@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11
 
 FROM node:24-alpine3.20@sha256:8fe019e0d57dbdce5f5c27c0b63d2775cf34b00e3755a7dea969802d7e0c2b25 AS node
