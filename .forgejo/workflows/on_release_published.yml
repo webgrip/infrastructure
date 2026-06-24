@@ -72,10 +72,15 @@ jobs:
           echo "is_prerelease=${{ github.event_name == 'workflow_dispatch' && inputs.is_prerelease || github.event.release.prerelease }}" >> "$GITHUB_OUTPUT"
           echo "created=$created" >> "$GITHUB_OUTPUT"
 
+  # ONE distribute job for BOTH prereleases and final releases. Do NOT split into two
+  # is_prerelease-gated reusable-workflow jobs: Forgejo flattens a reusable workflow's inner jobs
+  # into this caller's graph and does NOT apply the caller job's `if:` to those flattened jobs — so
+  # a "skipped" prerelease distribute STILL ran its flattened build, giving two concurrent builds
+  # racing on the same Harbor tag + buildx :cache ref. The only prerelease difference is the
+  # :latest tag, gated inline in docker-tags below.
   release-distribute-harbor:
     name: 'Distribute'
     needs: [parse-release-tag]
-    if: ${{ needs.parse-release-tag.outputs.is_prerelease != 'true' }}
     permissions:
       contents: read
     uses: webgrip/workflows/.forgejo/workflows/docker-build-and-push-harbor.yml@main
@@ -92,31 +97,11 @@ jobs:
       # EMPTY in this workflow_dispatch-triggered run, which produced `harbor.webgrip.dev//<image>`
       # (empty owner -> double slash -> invalid tag). Bare OWNER/IMAGE[:TAG]; the Harbor workflow
       # prefixes the registry, e.g. webgrip/<image>:<version> -> harbor.webgrip.dev/webgrip/<image>:<version>.
+      # :latest only on a FINAL release; on a prerelease the second line resolves to '' and the
+      # Harbor engine skips blank tags.
       docker-tags: |
         webgrip/${{ needs.parse-release-tag.outputs.image }}:${{ needs.parse-release-tag.outputs.version }}
-        webgrip/${{ needs.parse-release-tag.outputs.image }}:latest
-    secrets:
-      HARBOR_ROBOT_USER: ${{ secrets.HARBOR_ROBOT_USER }}
-      HARBOR_ROBOT_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
-
-  release-distribute-harbor-prerelease:
-    name: 'Distribute (prerelease)'
-    needs: [parse-release-tag]
-    if: ${{ needs.parse-release-tag.outputs.is_prerelease == 'true' }}
-    permissions:
-      contents: read
-    uses: webgrip/workflows/.forgejo/workflows/docker-build-and-push-harbor.yml@main
-    with:
-      registry: harbor.webgrip.dev
-      docker-context: "ops/docker/${{ needs.parse-release-tag.outputs.image }}"
-      docker-file: "Dockerfile"
-      platforms: "linux/amd64,linux/arm64"
-      docker-build-args: |
-        IMAGE_CREATED=${{ needs.parse-release-tag.outputs.created }}
-        IMAGE_VERSION=${{ needs.parse-release-tag.outputs.version }}
-        IMAGE_REVISION=${{ github.sha }}
-      docker-tags: |
-        webgrip/${{ needs.parse-release-tag.outputs.image }}:${{ needs.parse-release-tag.outputs.version }}
+        ${{ needs.parse-release-tag.outputs.is_prerelease != 'true' && format('webgrip/{0}:latest', needs.parse-release-tag.outputs.image) || '' }}
     secrets:
       HARBOR_ROBOT_USER: ${{ secrets.HARBOR_ROBOT_USER }}
       HARBOR_ROBOT_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
@@ -125,11 +110,10 @@ jobs:
   # cosign signing + CycloneDX SBOM attestation via OpenBao Transit (the key never
   # leaves OpenBao; the runner authenticates with its k8s ServiceAccount) + a
   # Dependency-Track upload. Runs on the in-cluster runner so it can reach Harbor
-  # (LAN-only), OpenBao, and Dependency-Track.
+  # (LAN-only), OpenBao, and Dependency-Track. Signs prereleases and finals alike.
   release-sign-and-attest:
     name: 'Sign & Attest'
     needs: [parse-release-tag, release-distribute-harbor]
-    if: ${{ needs.parse-release-tag.outputs.is_prerelease != 'true' }}
     runs-on: docker
     # Forgejo: mint a per-job OIDC token (claims: repository/event_name/ref) so the action can
     # authenticate to OpenBao's JWT auth for signing. (permissions: is ignored by Forgejo.)
@@ -140,29 +124,6 @@ jobs:
       # Local composite action — requires the repo checked out (checkout@v5, not v6).
       - uses: actions/checkout@v5
       - name: Sign, attest and SBOM
-        uses: ./.forgejo/actions/cosign-sign-attest
-        with:
-          registry: harbor.webgrip.dev
-          image-name: harbor.webgrip.dev/webgrip/${{ needs.parse-release-tag.outputs.image }}
-          image-version: ${{ needs.parse-release-tag.outputs.version }}
-        env:
-          HARBOR_ROBOT_USER: ${{ secrets.HARBOR_ROBOT_USER }}
-          HARBOR_ROBOT_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
-          DT_API_KEY: ${{ secrets.DT_API_KEY }}
-
-  release-sign-and-attest-prerelease:
-    name: 'Sign & Attest (prerelease)'
-    needs: [parse-release-tag, release-distribute-harbor-prerelease]
-    if: ${{ needs.parse-release-tag.outputs.is_prerelease == 'true' }}
-    runs-on: docker
-    # Forgejo: mint a per-job OIDC token (claims: repository/event_name/ref) so the action can
-    # authenticate to OpenBao's JWT auth for signing. (permissions: is ignored by Forgejo.)
-    enable-openid-connect: true
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v5
-      - name: Sign, attest and SBOM (prerelease)
         uses: ./.forgejo/actions/cosign-sign-attest
         with:
           registry: harbor.webgrip.dev
