@@ -88,11 +88,13 @@ jobs:
         IMAGE_CREATED=${{ needs.parse-release-tag.outputs.created }}
         IMAGE_VERSION=${{ needs.parse-release-tag.outputs.version }}
         IMAGE_REVISION=${{ github.sha }}
-      # Bare OWNER/IMAGE[:TAG]; the Harbor workflow prefixes the registry, e.g.
-      # webgrip/<image>:<version> -> harbor.webgrip.dev/webgrip/<image>:<version>.
+      # Owner is hardcoded `webgrip` (the Harbor project): Forgejo leaves github.repository_owner
+      # EMPTY in this workflow_dispatch-triggered run, which produced `harbor.webgrip.dev//<image>`
+      # (empty owner -> double slash -> invalid tag). Bare OWNER/IMAGE[:TAG]; the Harbor workflow
+      # prefixes the registry, e.g. webgrip/<image>:<version> -> harbor.webgrip.dev/webgrip/<image>:<version>.
       docker-tags: |
-        ${{ github.repository_owner }}/${{ needs.parse-release-tag.outputs.image }}:${{ needs.parse-release-tag.outputs.version }}
-        ${{ github.repository_owner }}/${{ needs.parse-release-tag.outputs.image }}:latest
+        webgrip/${{ needs.parse-release-tag.outputs.image }}:${{ needs.parse-release-tag.outputs.version }}
+        webgrip/${{ needs.parse-release-tag.outputs.image }}:latest
     secrets:
       HARBOR_ROBOT_USER: ${{ secrets.HARBOR_ROBOT_USER }}
       HARBOR_ROBOT_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
@@ -114,7 +116,7 @@ jobs:
         IMAGE_VERSION=${{ needs.parse-release-tag.outputs.version }}
         IMAGE_REVISION=${{ github.sha }}
       docker-tags: |
-        ${{ github.repository_owner }}/${{ needs.parse-release-tag.outputs.image }}:${{ needs.parse-release-tag.outputs.version }}
+        webgrip/${{ needs.parse-release-tag.outputs.image }}:${{ needs.parse-release-tag.outputs.version }}
     secrets:
       HARBOR_ROBOT_USER: ${{ secrets.HARBOR_ROBOT_USER }}
       HARBOR_ROBOT_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
@@ -141,7 +143,7 @@ jobs:
         uses: ./.forgejo/actions/cosign-sign-attest
         with:
           registry: harbor.webgrip.dev
-          image-name: harbor.webgrip.dev/${{ github.repository_owner }}/${{ needs.parse-release-tag.outputs.image }}
+          image-name: harbor.webgrip.dev/webgrip/${{ needs.parse-release-tag.outputs.image }}
           image-version: ${{ needs.parse-release-tag.outputs.version }}
         env:
           HARBOR_ROBOT_USER: ${{ secrets.HARBOR_ROBOT_USER }}
@@ -164,7 +166,7 @@ jobs:
         uses: ./.forgejo/actions/cosign-sign-attest
         with:
           registry: harbor.webgrip.dev
-          image-name: harbor.webgrip.dev/${{ github.repository_owner }}/${{ needs.parse-release-tag.outputs.image }}
+          image-name: harbor.webgrip.dev/webgrip/${{ needs.parse-release-tag.outputs.image }}
           image-version: ${{ needs.parse-release-tag.outputs.version }}
         env:
           HARBOR_ROBOT_USER: ${{ secrets.HARBOR_ROBOT_USER }}

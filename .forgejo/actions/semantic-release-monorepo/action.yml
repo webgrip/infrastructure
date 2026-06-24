@@ -97,17 +97,18 @@ runs:
 
     # Forgejo does NOT emit a `release` Actions event for a release created inside a CI job
     # (loop-prevention), so on_release_published.yml never auto-fires here. Dispatch it explicitly
-    # for the tag we just cut. steps.semantic-release.outputs.version is the bare semver (the exec
-    # successCmd writes ${nextRelease.version}, NOT the namespaced gitTag), so reconstruct the full
-    # "<image>-v<version>" tag here — that's the format on_release_published's parse-release-tag
-    # requires (^(.+)-v(.+)$). Empty when no release happened, so this no-ops on a non-releasing run.
+    # for the tag we just cut. steps.semantic-release.outputs.version is ALREADY the full namespaced
+    # tag "<image>-v<version>" (e.g. techdocs-builder-v1.2.14) — semantic-release-monorepo emits the
+    # tagFormat-prefixed value, NOT a bare semver — which is exactly the format parse-release-tag
+    # requires (^(.+)-v(.+)$). Pass it through verbatim; do NOT prepend the package name (that doubles
+    # the prefix -> techdocs-builder-vtechdocs-builder-v1.2.14). Empty on a non-releasing run -> no-op.
     - name: Trigger image build + sign (on_release_published)
       if: ${{ steps.semantic-release.outputs.version != '' }}
       shell: bash
       env:
         GITEA_URL: ${{ vars.FORGEJO_INSTANCE_URL || github.server_url }}
         GITEA_TOKEN: ${{ inputs.token || github.token }}
-        TAG: ${{ inputs.package-name }}-v${{ steps.semantic-release.outputs.version }}
+        TAG: ${{ steps.semantic-release.outputs.version }}
         REF: ${{ github.ref_name }}
         REPO: ${{ github.repository }}
         IS_PRERELEASE: ${{ startsWith(github.ref, 'refs/heads/release/') && 'true' || 'false' }}
