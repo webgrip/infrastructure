@@ -116,17 +116,32 @@ runs:
       run: |
         set -euo pipefail
         # 1) Fetch this job's Forgejo OIDC token (requires enable-openid-connect on the job).
-        #    Its claims (repository, event_name=release, ref=refs/tags/*) are exactly what the
-        #    OpenBao role binds to, so only the release workflow on a tag can mint a signer token.
+        #    Its claims must satisfy the OpenBao cosign-signer role's bound_claims/bound_audiences.
+        #    NB: the Forgejo flow triggers on_release_published via workflow_dispatch on a branch,
+        #    NOT a release event on a tag — so the role must bind event_name=workflow_dispatch, not
+        #    event_name=release/ref=refs/tags/* (the GitHub-shaped binding). See the printed claims.
         [ -n "${ACTIONS_ID_TOKEN_REQUEST_URL:-}" ] || { echo "::error::no OIDC token endpoint — is enable-openid-connect set on this job?"; exit 1; }
-        oidc="$(curl -fsS -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
-          "${ACTIONS_ID_TOKEN_REQUEST_URL}&audience=${OIDC_AUDIENCE}" | jq -r '.value')"
-        [ -n "$oidc" ] && [ "$oidc" != "null" ] || { echo "::error::failed to obtain Forgejo OIDC token"; exit 1; }
-        # 2) Exchange it for a short-lived OpenBao token scoped to Transit sign-only.
-        VAULT_TOKEN="$(curl -fsS --request POST \
+        # GitHub's request URL already has a query string; Forgejo's may not — pick the right separator
+        # so the audience param is actually applied (a malformed URL yields the default audience -> 400).
+        case "$ACTIONS_ID_TOKEN_REQUEST_URL" in *\?*) sep='&';; *) sep='?';; esac
+        oidc_code="$(curl -sS -o /tmp/oidc.json -w '%{http_code}' \
+          -H "Authorization: bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+          "${ACTIONS_ID_TOKEN_REQUEST_URL}${sep}audience=${OIDC_AUDIENCE}" || echo 000)"
+        [ "$oidc_code" = "200" ] || { echo "::error::OIDC token request HTTP ${oidc_code}: $(cat /tmp/oidc.json 2>/dev/null)"; exit 1; }
+        oidc="$(jq -r '.value' /tmp/oidc.json)"
+        [ -n "$oidc" ] && [ "$oidc" != "null" ] || { echo "::error::OIDC token endpoint returned no .value"; exit 1; }
+        # Diagnostic: decode + print the token's CLAIMS only (never the token itself). These are what
+        # the OpenBao role binds against — compare to bound_claims/bound_audiences if the login 400s.
+        b64pad() { p="$(printf '%s' "$1" | tr '_-' '/+')"; m=$(( ${#p} % 4 )); [ "$m" -ne 0 ] && p="${p}$(printf '%*s' $((4 - m)) '' | tr ' ' '=')"; printf '%s' "$p"; }
+        echo "OIDC token claims: $(b64pad "$(printf '%s' "$oidc" | cut -d. -f2)" | base64 -d 2>/dev/null | jq -c '{sub, repository, event_name, ref, workflow, aud}' 2>/dev/null || echo '<undecodable>')"
+        # 2) Exchange it for a short-lived OpenBao token scoped to Transit sign-only. Capture the body
+        #    so a rejected claim/audience shows the exact reason instead of a bare curl exit 22.
+        login_code="$(curl -sS -o /tmp/bao.json -w '%{http_code}' --request POST \
           --data "$(jq -nc --arg jwt "$oidc" --arg role "$OPENBAO_ROLE" '{jwt:$jwt, role:$role}')" \
-          "${VAULT_ADDR}/v1/auth/forgejo/login" | jq -r '.auth.client_token')"
-        [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "::error::OpenBao JWT login failed"; exit 1; }
+          "${VAULT_ADDR}/v1/auth/forgejo/login" || echo 000)"
+        [ "$login_code" = "200" ] || { echo "::error::OpenBao JWT login HTTP ${login_code}: $(cat /tmp/bao.json 2>/dev/null)"; exit 1; }
+        VAULT_TOKEN="$(jq -r '.auth.client_token' /tmp/bao.json)"
+        [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "::error::OpenBao login returned no client_token"; exit 1; }
         export VAULT_ADDR VAULT_TOKEN
         # 3) The signing key never leaves OpenBao: cosign calls transit/sign over the API.
         cosign sign   --yes --key "hashivault://${TRANSIT_KEY}" "$IMAGE"
