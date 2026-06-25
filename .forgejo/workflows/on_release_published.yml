@@ -83,12 +83,16 @@ jobs:
     needs: [parse-release-tag]
     permissions:
       contents: read
-    uses: webgrip/workflows/.forgejo/workflows/docker-build-and-push-harbor.yml@main
+    uses: webgrip/workflows/.forgejo/workflows/docker-build-and-push-harbor-fast.yml@main
     with:
       registry: harbor.webgrip.dev
       docker-context: "ops/docker/${{ needs.parse-release-tag.outputs.image }}"
       docker-file: "Dockerfile"
-      platforms: "linux/amd64,linux/arm64"
+      # amd64-only: the homelab (and these runner images' only consumer) is amd64 Talos, so we drop
+      # the emulated arm64 build — the dominant build-time cost. The -fast wrapper skips setup-qemu
+      # for a pure-amd64 platforms value. See webgrip/homelab-cluster ADR-0036. To restore arm64,
+      # set platforms back to "linux/amd64,linux/arm64" (re-enables QEMU automatically).
+      platforms: "linux/amd64"
       docker-build-args: |
         IMAGE_CREATED=${{ needs.parse-release-tag.outputs.created }}
         IMAGE_VERSION=${{ needs.parse-release-tag.outputs.version }}
