@@ -144,8 +144,13 @@ runs:
         [ -n "$VAULT_TOKEN" ] && [ "$VAULT_TOKEN" != "null" ] || { echo "::error::OpenBao login returned no client_token"; exit 1; }
         export VAULT_ADDR VAULT_TOKEN
         # 3) The signing key never leaves OpenBao: cosign calls transit/sign over the API.
-        cosign sign   --yes --key "hashivault://${TRANSIT_KEY}" "$IMAGE"
-        cosign attest --yes --key "hashivault://${TRANSIT_KEY}" \
+        # --tlog-upload=false keeps signing fully in-cluster: with a static OpenBao Transit key we do
+        # NOT need the public sigstore transparency log (rekor.sigstore.dev), which would publish our
+        # image digests + timestamps to a world-readable, immutable log and add an internet dependency.
+        # Safe because verification is key-only: the Kyverno image-verify-harbor-audit policy has no
+        # `rekor` block (unlike the GHCR keyless policy), so it never looks up a tlog entry.
+        cosign sign   --yes --tlog-upload=false --key "hashivault://${TRANSIT_KEY}" "$IMAGE"
+        cosign attest --yes --tlog-upload=false --key "hashivault://${TRANSIT_KEY}" \
           --predicate sbom.cdx.json --type cyclonedx "$IMAGE"
 
     - name: Upload SBOM to Dependency-Track (fail-soft)
