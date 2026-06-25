@@ -43,10 +43,30 @@ const releaseNotesGeneratorConfig = [
     },
 ];
 
+// The verifyRelease step proves the image still builds before we cut a tag. A plain
+// `docker build` is uncached on the ephemeral runner, so it rebuilds the whole image (heavy
+// `apk add`s, multiple base images) on every run — minutes per release. When the monorepo
+// action exports BUILD_CACHE_REF (the `<registry>/<owner>/<image>:cache` ref the publish path's
+// docker-build-push-registry writes via buildx, mode=max), read from it: a commit that doesn't
+// touch the Dockerfile becomes a full cache hit (seconds). We deliberately do NOT cache-to it —
+// this gate is amd64-only while publish builds amd64+arm64 into the same ref, so writing here
+// would clobber the arm64 layers publish relies on. The cache is populated solely by publish, so
+// verify reads "one release behind", which is a full hit for the common no-Dockerfile-change bump.
+// `--output=type=cacheonly` builds every stage and discards the result (it's only a gate). Falls
+// back to a plain build when the env var is unset (e.g. a GitHub run that hasn't opted in).
+const cacheRef = process.env.BUILD_CACHE_REF;
+const verifyReleaseCmd = cacheRef
+    ? [
+        'docker buildx build --file Dockerfile --platform linux/amd64',
+        `--cache-from type=registry,ref=${cacheRef}`,
+        '--output=type=cacheonly .',
+    ].join(' ')
+    : 'docker build --file Dockerfile .';
+
 const execConfig = [
     '@semantic-release/exec',
     {
-        verifyReleaseCmd: 'docker build --file Dockerfile .',
+        verifyReleaseCmd,
         successCmd: 'echo "version=${nextRelease.version}" >> $GITHUB_OUTPUT',
     },
 ];

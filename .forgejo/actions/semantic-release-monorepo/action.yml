@@ -20,6 +20,16 @@ inputs:
   package-name:
     description: "Package name used for tag prefix, e.g. helm-deploy"
     required: true
+  registry:
+    description: "Registry the verifyRelease build caches against (must match the publish path's registry)"
+    required: false
+    default: "harbor.webgrip.dev"
+  harbor-robot-user:
+    description: "Harbor robot user. When set (with the token), the verifyRelease build uses buildx registry cache instead of a cold `docker build`."
+    required: false
+  harbor-robot-token:
+    description: "Harbor robot token. When set (with the user), enables the cached verifyRelease build."
+    required: false
 
 outputs:
   version:
@@ -40,6 +50,42 @@ runs:
       uses: actions/setup-node@v4
       with:
         node-version: "24"
+
+    # Cache the npm download cache so the (unpinned-lockfile) semantic-release install resolves
+    # from disk instead of re-fetching ~400 packages every run. Bump the key suffix when the
+    # pinned versions below change.
+    - name: Cache npm downloads
+      uses: actions/cache@v4
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-npm-semrel-24.2.7
+
+    # When Harbor creds are provided, set up buildx (docker-container driver — supports
+    # `cache-from type=registry`) + log in (the Harbor :cache repo needs auth to pull), then
+    # export BUILD_CACHE_REF. .releaserc.js keys on BUILD_CACHE_REF to run the cached buildx
+    # verifyRelease build; without these the build falls back to a plain (cold) `docker build`.
+    - name: Set up Docker Buildx
+      if: ${{ inputs.harbor-robot-token != '' }}
+      uses: docker/setup-buildx-action@v3
+
+    - name: Log in to Harbor (verifyRelease build cache)
+      if: ${{ inputs.harbor-robot-token != '' }}
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ inputs.registry }}
+        username: ${{ inputs.harbor-robot-user }}
+        password: ${{ inputs.harbor-robot-token }}
+
+    - name: Export build cache ref
+      if: ${{ inputs.harbor-robot-token != '' }}
+      shell: bash
+      # Mirrors docker-build-push-registry's cache tag: it pushes the image to
+      # <registry>/<owner>/<image>:<version> and writes buildx cache to the same ref with :cache.
+      # Owner is hardcoded `webgrip` to MATCH the publish path (on_release_published also hardcodes
+      # webgrip): github.repository_owner is empty on Forgejo here too, which would yield
+      # `<registry>//<image>:cache` (double slash) — an invalid ref that never matches the cache.
+      run: |
+        echo "BUILD_CACHE_REF=${{ inputs.registry }}/webgrip/${{ inputs.package-name }}:cache" >> "$GITHUB_ENV"
 
     - name: Run semantic-release
       shell: bash

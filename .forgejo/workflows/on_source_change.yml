@@ -67,3 +67,7 @@ jobs:
           package-path: ${{ matrix.path }}
           package-name: ${{ matrix.basename }}
           token: ${{ secrets.FORGEJO_TOKEN }}
+          # Lets the verifyRelease build reuse the Harbor buildx layer-cache that
+          # on_release_published writes, instead of a cold full rebuild every release.
+          harbor-robot-user: ${{ secrets.HARBOR_ROBOT_USER }}
+          harbor-robot-token: ${{ secrets.HARBOR_ROBOT_TOKEN }}
