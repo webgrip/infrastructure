@@ -1,4 +1,4 @@
-# Trigger a techdocs-builder release to verify the full hardened pipeline (no-tlog sign, auto-scan, SBOM, GC/retention).
+# Trigger a techdocs-builder release to verify Option A end-to-end (dual-registry signed + GitHub release mirror).
 ARG REGISTRY_DOCKERHUB=docker.io
 ARG FINAL_BASE=${REGISTRY_DOCKERHUB}/library/alpine:3.23.4@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11
 
