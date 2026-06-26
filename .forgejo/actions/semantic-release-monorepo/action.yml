@@ -30,6 +30,9 @@ inputs:
   harbor-robot-token:
     description: "Harbor robot token. When set (with the user), enables the cached verifyRelease build."
     required: false
+  github-release-token:
+    description: "GitHub PAT (classic: repo, or fine-grained: contents+read/write) used to mirror the Release object onto the github.com mirror so its Releases tab stays populated. When unset, the mirror step is skipped."
+    required: false
 
 outputs:
   version:
@@ -99,6 +102,12 @@ runs:
         # runner's instance URL (github.server_url) when the FORGEJO_INSTANCE_URL repo var is unset.
         GITEA_URL: ${{ vars.FORGEJO_INSTANCE_URL || github.server_url }}
         GITEA_TOKEN: ${{ inputs.token || github.token }}
+        # Identity for @semantic-release/git's version-bump commit-back (Forgejo-gated in .releaserc.js).
+        # checkout@v5 persisted the FORGEJO_TOKEN credentials, so the push back to Forgejo authenticates.
+        GIT_AUTHOR_NAME: webgrip-ci
+        GIT_AUTHOR_EMAIL: ci@webgrip.nl
+        GIT_COMMITTER_NAME: webgrip-ci
+        GIT_COMMITTER_EMAIL: ci@webgrip.nl
       run: |
         set -euo pipefail
 
@@ -131,6 +140,8 @@ runs:
           semantic-release-monorepo@8.0.2 \
           @semantic-release/commit-analyzer@13.0.0 \
           @semantic-release/exec@7.0.3 \
+          @semantic-release/npm@12.0.1 \
+          @semantic-release/git@10.0.1 \
           @saithodev/semantic-release-gitea \
           @semantic-release/release-notes-generator@14.0.0 \
           conventional-changelog-conventionalcommits@7.0.2
@@ -166,3 +177,36 @@ runs:
           -H "Content-Type: application/json" \
           "${GITEA_URL%/}/api/v1/repos/${REPO}/actions/workflows/on_release_published.yml/dispatches" \
           -d "{\"ref\":\"${REF}\",\"inputs\":{\"tag\":\"${TAG}\",\"is_prerelease\":\"${IS_PRERELEASE}\"}}"
+
+    # Mirror the just-cut release onto the GitHub mirror's Releases tab. Forgejo stays the SOLE release
+    # authority (it decided the version + created the canonical Release); this only REFLECTS that object
+    # onto github.com. Best-effort: NOT `set -e`, so a GitHub/PAT/mirror-lag hiccup logs a warning and
+    # never fails the release or blocks the Harbor build — unlike @semantic-release/github inline, which
+    # would abort the whole run. Notes are read back from the Forgejo release so they match exactly.
+    - name: Mirror release to GitHub (best-effort)
+      if: ${{ steps.semantic-release.outputs.version != '' && inputs.github-release-token != '' }}
+      shell: bash
+      env:
+        GITEA_URL: ${{ vars.FORGEJO_INSTANCE_URL || github.server_url }}
+        GITEA_TOKEN: ${{ inputs.token || github.token }}
+        GH_TOKEN: ${{ inputs.github-release-token }}
+        TAG: ${{ steps.semantic-release.outputs.version }}
+        REPO: ${{ github.repository }}
+        BRANCH: ${{ github.ref_name }}
+        IS_PRERELEASE: ${{ startsWith(github.ref, 'refs/heads/release/') && 'true' || 'false' }}
+      run: |
+        set -uo pipefail   # deliberately NOT -e: best-effort
+        notes="$(curl -fsS -H "Authorization: token ${GITEA_TOKEN}" \
+          "${GITEA_URL%/}/api/v1/repos/${REPO}/releases/tags/${TAG}" 2>/dev/null | jq -r '.body // ""')"
+        # target_commitish=BRANCH so GitHub resolves the mirrored tag (or creates it at that branch's
+        # HEAD if the push-mirror hasn't synced the tag yet).
+        body="$(jq -nc --arg t "$TAG" --arg b "$notes" --arg c "$BRANCH" --argjson pre "${IS_PRERELEASE}" \
+          '{tag_name:$t, name:$t, body:$b, target_commitish:$c, prerelease:$pre}')"
+        code="$(curl -sS -o /tmp/ghrel.json -w '%{http_code}' \
+          -X POST -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' \
+          "https://api.github.com/repos/${REPO}/releases" -d "$body" || echo 000)"
+        case "$code" in
+          201) echo "mirrored release ${TAG} to GitHub" ;;
+          422) echo "::notice::GitHub release ${TAG} already exists — skipping" ;;
+          *)   echo "::warning::GitHub release mirror for ${TAG} -> HTTP ${code}: $(cat /tmp/ghrel.json 2>/dev/null) (non-fatal)" ;;
+        esac

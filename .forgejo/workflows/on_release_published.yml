@@ -97,6 +97,13 @@ jobs:
         IMAGE_CREATED=${{ needs.parse-release-tag.outputs.created }}
         IMAGE_VERSION=${{ needs.parse-release-tag.outputs.version }}
         IMAGE_REVISION=${{ github.sha }}
+        # Route base images through Harbor: the Dockerfiles default these to docker.io/ghcr.io
+        # (so .github/GHCR builds work unchanged); the in-cluster build overrides them to the
+        # Harbor pull-through proxy projects (+ webgrip for the techdocs-builder inter-image dep).
+        # Each image only consumes the prefixes it declares; the rest are harmlessly unused.
+        REGISTRY_DOCKERHUB=harbor.webgrip.dev/dockerhub
+        REGISTRY_GHCR=harbor.webgrip.dev/ghcr
+        REGISTRY_MCR=harbor.webgrip.dev/mcr
       # Owner is hardcoded `webgrip` (the Harbor project): Forgejo leaves github.repository_owner
       # EMPTY in this workflow_dispatch-triggered run, which produced `harbor.webgrip.dev//<image>`
       # (empty owner -> double slash -> invalid tag). Bare OWNER/IMAGE[:TAG]; the Harbor workflow
@@ -110,6 +117,36 @@ jobs:
       HARBOR_ROBOT_USER: ${{ secrets.HARBOR_ROBOT_USER }}
       HARBOR_ROBOT_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
 
+  # Dual-publish to GHCR. Forgejo is now the SOLE release authority (GitHub is a pure mirror that cuts
+  # no releases), so the in-cluster runner also pushes ghcr.io/webgrip/<image>. Same Harbor-proxy base
+  # args, so the GHCR image is byte-identical to the Harbor one. Requires a GitHub PAT with
+  # write:packages published as Forgejo org secrets GHCR_USERNAME/GHCR_TOKEN (see forgejo-actions-secrets).
+  # NB: these GHCR images are NOT yet cosign-signed (the Sign & Attest job targets Harbor) — sign GHCR
+  # too, or relax the ghcr Kyverno policy, before relying on it. amd64-only to match the Harbor build.
+  release-distribute-ghcr:
+    name: 'Distribute (GHCR)'
+    needs: [parse-release-tag]
+    permissions:
+      contents: read
+    uses: webgrip/workflows/.forgejo/workflows/docker-build-and-push-ghcr.yml@main
+    with:
+      docker-context: "ops/docker/${{ needs.parse-release-tag.outputs.image }}"
+      docker-file: "Dockerfile"
+      platforms: "linux/amd64"
+      docker-build-args: |
+        IMAGE_CREATED=${{ needs.parse-release-tag.outputs.created }}
+        IMAGE_VERSION=${{ needs.parse-release-tag.outputs.version }}
+        IMAGE_REVISION=${{ github.sha }}
+        REGISTRY_DOCKERHUB=harbor.webgrip.dev/dockerhub
+        REGISTRY_GHCR=harbor.webgrip.dev/ghcr
+        REGISTRY_MCR=harbor.webgrip.dev/mcr
+      docker-tags: |
+        webgrip/${{ needs.parse-release-tag.outputs.image }}:${{ needs.parse-release-tag.outputs.version }}
+        ${{ needs.parse-release-tag.outputs.is_prerelease != 'true' && format('webgrip/{0}:latest', needs.parse-release-tag.outputs.image) || '' }}
+    secrets:
+      REGISTRY_USERNAME: ${{ secrets.GHCR_USERNAME }}
+      REGISTRY_TOKEN: ${{ secrets.GHCR_TOKEN }}
+
   # ── Supply chain security ──────────────────────────────────────────────────
   # cosign signing + CycloneDX SBOM attestation via OpenBao Transit (the key never
   # leaves OpenBao; the runner authenticates with its k8s ServiceAccount) + a
@@ -117,7 +154,10 @@ jobs:
   # (LAN-only), OpenBao, and Dependency-Track. Signs prereleases and finals alike.
   release-sign-and-attest:
     name: 'Sign & Attest'
-    needs: [parse-release-tag, release-distribute-harbor]
+    # Depend on BOTH distributes so the images exist before we sign their digests. NB: this couples
+    # signing to the GHCR push — provision GHCR_USERNAME/GHCR_TOKEN before relying on this, or the
+    # GHCR distribute fails and skips signing for both registries.
+    needs: [parse-release-tag, release-distribute-harbor, release-distribute-ghcr]
     runs-on: docker
     # Forgejo: mint a per-job OIDC token (claims: repository/event_name/ref) so the action can
     # authenticate to OpenBao's JWT auth for signing. (permissions: is ignored by Forgejo.)
@@ -127,13 +167,26 @@ jobs:
     steps:
       # Local composite action — requires the repo checked out (checkout@v5, not v6).
       - uses: actions/checkout@v5
-      - name: Sign, attest and SBOM
+      # Same OpenBao Transit key signs both registries (each step mints its own OIDC->OpenBao token
+      # and signs that registry's digest by reference). Owner hardcoded `webgrip` — github.repository_owner
+      # is empty on Forgejo's workflow_dispatch.
+      - name: Sign, attest and SBOM (Harbor)
         uses: ./.forgejo/actions/cosign-sign-attest
         with:
           registry: harbor.webgrip.dev
           image-name: harbor.webgrip.dev/webgrip/${{ needs.parse-release-tag.outputs.image }}
           image-version: ${{ needs.parse-release-tag.outputs.version }}
         env:
-          HARBOR_ROBOT_USER: ${{ secrets.HARBOR_ROBOT_USER }}
-          HARBOR_ROBOT_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
+          REGISTRY_USERNAME: ${{ secrets.HARBOR_ROBOT_USER }}
+          REGISTRY_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
+          DT_API_KEY: ${{ secrets.DT_API_KEY }}
+      - name: Sign, attest and SBOM (GHCR)
+        uses: ./.forgejo/actions/cosign-sign-attest
+        with:
+          registry: ghcr.io
+          image-name: ghcr.io/webgrip/${{ needs.parse-release-tag.outputs.image }}
+          image-version: ${{ needs.parse-release-tag.outputs.version }}
+        env:
+          REGISTRY_USERNAME: ${{ secrets.GHCR_USERNAME }}
+          REGISTRY_TOKEN: ${{ secrets.GHCR_TOKEN }}
           DT_API_KEY: ${{ secrets.DT_API_KEY }}

@@ -1,13 +1,17 @@
 ###############################################################################
 # Base image: Node 22 on Debian 12 (bookworm-slim)
 ###############################################################################
+ARG REGISTRY_DOCKERHUB=docker.io
 ARG NODE_VERSION=22
 ARG DEBIAN_CODENAME=bookworm
-FROM node:${NODE_VERSION}-${DEBIAN_CODENAME}-slim
+FROM ${REGISTRY_DOCKERHUB}/library/node:${NODE_VERSION}-${DEBIAN_CODENAME}-slim
 
 ARG IMAGE_CREATED=1970-01-01T00:00:00Z
 ARG IMAGE_VERSION=dev
 ARG IMAGE_REVISION=unknown
+ARG REGISTRY_DOCKERHUB
+ARG NODE_VERSION
+ARG DEBIAN_CODENAME
 ENV DEBIAN_FRONTEND=noninteractive
 
 ###############################################################################
@@ -95,7 +99,7 @@ LABEL org.opencontainers.image.title="WebGrip Rust Releaser" \
     org.opencontainers.image.vendor="WebGrip" \
     org.opencontainers.image.authors="Ryan Grippeling <ryan@webgrip.nl>" \
     org.opencontainers.image.licenses="MIT" \
-    org.opencontainers.image.base.name="node:${NODE_VERSION}-${DEBIAN_CODENAME}-slim" \
+    org.opencontainers.image.base.name="${REGISTRY_DOCKERHUB}/library/node:${NODE_VERSION}-${DEBIAN_CODENAME}-slim" \
     org.opencontainers.image.created="${IMAGE_CREATED}" \
     org.opencontainers.image.version="${IMAGE_VERSION}" \
     org.opencontainers.image.revision="${IMAGE_REVISION}"

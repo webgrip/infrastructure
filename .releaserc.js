@@ -54,10 +54,20 @@ const releaseNotesGeneratorConfig = [
 // verify reads "one release behind", which is a full hit for the common no-Dockerfile-change bump.
 // `--output=type=cacheonly` builds every stage and discards the result (it's only a gate). Falls
 // back to a plain build when the env var is unset (e.g. a GitHub run that hasn't opted in).
+// The cached (in-cluster) verify build pulls base images through the Harbor proxy too — the
+// Dockerfiles default REGISTRY_* to docker.io/ghcr, so override them here to match the publish
+// build. Only the cached branch (Forgejo, BUILD_CACHE_REF set) does this; the plain `docker build`
+// fallback (GitHub) keeps the upstream defaults, since it can't reach LAN-only Harbor.
+const harborBaseArgs = [
+    '--build-arg REGISTRY_DOCKERHUB=harbor.webgrip.dev/dockerhub',
+    '--build-arg REGISTRY_GHCR=harbor.webgrip.dev/ghcr',
+    '--build-arg REGISTRY_MCR=harbor.webgrip.dev/mcr',
+];
 const cacheRef = process.env.BUILD_CACHE_REF;
 const verifyReleaseCmd = cacheRef
     ? [
         'docker buildx build --file Dockerfile --platform linux/amd64',
+        ...harborBaseArgs,
         `--cache-from type=registry,ref=${cacheRef}`,
         '--output=type=cacheonly .',
     ].join(' ')
@@ -79,10 +89,25 @@ const publishPlugin = process.env.SEMANTIC_RELEASE_GITEA
     ? '@saithodev/semantic-release-gitea'
     : '@semantic-release/github';
 
+// Version bump (package.json) + commit-back, but ONLY on the leading Forgejo side
+// (SEMANTIC_RELEASE_GITEA). GitHub is now a pure mirror that cuts no releases, so it must never
+// re-version or commit — that's what kept the two sequences from diverging. The `[skip ci]` message
+// is honoured by both Forgejo and GitHub, so the mirror push of this commit re-triggers nothing.
+const commitBackPlugins = process.env.SEMANTIC_RELEASE_GITEA
+    ? [
+        ['@semantic-release/npm', { npmPublish: false }],
+        ['@semantic-release/git', {
+            assets: ['package.json'],
+            message: 'chore(release): ${nextRelease.gitTag} [skip ci]\n\n${nextRelease.notes}',
+        }],
+    ]
+    : [];
+
 const plugins = [
     commitAnalyzerConfig,
     releaseNotesGeneratorConfig,
     execConfig,
+    ...commitBackPlugins,
     publishPlugin,
 ];
 

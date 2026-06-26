@@ -1,7 +1,8 @@
 # Trigger a techdocs-builder release to verify the full hardened pipeline (no-tlog sign, auto-scan, SBOM, GC/retention).
-ARG FINAL_BASE=alpine:3.23.4@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11
+ARG REGISTRY_DOCKERHUB=docker.io
+ARG FINAL_BASE=${REGISTRY_DOCKERHUB}/library/alpine:3.23.4@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11
 
-FROM node:24-alpine3.20@sha256:8fe019e0d57dbdce5f5c27c0b63d2775cf34b00e3755a7dea969802d7e0c2b25 AS node
+FROM ${REGISTRY_DOCKERHUB}/library/node:24-alpine3.20@sha256:8fe019e0d57dbdce5f5c27c0b63d2775cf34b00e3755a7dea969802d7e0c2b25 AS node
 
 RUN corepack enable && corepack prepare npm@latest --activate
 
@@ -12,7 +13,7 @@ RUN npm install -g \
     @mermaid-js/mermaid-cli@11.4.2
 
 
-FROM python:3.13.3-alpine3.20@sha256:40a4559d3d6b2117b1fbe426f17d55b9100fa40609733a1d0c3f39e2151d4b33 AS python
+FROM ${REGISTRY_DOCKERHUB}/library/python:3.13.3-alpine3.20@sha256:40a4559d3d6b2117b1fbe426f17d55b9100fa40609733a1d0c3f39e2151d4b33 AS python
 
 RUN apk add --no-cache graphviz
 
@@ -25,7 +26,7 @@ RUN pip3 install --no-cache-dir \
     mkdocs-dracula-theme==1.0.7
 
 
-FROM eclipse-temurin:11.0.31_11-jre-jammy@sha256:40f4f041471e1288071281c7723b4706f1bb8f60a04acbf34b6bb84ac064de50 AS openjdk
+FROM ${REGISTRY_DOCKERHUB}/library/eclipse-temurin:11.0.31_11-jre-jammy@sha256:40f4f041471e1288071281c7723b4706f1bb8f60a04acbf34b6bb84ac064de50 AS openjdk
 
 RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 

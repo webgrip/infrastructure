@@ -1,9 +1,10 @@
+ARG REGISTRY_DOCKERHUB=docker.io
 ARG RUST_VERSION=1.87.0
 
 # ────────────────────────────────────────────────────────────────
 # 1️⃣ Build stage – Rust toolchains & CLI helpers
 # ────────────────────────────────────────────────────────────────
-FROM --platform=$BUILDPLATFORM rust:${RUST_VERSION}-slim-bookworm AS build
+FROM --platform=$BUILDPLATFORM ${REGISTRY_DOCKERHUB}/library/rust:${RUST_VERSION}-slim-bookworm AS build
 
 # 1.1 System packages needed to *build* helper crates
 RUN apt-get update -qq \
@@ -40,7 +41,7 @@ RUN rustup default ${RUST_VERSION} \
 # ────────────────────────────────────────────────────────────────
 # 2️⃣ Runtime / CI stage – tiny Debian image
 # ────────────────────────────────────────────────────────────────
-ARG DEBIAN_BASE=debian:bookworm-slim@sha256:0104b334637a5f19aa9c983a91b54c89887c0984081f2068983107a6f6c21eeb
+ARG DEBIAN_BASE=${REGISTRY_DOCKERHUB}/library/debian:bookworm-slim@sha256:0104b334637a5f19aa9c983a91b54c89887c0984081f2068983107a6f6c21eeb
 FROM ${DEBIAN_BASE} AS final
 
 ARG IMAGE_CREATED=1970-01-01T00:00:00Z

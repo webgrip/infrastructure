@@ -1,4 +1,4 @@
-name: "Supply Chain Security: Sign, Attest & SBOM (Harbor)"
+name: "Supply Chain Security: Sign, Attest & SBOM (per registry)"
 description: >-
   Forgejo/Harbor analog of .github/actions/cosign-sign-attest. Signs the pushed image
   with cosign via OpenBao Transit — the signing key is generated in OpenBao and NEVER
@@ -69,18 +69,19 @@ runs:
       with:
         syft-version: ${{ inputs.syft-version }}
 
-    - name: Log in to Harbor
+    - name: Log in to the target registry
       shell: bash
       env:
-        # robot username carries a literal '$' (robot$webgrip+ci); env-var expansion
-        # keeps it intact, and --password-stdin keeps the token out of argv/logs.
-        HARBOR_ROBOT_USER: ${{ env.HARBOR_ROBOT_USER }}
-        HARBOR_ROBOT_TOKEN: ${{ env.HARBOR_ROBOT_TOKEN }}
+        # Generic registry creds so this action signs ANY registry (Harbor robot, GHCR PAT, …). The
+        # Harbor robot username carries a literal '$' (robot$webgrip+ci); env-var expansion keeps it
+        # intact, and --password-stdin keeps the token out of argv/logs.
+        REGISTRY_USERNAME: ${{ env.REGISTRY_USERNAME }}
+        REGISTRY_TOKEN: ${{ env.REGISTRY_TOKEN }}
         REGISTRY: ${{ inputs.registry }}
       run: |
         set -euo pipefail
-        printf '%s' "$HARBOR_ROBOT_TOKEN" \
-          | docker login "$REGISTRY" -u "$HARBOR_ROBOT_USER" --password-stdin
+        printf '%s' "$REGISTRY_TOKEN" \
+          | docker login "$REGISTRY" -u "$REGISTRY_USERNAME" --password-stdin
 
     - name: Resolve image digest
       id: digest
@@ -153,6 +154,50 @@ runs:
         cosign attest --yes --tlog-upload=false --key "hashivault://${TRANSIT_KEY}" \
           --predicate sbom.cdx.json --type cyclonedx "$IMAGE"
 
+    - name: "Generate Harbor-native SBOM accessory (fail-soft)"
+      # Harbor-only: this hits Harbor's v2 API (no analog on ghcr.io etc.), so skip it for other
+      # registries — the cosign attestation + DT upload above already cover GHCR's provenance.
+      if: ${{ contains(inputs.registry, 'harbor') }}
+      shell: bash
+      env:
+        REGISTRY_USERNAME: ${{ env.REGISTRY_USERNAME }}
+        REGISTRY_TOKEN: ${{ env.REGISTRY_TOKEN }}
+        REGISTRY: ${{ inputs.registry }}
+        IMAGE: ${{ steps.digest.outputs.image-with-digest }}
+      run: |
+        set -euo pipefail
+        # The cosign attestation above is a `.att` accessory consumed by Kyverno admission +
+        # Dependency-Track — it does NOT populate Harbor's own "SBOM" column. That column is fed
+        # ONLY by Harbor's native (scanner-backed) SBOM generator, which produces a separate `.sbom`
+        # accessory. Ask Harbor to generate it for the pushed DIGEST so the registry UI/API exposes
+        # an SBOM too. Harbor >= 2.11 with an SBOM-capable scanner (Trivy):
+        #   POST /api/v2.0/projects/{project}/repositories/{repo}/artifacts/{ref}/scan {"scan_type":"sbom"}
+        # Fail-soft (like the Dependency-Track upload): a robot missing the sbom/scan permission, an
+        # older Harbor, or a scanner without SBOM support must NEVER fail the release — the signed
+        # cosign attestation already proves provenance, and this column is convenience visibility.
+        # IMAGE = harbor.webgrip.dev/webgrip/<image>@sha256:<digest>
+        digest="${IMAGE##*@}"
+        repo_path="${IMAGE%@*}"      # harbor.webgrip.dev/webgrip/<image>
+        repo_path="${repo_path#*/}"  # webgrip/<image>  (drop the registry host)
+        project="${repo_path%%/*}"   # webgrip
+        repository="${repo_path#*/}" # <image>  (may itself contain '/' for nested repos)
+        # Harbor wants the repository path-segment URL-encoded ('/' -> %2F); single-segment names
+        # like techdocs-builder are unaffected.
+        repo_enc="${repository//\//%2F}"
+        url="https://${REGISTRY}/api/v2.0/projects/${project}/repositories/${repo_enc}/artifacts/${digest}/scan"
+        # Keep the robot token out of argv/the process list: pass credentials via a 0600 curl config,
+        # not -u (the robot user's literal '$'/'+' survive the quoted curl-config value verbatim).
+        umask 077
+        cfg="$(mktemp)"; trap 'rm -f "$cfg"' EXIT
+        printf 'user = "%s:%s"\n' "$REGISTRY_USERNAME" "$REGISTRY_TOKEN" > "$cfg"
+        code="$(curl -sS -K "$cfg" -o /tmp/sbom-gen.json -w '%{http_code}' \
+          -X POST "$url" -H 'Content-Type: application/json' \
+          --data '{"scan_type":"sbom"}' || echo 000)"
+        case "$code" in
+          200|202) echo "Harbor SBOM generation queued for ${project}/${repository}@${digest}" ;;
+          *) echo "::warning::Harbor SBOM generation request returned HTTP ${code} (non-fatal): $(cat /tmp/sbom-gen.json 2>/dev/null)" ;;
+        esac
+
     - name: Upload SBOM to Dependency-Track (fail-soft)
       shell: bash
       env:
@@ -191,4 +236,5 @@ runs:
           echo ""
           echo "- Signed (cosign via OpenBao Transit): \`${IMAGE}\`"
           echo "- CycloneDX SBOM attested in Harbor + uploaded to Dependency-Track (${COMPONENTS:-?} components)"
+          echo "- Harbor-native SBOM accessory generation requested for the pushed digest (populates Harbor's SBOM column; fail-soft)"
         } >> "$GITHUB_STEP_SUMMARY"

@@ -71,3 +71,6 @@ jobs:
           # on_release_published writes, instead of a cold full rebuild every release.
           harbor-robot-user: ${{ secrets.HARBOR_ROBOT_USER }}
           harbor-robot-token: ${{ secrets.HARBOR_ROBOT_TOKEN }}
+          # GitHub PAT so Forgejo (the sole release authority) also mirrors the Release object onto
+          # the github.com mirror's Releases tab. Best-effort; unset -> mirror step skipped.
+          github-release-token: ${{ secrets.GH_RELEASE_TOKEN }}

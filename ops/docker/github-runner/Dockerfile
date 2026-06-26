@@ -1,10 +1,13 @@
 
 ARG RUNNER_VERSION=2.334.0@sha256:b6614fce332517f74d0a76e7c762fb08e4f2ff13dcf333183397c8a5725b6e8e
-FROM ghcr.io/actions/actions-runner:${RUNNER_VERSION} AS runner
+ARG REGISTRY_GHCR=ghcr.io
+FROM ${REGISTRY_GHCR}/actions/actions-runner:${RUNNER_VERSION} AS runner
 
 ARG IMAGE_CREATED=1970-01-01T00:00:00Z
 ARG IMAGE_VERSION=dev
 ARG IMAGE_REVISION=unknown
+ARG REGISTRY_GHCR
+ARG RUNNER_VERSION
 
 LABEL org.opencontainers.image.title="WebGrip GitHub Runner" \
     org.opencontainers.image.description="Customized GitHub Actions self-hosted runner with PHP and .NET tooling" \
@@ -14,7 +17,7 @@ LABEL org.opencontainers.image.title="WebGrip GitHub Runner" \
     org.opencontainers.image.vendor="WebGrip" \
     org.opencontainers.image.authors="Ryan Grippeling <ryan@webgrip.nl>" \
     org.opencontainers.image.licenses="MIT" \
-    org.opencontainers.image.base.name="ghcr.io/actions/actions-runner:${RUNNER_VERSION}" \
+    org.opencontainers.image.base.name="${REGISTRY_GHCR}/actions/actions-runner:${RUNNER_VERSION}" \
     org.opencontainers.image.created="${IMAGE_CREATED}" \
     org.opencontainers.image.version="${IMAGE_VERSION}" \
     org.opencontainers.image.revision="${IMAGE_REVISION}"
