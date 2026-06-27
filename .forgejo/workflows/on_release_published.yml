@@ -166,7 +166,7 @@ jobs:
       contents: read
     steps:
       # Local composite action — requires the repo checked out (checkout@v5, not v6).
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       # Same OpenBao Transit key signs both registries (each step mints its own OIDC->OpenBao token
       # and signs that registry's digest by reference). Owner hardcoded `webgrip` — github.repository_owner
       # is empty on Forgejo's workflow_dispatch.
