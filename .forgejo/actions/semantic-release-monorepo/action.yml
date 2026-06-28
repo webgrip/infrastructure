@@ -44,7 +44,7 @@ runs:
   steps:
     - name: Check out repo
       # Forgejo: the v6 checkout action is broken on non-GitHub runners — pin v5.
-      uses: actions/checkout@v5
+      uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
       with:
         fetch-depth: 0 # semantic-release requires all commits/tags
         token: ${{ inputs.token || github.token }}
