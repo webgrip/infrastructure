@@ -1,4 +1,5 @@
 ARG REGISTRY_DOCKERHUB=docker.io
+# renovate: datasource=docker depName=rust versioning=docker
 ARG RUST_VERSION=1.87.0
 
 # ────────────────────────────────────────────────────────────────
