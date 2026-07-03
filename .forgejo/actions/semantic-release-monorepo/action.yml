@@ -69,7 +69,7 @@ runs:
     # verifyRelease build; without these the build falls back to a plain (cold) `docker build`.
     - name: Set up Docker Buildx
       if: ${{ inputs.harbor-robot-token != '' }}
-      uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4
+      uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4
 
     - name: Log in to Harbor (verifyRelease build cache)
       if: ${{ inputs.harbor-robot-token != '' }}
