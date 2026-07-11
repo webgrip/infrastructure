@@ -65,7 +65,7 @@ runs:
         cosign-release: ${{ inputs.cosign-version }}
 
     - name: Install Syft (SBOM generator)
-      uses: https://github.com/anchore/sbom-action/download-syft@v0
+      uses: https://github.com/anchore/sbom-action/download-syft@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
       with:
         syft-version: ${{ inputs.syft-version }}
 

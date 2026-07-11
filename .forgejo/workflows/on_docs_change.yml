@@ -24,13 +24,13 @@ on:
 jobs:
   generate-documentation:
     name: 'Generate'
-    uses: webgrip/workflows/.forgejo/workflows/techdocs-generate.yml@main
+    uses: webgrip/workflows/.forgejo/workflows/techdocs-generate.yml@546c0e02f6ca473419b9a8aa48e430304efaeebf # main
     with:
       source-dir: ${{ github.event.inputs.source-dir || 'docs/techdocs' }}
 
   deploy-documentation:
     name: 'Deploy (Codeberg Pages)'
-    uses: webgrip/workflows/.forgejo/workflows/techdocs-deploy-codeberg.yml@main
+    uses: webgrip/workflows/.forgejo/workflows/techdocs-deploy-codeberg.yml@546c0e02f6ca473419b9a8aa48e430304efaeebf # main
     needs: generate-documentation
     if: github.ref == 'refs/heads/main'
     with:

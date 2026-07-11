@@ -31,7 +31,7 @@ jobs:
   # namespaces inner jobs under the caller, so the same file is fine on the .github side.)
   changed-images:
     name: 'Determine changed images'
-    uses: webgrip/workflows/.forgejo/workflows/determine-changed-directories.yml@main
+    uses: webgrip/workflows/.forgejo/workflows/determine-changed-directories.yml@546c0e02f6ca473419b9a8aa48e430304efaeebf # main
     with:
       inside-dir: 'ops/docker'
 
@@ -57,7 +57,7 @@ jobs:
       # cannot read the action ("failed to read action … no files found … action.yml").
       # Mirrors the .github job's checkout (adapted: checkout v5, since v6 is broken on
       # non-GitHub runners, and the CI bot's FORGEJO_TOKEN instead of a GitHub App token).
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0 # semantic-release requires all commits/tags
           token: ${{ secrets.FORGEJO_TOKEN }}
