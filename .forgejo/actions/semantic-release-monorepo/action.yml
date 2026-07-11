@@ -44,13 +44,13 @@ runs:
   steps:
     - name: Check out repo
       # Forgejo: the v6 checkout action is broken on non-GitHub runners — pin v5.
-      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7
+      uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       with:
         fetch-depth: 0 # semantic-release requires all commits/tags
         token: ${{ inputs.token || github.token }}
 
     - name: Set up Node.js
-      uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+      uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6.4.0
       with:
         node-version: "24"
 
@@ -58,7 +58,7 @@ runs:
     # from disk instead of re-fetching ~400 packages every run. Bump the key suffix when the
     # pinned versions below change.
     - name: Cache npm downloads
-      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ~/.npm
         key: ${{ runner.os }}-npm-semrel-24.2.7
@@ -69,11 +69,11 @@ runs:
     # verifyRelease build; without these the build falls back to a plain (cold) `docker build`.
     - name: Set up Docker Buildx
       if: ${{ inputs.harbor-robot-token != '' }}
-      uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4
+      uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
 
     - name: Log in to Harbor (verifyRelease build cache)
       if: ${{ inputs.harbor-robot-token != '' }}
-      uses: docker/login-action@v3
+      uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
       with:
         registry: ${{ inputs.registry }}
         username: ${{ inputs.harbor-robot-user }}
