@@ -1,6 +1,6 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "github>webgrip/renovate-config#v1.4.5"
+    "github>webgrip/renovate-config#v1.5.0"
   ]
 }
