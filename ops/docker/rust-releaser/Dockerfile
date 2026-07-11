@@ -2,7 +2,7 @@
 # Base image: Node 22 on Debian 12 (bookworm-slim)
 ###############################################################################
 ARG REGISTRY_DOCKERHUB=docker.io
-# renovate: datasource=docker depName=node versioning=docker
+# renovate: datasource=docker depName=docker.io/library/node versioning=docker
 ARG NODE_VERSION=22
 ARG DEBIAN_CODENAME=bookworm
 FROM ${REGISTRY_DOCKERHUB}/library/node:${NODE_VERSION}-${DEBIAN_CODENAME}-slim

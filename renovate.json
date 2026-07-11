@@ -1,6 +1,39 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "github>webgrip/renovate-config#v1.5.0"
+    "github>webgrip/renovate-config#v1.5.1"
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Update ARGs annotated with '# renovate: datasource=… depName=…'. Needed because the base images compose multiple ARGs in FROM (e.g. ${REGISTRY_DOCKERHUB}/library/rust:${RUST_VERSION}-slim-bookworm), which the dockerfile manager cannot auto-replace.",
+      "managerFilePatterns": [
+        "/(^|/)Dockerfile$/"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?\\s*\\nARG \\S+=(?<currentValue>\\S+)"
+      ],
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "These Dockerfiles compose their FROM refs from multiple ARGs; the dockerfile manager resolves the ARGs at extraction but then cannot find the resolved string in the raw file ('Cannot find replaceString' → the whole branch silently produces no commit). The annotated-ARG custom manager above owns these deps instead.",
+      "matchManagers": [
+        "dockerfile"
+      ],
+      "matchFileNames": [
+        "ops/docker/rust-ci-runner/Dockerfile",
+        "ops/docker/rust-releaser/Dockerfile"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Annotated ARGs hold bare versions that are reused outside the FROM line (rustup default, tag suffix composition); appending @sha256 digests would corrupt them.",
+      "matchManagers": [
+        "custom.regex"
+      ],
+      "pinDigests": false
+    }
   ]
 }
