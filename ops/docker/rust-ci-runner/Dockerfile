@@ -1,6 +1,6 @@
 ARG REGISTRY_DOCKERHUB=docker.io
 # renovate: datasource=docker depName=docker.io/library/rust versioning=docker
-ARG RUST_VERSION=1.87.0
+ARG RUST_VERSION=1.97.0
 
 # ────────────────────────────────────────────────────────────────
 # 1️⃣ Build stage – Rust toolchains & CLI helpers
