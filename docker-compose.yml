@@ -17,10 +17,6 @@ services:
     build:
       context: ops/docker/rust-ci-runner
       dockerfile: Dockerfile
-  skills-ci-runner:
-    build:
-      context: ops/docker/skills-ci-runner
-      dockerfile: Dockerfile
   openhands-runner:
     build:
       context: ops/docker/openhands-runner

@@ -10,7 +10,7 @@ ARG REGISTRY_GHCR
 ARG RUNNER_VERSION
 
 LABEL org.opencontainers.image.title="WebGrip GitHub Runner" \
-    org.opencontainers.image.description="Customized GitHub Actions self-hosted runner with PHP and .NET tooling" \
+    org.opencontainers.image.description="Customized self-hosted CI runner toolchain (PHP, .NET, Node, Python, Claude Code CLI). Also used as the host-mode toolchain for the in-cluster Forgejo runner." \
     org.opencontainers.image.source="https://github.com/webgrip/infrastructure" \
     org.opencontainers.image.url="https://github.com/webgrip/infrastructure" \
     org.opencontainers.image.documentation="https://github.com/webgrip/infrastructure/tree/main/docs/techdocs" \
@@ -91,5 +91,32 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" &&
     php composer-setup.php --install-dir=/usr/local/bin --filename=composer && \
     php -r "unlink('composer-setup.php');" && \
     chmod +x /usr/local/bin/composer
+
+# Node.js toolchain for host-mode jobs. The actions-runner base bundles node under
+# externals/ for JS actions only (not on PATH, and its layout is a runner internal), so
+# install Node properly: host-mode steps need `node`/`npm`/`npx` on PATH, and a stable
+# global npm prefix for the CLI below. Size is not a per-job cost — the kubelet pulls this
+# image once per node and containerd caches it (that is the point of host mode).
+ARG NODE_MAJOR=24
+RUN curl -fsSL "https://deb.nodesource.com/setup_${NODE_MAJOR}.x" | bash - && \
+    apt-get install -y nodejs && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* && \
+    node --version && npm --version
+
+# PyYAML for CI that parses YAML from python (e.g. webgrip/ai-skills' plugin test suites).
+# From apt, not pip: the base python3 is externally-managed (PEP 668), so pip would need
+# --break-system-packages.
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends python3-yaml && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Anthropic's Claude Code CLI — `claude plugin validate` is the official manifest/frontmatter
+# validator used by the skills/plugin repos. Pinned so validation is reproducible and moves
+# only on a deliberate image rebuild (Renovate bumps this ARG).
+ARG CLAUDE_CODE_VERSION=2.1.214
+RUN npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" && \
+    npm cache clean --force
 
 USER runner
