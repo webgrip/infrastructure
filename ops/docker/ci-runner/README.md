@@ -48,7 +48,9 @@ tip — the analyzer still picks up every unreleased commit since the last tag.
 
 **Transient release-job failures:** action resolution clones `actions/*` from
 `data.forgejo.org` at job start; a WAN hiccup there kills the job in under a minute
-(e.g. v1.0.2 attempt 1 died at 43s on action resolution; attempt 2 hit the in-cluster
-Harbor mid-rollout while pulling its proxied base image -- wait for the harbor HelmRelease
-to be Ready before re-triggering). Re-trigger
-with any commit touching this directory — unreleased fix commits are picked up cumulatively.
+(v1.0.2 attempt 1 died at 43s this way). Attempts 2-3 died at an identical ~3m20s for a
+different reason: the runner ScaledJob's default KEDA rollout strategy deleted every
+in-flight runner Job on ANY pool spec change (fixed in homelab-cluster 3fc595ed with
+`rollout.strategy: gradual` -- concurrent pool edits no longer murder running releases).
+Re-trigger with any commit touching this directory — unreleased fix commits are picked
+up cumulatively.
