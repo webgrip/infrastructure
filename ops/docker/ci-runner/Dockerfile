@@ -56,7 +56,8 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
     | tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
     apt-get update && \
     apt-get install -y gh && \
-    apt-get clean
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # https://github.com/orgs/community/discussions/177903
 # This "fixes" a "bug" that causes errors on self-hosted runners when runner ghcp agents workloads
@@ -97,7 +98,8 @@ RUN add-apt-repository ppa:ondrej/php -y && \
     php${PHP_VERSION}-sockets \
     php${PHP_VERSION}-xml \
     php${PHP_VERSION}-zip \
-    && apt-get clean
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Composer using the official installer
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
