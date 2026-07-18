@@ -38,3 +38,10 @@ Released by the monorepo pipeline as `ci-runner-v<x.y.z>` and pushed to both
 `harbor.webgrip.dev/webgrip/ci-runner` (in-cluster, LAN) and `ghcr.io/webgrip/ci-runner`.
 Cluster workloads pull the **Harbor** copy: it is LAN-local, survives a WAN outage, and avoids
 ghcr package-visibility surprises. Consumers pin by digest.
+
+**Release-skip race:** the Release job checks out the *pushed* sha, but semantic-release
+refuses to publish when that sha is behind the remote branch tip — and exits **green**
+("local branch is behind the remote one", a skip, not a failure). With a busy runner queue
+(runs can wait 15+ min) any concurrent push to `main` silently eats the release: job success,
+no tag. Fix: land another commit touching this directory to re-run the release from the new
+tip — the analyzer still picks up every unreleased commit since the last tag.
