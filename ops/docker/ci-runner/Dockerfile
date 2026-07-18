@@ -39,7 +39,15 @@ RUN apt-get update && \
     unzip \
     rsync \
     gettext-base \
-    software-properties-common
+    software-properties-common && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Regression guard for the tool the signing path depends on: cosign-installer v4+ hard-requires
+# envsubst, so a base-image bump or refactor that drops gettext-base must fail THIS build --
+# not every future release's Sign & Attest job at runtime (which is exactly what happened
+# before gettext-base was added).
+RUN command -v envsubst
 
 RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
     | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
