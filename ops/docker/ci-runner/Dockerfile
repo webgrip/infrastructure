@@ -24,6 +24,10 @@ LABEL org.opencontainers.image.title="WebGrip CI Runner" \
 
 USER root
 
+# gettext-base provides envsubst. sigstore/cosign-installer v4+ shells out to it unconditionally
+# to expand the `$HOME` in its default install-dir, so without it every signing job dies
+# "envsubst: command not found" (exit 127) before cosign is even installed. Host-mode Forgejo jobs
+# execute in THIS image, so the tool has to be here — a workflow can't apt-get it (non-root runner).
 RUN apt-get update && \
     apt-get install -y \
     ca-certificates \
@@ -34,6 +38,7 @@ RUN apt-get update && \
     patch \
     unzip \
     rsync \
+    gettext-base \
     software-properties-common
 
 RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \

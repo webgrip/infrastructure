@@ -22,6 +22,8 @@ cost**, so baking a tool in is usually cheaper than installing it in every workf
 
 - Docker CLI + buildx plugin (talks to the DinD sidecar via `DOCKER_HOST`)
 - git, gh, jq, curl, rsync, unzip, patch
+- `envsubst` (gettext-base) — `sigstore/cosign-installer` v4+ shells out to it unconditionally, so
+  without it every signing job dies with exit 127 before cosign is installed
 - PHP 8.3 + Composer
 - .NET 9
 - CodeQL bundle
