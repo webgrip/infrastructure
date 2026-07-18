@@ -9,8 +9,8 @@ ARG IMAGE_REVISION=unknown
 ARG REGISTRY_GHCR
 ARG RUNNER_VERSION
 
-LABEL org.opencontainers.image.title="WebGrip GitHub Runner" \
-    org.opencontainers.image.description="Customized self-hosted CI runner toolchain (PHP, .NET, Node, Python, Claude Code CLI). Also used as the host-mode toolchain for the in-cluster Forgejo runner." \
+LABEL org.opencontainers.image.title="WebGrip CI Runner" \
+    org.opencontainers.image.description="Shared CI runner toolchain (PHP, .NET, Node, Python, Claude Code CLI). Runs as a GitHub Actions self-hosted runner under ARC, and as the host-mode toolchain for the in-cluster Forgejo runner (which injects the forgejo-runner binary alongside it)." \
     org.opencontainers.image.source="https://github.com/webgrip/infrastructure" \
     org.opencontainers.image.url="https://github.com/webgrip/infrastructure" \
     org.opencontainers.image.documentation="https://github.com/webgrip/infrastructure/tree/main/docs/techdocs" \

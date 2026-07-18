@@ -192,7 +192,7 @@ The pipeline automatically builds and publishes these images:
 | Directory | Image Name | Purpose |
 |-----------|------------|---------|
 | `ops/docker/rust-ci-runner` | `webgrip/rust-ci-runner` | [Rust development environment](../docker-images/rust-ci-runner.md) |
-| `ops/docker/github-runner` | `webgrip/github-runner` | [Self-hosted GitHub Actions runner](../docker-images/github-runner.md) |
+| `ops/docker/ci-runner` | `webgrip/ci-runner` | [Self-hosted GitHub Actions runner](../docker-images/ci-runner.md) |
 | `ops/docker/helm-deploy` | `webgrip/helm-deploy` | [Kubernetes deployment tools](../docker-images/helm-deploy.md) |
 | `ops/docker/playwright-runner` | `webgrip/playwright-runner` | [E2E testing environment](../docker-images/playwright-runner.md) |
 | `ops/docker/act-runner` | `webgrip/act-runner` | [Local GitHub Actions testing](../docker-images/act-runner.md) |

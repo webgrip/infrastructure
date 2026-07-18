@@ -487,7 +487,7 @@ RUN helm plugin install https://github.com/jkroepke/helm-secrets
 
 - [Architecture Overview](../overview/architecture.md) - Kubernetes deployment architecture
 - [CI/CD Pipeline](../cicd/automated-building.md) - Automated image building
-- [GitHub Runner](github-runner.md) - Self-hosted runner that uses this image
+- [GitHub Runner](ci-runner.md) - Self-hosted runner that uses this image
 - [Operations Guide](../operations/contributing-images.md) - Contributing improvements
 
 ## Maintenance

@@ -2,5 +2,5 @@ const base = require('../../../.releaserc.js');
 
 module.exports = {
   ...base,
-  tagFormat: 'github-runner-v${version}',
+  tagFormat: 'ci-runner-v${version}',
 };

@@ -63,7 +63,7 @@ spec:
 
           # Mutate image tag to digest at admission time.
           # After this mutation, the running container spec will contain:
-          #   ghcr.io/webgrip/github-runner@sha256:<digest>
+          #   ghcr.io/webgrip/ci-runner@sha256:<digest>
           # which is immutable and cannot be tampered with via tag reassignment.
           mutateDigest: true
           verifyDigest: true

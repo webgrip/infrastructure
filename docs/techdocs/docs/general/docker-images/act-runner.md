@@ -596,7 +596,7 @@ ENTRYPOINT ["/usr/local/bin/act-entrypoint.sh"]
 ## Related Documentation
 
 - [Architecture Overview](../overview/architecture.md) - Local development in our infrastructure
-- [GitHub Runner](github-runner.md) - Production GitHub Actions runner
+- [GitHub Runner](ci-runner.md) - Production GitHub Actions runner
 - [CI/CD Pipeline](../cicd/automated-building.md) - Our GitHub Actions workflows
 - [Quick Start Guide](../overview/quick-start.md) - Getting started with local testing
 

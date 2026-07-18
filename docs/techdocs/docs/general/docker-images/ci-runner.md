@@ -1,15 +1,28 @@
-# GitHub Actions Runner
+# CI Runner
 
-A self-hosted GitHub Actions runner with enhanced tooling for PHP development and general CI/CD workflows.
+WebGrip's shared CI runner toolchain — the image jobs actually execute in, on **both** forges.
 
 ## Purpose
 
-This image provides a **self-hosted GitHub Actions runner** that extends the official Actions runner with additional tools commonly needed in WebGrip's development workflows:
+Built on the official GitHub Actions runner, this image serves two consumers. The name is
+deliberately forge-neutral because it is not GitHub-specific:
+
+- **GitHub Actions (ARC)** — runs as a genuine self-hosted runner in the `arc-systems`
+  scale-sets; the Actions runner agent from the base image is the process that runs.
+- **Forgejo (in-cluster, host-mode)** — used purely as the **toolchain** container. The KEDA
+  runner pod injects the `forgejo-runner` binary beside it via an init container, and because
+  the runner advertises `docker:host`, workflow steps execute *in this image*. Nothing here is
+  extracted per job: the kubelet pulls it once per node and containerd caches it, which is why
+  host-mode jobs start instantly.
+
+What it provides:
 
 - ✅ **Self-hosted execution** for faster builds and custom environments
 - ✅ **PHP 8.3 ecosystem** with Composer for PHP projects
-- ✅ **Standard CI tools** (git, curl, jq) for automation workflows
-- ✅ **Custom runner configuration** tailored to WebGrip's needs
+- ✅ **Node 24** on PATH (`node`/`npm`/`npx`) for JS actions and host-mode step scripts
+- ✅ **Python 3 + PyYAML** for CI scripting
+- ✅ **Claude Code CLI** (`claude plugin validate`) for the skills/plugin repos
+- ✅ **Standard CI tools** (git, curl, jq, docker CLI + buildx) for automation workflows
 
 ## Image Details
 
@@ -18,8 +31,8 @@ This image provides a **self-hosted GitHub Actions runner** that extends the off
 | **Base Image** | `ghcr.io/actions/actions-runner:2.328.0` |
 | **PHP Version** | 8.3 with common extensions |
 | **Architecture** | AMD64 |
-| **Registry** | `webgrip/github-runner` |
-| **Dockerfile** | [`ops/docker/github-runner/Dockerfile`](../../../../../ops/docker/github-runner/Dockerfile) |
+| **Registry** | `webgrip/ci-runner` |
+| **Dockerfile** | [`ops/docker/ci-runner/Dockerfile`](../../../../../ops/docker/ci-runner/Dockerfile) |
 
 ## Installed Tools & Software
 
@@ -115,11 +128,11 @@ flowchart TB
 
 ```bash
 # Example runner registration (requires GitHub token)
-docker run -d --name github-runner \
+docker run -d --name ci-runner \
   -e GITHUB_URL=https://github.com/webgrip/your-repo \
   -e GITHUB_TOKEN=your_runner_token \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  webgrip/github-runner:latest
+  webgrip/ci-runner:latest
 ```
 
 ### Workflow Configuration
@@ -190,7 +203,7 @@ The image uses system default PHP configuration. For custom settings:
 # Custom php.ini settings via environment
 docker run -e "PHP_INI_SCAN_DIR=/usr/local/etc/php/conf.d" \
   -v $(pwd)/php.ini:/usr/local/etc/php/conf.d/custom.ini \
-  webgrip/github-runner:latest
+  webgrip/ci-runner:latest
 ```
 
 ## Security Considerations
@@ -249,9 +262,9 @@ jobs:
    ```bash
    # Run multiple runner containers
    for i in {1..3}; do
-     docker run -d --name "github-runner-$i" \
+     docker run -d --name "ci-runner-$i" \
        -e RUNNER_NAME="webgrip-runner-$i" \
-       webgrip/github-runner:latest
+       webgrip/ci-runner:latest
    done
    ```
 
@@ -268,7 +281,7 @@ jobs:
 **Runner registration fails**
 ```bash
 # Check runner logs
-docker logs github-runner
+docker logs ci-runner
 
 # Verify token and URL
 echo "URL: $GITHUB_URL"
@@ -280,7 +293,7 @@ echo "Token: ${GITHUB_TOKEN:0:4}..." # Only show first 4 chars
 # Increase PHP memory limit
 echo "memory_limit = 512M" > custom-php.ini
 docker run -v $(pwd)/custom-php.ini:/etc/php/8.3/cli/conf.d/99-custom.ini \
-  webgrip/github-runner:latest php -m
+  webgrip/ci-runner:latest php -m
 ```
 
 **Composer timeouts**
@@ -292,15 +305,15 @@ composer config --global process-timeout 2000
 **Permission issues**
 ```bash
 # Check runner user permissions
-docker exec github-runner id runner
-docker exec github-runner ls -la /home/runner
+docker exec ci-runner id runner
+docker exec ci-runner ls -la /home/runner
 ```
 
 ### Debugging
 
 ```bash
 # Interactive debugging session
-docker run -it --entrypoint=/bin/bash webgrip/github-runner:latest
+docker run -it --entrypoint=/bin/bash webgrip/ci-runner:latest
 
 # Inside container - verify tools
 php --version
@@ -314,7 +327,7 @@ which git curl jq
 
 ```dockerfile
 # Dockerfile.custom
-FROM webgrip/github-runner:latest
+FROM webgrip/ci-runner:latest
 
 USER root
 
@@ -339,7 +352,7 @@ RUNNER_LABELS=php,infra,webgrip
 RUNNER_WORKDIR=/tmp/runner-work
 EOF
 
-docker run --env-file runner.env webgrip/github-runner:latest
+docker run --env-file runner.env webgrip/ci-runner:latest
 ```
 
 ## Maintenance
@@ -354,8 +367,8 @@ docker run --env-file runner.env webgrip/github-runner:latest
 
 ```bash
 # Check runner health
-docker exec github-runner ps aux | grep Runner.Listener
-docker exec github-runner systemctl status actions.runner.service
+docker exec ci-runner ps aux | grep Runner.Listener
+docker exec ci-runner systemctl status actions.runner.service
 ```
 
 ### Backup & Recovery
@@ -411,5 +424,5 @@ jobs:
 > **Assumption**: Self-hosted runners are deployed in secure, managed environments with proper network isolation and monitoring. Validation needed: Confirm runner deployment strategy and security requirements with ops team.
 
 **Maintainer**: [WebGrip Ops Team](https://github.com/orgs/webgrip/teams/ops)  
-**Source**: [`ops/docker/github-runner/Dockerfile`](../../../../../ops/docker/github-runner/Dockerfile)  
-**Registry**: [webgrip/github-runner](https://hub.docker.com/r/webgrip/github-runner)
+**Source**: [`ops/docker/ci-runner/Dockerfile`](../../../../../ops/docker/ci-runner/Dockerfile)  
+**Registry**: [webgrip/ci-runner](https://hub.docker.com/r/webgrip/ci-runner)

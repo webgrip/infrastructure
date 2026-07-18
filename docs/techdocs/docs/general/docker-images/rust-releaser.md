@@ -611,7 +611,7 @@ RUN apt-get update && apt-get install -y \
 - [Architecture Overview](../overview/architecture.md) - Release automation in our infrastructure
 - [Rust CI Runner](rust-ci-runner.md) - Development and testing environment
 - [CI/CD Pipeline](../cicd/automated-building.md) - Automated building and releasing
-- [GitHub Runner](github-runner.md) - Self-hosted runner for releases
+- [GitHub Runner](ci-runner.md) - Self-hosted runner for releases
 
 ## Maintenance
 

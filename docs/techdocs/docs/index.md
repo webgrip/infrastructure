@@ -24,7 +24,7 @@ Our specialized container images for different purposes:
 | Image | Purpose | Documentation |
 |-------|---------|---------------|
 | [Rust CI Runner](general/docker-images/rust-ci-runner.md) | Rust development and CI environment | Complete Rust toolchain + utilities |
-| [GitHub Actions Runner](general/docker-images/github-runner.md) | Self-hosted GitHub Actions runner | Custom runner with additional tools |
+| [CI Runner](general/docker-images/ci-runner.md) | Shared CI toolchain (GitHub ARC + Forgejo host-mode) | PHP, .NET, Node, Python, Claude Code CLI |
 | [Helm Deploy](general/docker-images/helm-deploy.md) | Kubernetes deployment via Helm | Alpine-based deployment image |
 | [Playwright Runner](general/docker-images/playwright-runner.md) | End-to-end testing environment | Browser testing infrastructure |
 | [ACT Runner](general/docker-images/act-runner.md) | Local GitHub Actions testing | Run workflows locally with ACT |
@@ -41,7 +41,7 @@ Our specialized container images for different purposes:
 infrastructure/
 ├── ops/docker/              # Docker image definitions
 │   ├── rust-ci-runner/      # Rust development environment
-│   ├── github-runner/       # GitHub Actions runner
+│   ├── ci-runner/          # Shared CI runner toolchain (ARC + Forgejo)
 │   ├── helm-deploy/         # Kubernetes Helm deployment
 │   ├── playwright-runner/   # Browser testing environment
 │   ├── act-runner/          # Local GitHub Actions testing

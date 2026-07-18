@@ -37,7 +37,7 @@ The Playwright Runner provides a **complete browser testing environment** that s
 
 ### PHP Development Stack
 
-Complete PHP 8.3 setup matching the [GitHub Runner](github-runner.md):
+Complete PHP 8.3 setup matching the [GitHub Runner](ci-runner.md):
 
 | Tool | Version | Purpose |
 |------|---------|---------|
@@ -536,7 +536,7 @@ USER playwright
 ## Related Documentation
 
 - [Architecture Overview](../overview/architecture.md) - E2E testing in our infrastructure
-- [GitHub Runner](github-runner.md) - Complementary CI runner with PHP support  
+- [GitHub Runner](ci-runner.md) - Complementary CI runner with PHP support  
 - [Testing Guide](../testing/playwright-setup.md) - Detailed Playwright configuration
 - [CI/CD Pipeline](../cicd/automated-building.md) - Automated image building
 

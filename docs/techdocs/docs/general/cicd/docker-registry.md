@@ -25,7 +25,7 @@ WebGrip uses **Docker Hub** as the primary registry for hosting our infrastructu
 | Repository | Purpose | Latest Size | Tags |
 |------------|---------|-------------|------|
 | [`webgrip/rust-ci-runner`](https://hub.docker.com/r/webgrip/rust-ci-runner) | Rust development environment | ~800MB | `latest`, commit SHAs |
-| [`webgrip/github-runner`](https://hub.docker.com/r/webgrip/github-runner) | Self-hosted GitHub Actions runner | ~500MB | `latest`, commit SHAs |
+| [`webgrip/ci-runner`](https://hub.docker.com/r/webgrip/ci-runner) | Self-hosted GitHub Actions runner | ~500MB | `latest`, commit SHAs |
 | [`webgrip/helm-deploy`](https://hub.docker.com/r/webgrip/helm-deploy) | Kubernetes deployment tools | ~150MB | `latest`, commit SHAs |
 | [`webgrip/playwright-runner`](https://hub.docker.com/r/webgrip/playwright-runner) | E2E testing environment | ~2GB | `latest`, commit SHAs |
 | [`webgrip/act-runner`](https://hub.docker.com/r/webgrip/act-runner) | Local GitHub Actions testing | ~100MB | `latest`, commit SHAs |

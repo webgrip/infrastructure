@@ -91,7 +91,7 @@ Chosen option: "**Option 2: Service-specific images organized by tool category**
 ```
 ops/docker/
 ├── rust-ci-runner/      # Rust development and CI tools
-├── github-runner/       # Self-hosted GitHub Actions runner
+├── ci-runner/       # Self-hosted GitHub Actions runner
 ├── helm-deploy/         # Kubernetes deployment tools
 ├── playwright-runner/   # End-to-end testing environment
 ├── act-runner/          # Local GitHub Actions testing

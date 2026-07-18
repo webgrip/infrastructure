@@ -16,7 +16,7 @@ The TechDocs structure directly maps to the repository organization:
 Repository Structure          →    Documentation Structure
 ├── ops/docker/              →    ├── docker-images/
 │   ├── rust-ci-runner/      →    │   ├── rust-ci-runner.md
-│   ├── github-runner/       →    │   ├── github-runner.md
+│   ├── ci-runner/       →    │   ├── ci-runner.md
 │   └── ...                  →    │   └── ...
 ├── .github/workflows/       →    ├── cicd/
 ├── tests/playwright-runner/ →    ├── testing/

@@ -1,7 +1,7 @@
 services:
-  github-runner:
+  ci-runner:
     build:
-      context: ops/docker/github-runner
+      context: ops/docker/ci-runner
       dockerfile: Dockerfile
   helm-deploy:
     build:

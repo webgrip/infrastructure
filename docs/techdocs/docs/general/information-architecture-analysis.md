@@ -63,7 +63,7 @@ The `webgrip/infrastructure` repository serves as a centralized CI/CD infrastruc
    - Build automation
 4. Deployment Layer
    - Helm deployment (helm-deploy)
-   - Runner infrastructure (github-runner, act-runner)
+   - Runner infrastructure (ci-runner, act-runner)
 5. Testing Layer
    - Playwright testing (playwright-runner)
 6. Automation
@@ -86,7 +86,7 @@ The `webgrip/infrastructure` repository serves as a centralized CI/CD infrastruc
    - Kubernetes deployment (helm-deploy)
    - Release processes (rust-releaser)
 4. Infrastructure Workflows
-   - Self-hosted runners (github-runner)
+   - Self-hosted runners (ci-runner)
    - Automated image building
 5. Testing & Quality
 6. Operations

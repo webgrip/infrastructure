@@ -174,7 +174,7 @@ docker system prune -a
 
 ```makefile
 # Makefile for local building
-IMAGES := rust-ci-runner github-runner helm-deploy playwright-runner act-runner rust-releaser
+IMAGES := rust-ci-runner ci-runner helm-deploy playwright-runner act-runner rust-releaser
 REGISTRY := webgrip
 TAG := local
 
@@ -278,7 +278,7 @@ log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 # Image definitions
 declare -A IMAGES=(
     ["rust-ci-runner"]="ops/docker/rust-ci-runner"
-    ["github-runner"]="ops/docker/github-runner"
+    ["ci-runner"]="ops/docker/ci-runner"
     ["helm-deploy"]="ops/docker/helm-deploy"
     ["playwright-runner"]="ops/docker/playwright-runner"
     ["act-runner"]="ops/docker/act-runner"
@@ -313,7 +313,7 @@ test_image() {
         "rust-ci-runner")
             docker run --rm "$full_tag" rustc --version >/dev/null
             ;;
-        "github-runner")
+        "ci-runner")
             docker run --rm "$full_tag" php --version >/dev/null
             ;;
         "helm-deploy")
@@ -498,8 +498,8 @@ docker run --rm webgrip/helm-deploy:local kubectl version --client
 docker run --rm webgrip/act-runner:local act --version
 
 # Test GitHub Runner (requires setup)
-docker run --rm webgrip/github-runner:local php --version
-docker run --rm webgrip/github-runner:local composer --version
+docker run --rm webgrip/ci-runner:local php --version
+docker run --rm webgrip/ci-runner:local composer --version
 
 # Test Rust Releaser
 docker run --rm webgrip/rust-releaser:local node --version

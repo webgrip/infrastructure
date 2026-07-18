@@ -277,7 +277,7 @@ Now that you're up and running:
 | E2E testing | `webgrip/playwright-runner` | `docker run --rm -v $(pwd):/app webgrip/playwright-runner npx playwright test` |
 | K8s deployment | `webgrip/helm-deploy` | `docker run --rm -v $(pwd):/workspace webgrip/helm-deploy helm version` |
 | Local Actions testing | `webgrip/act-runner` | `docker run --rm -v $(pwd):/workspace webgrip/act-runner act` |
-| GitHub Actions runner | `webgrip/github-runner` | See [GitHub Runner docs](../docker-images/github-runner.md) |
+| GitHub Actions runner | `webgrip/ci-runner` | See [GitHub Runner docs](../docker-images/ci-runner.md) |
 | Release automation | `webgrip/rust-releaser` | See [Rust Releaser docs](../docker-images/rust-releaser.md) |
 
 ### Resource Links

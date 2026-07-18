@@ -11,7 +11,7 @@ nav:
   - Docker Images:
       - Rust CI Runner: general/docker-images/rust-ci-runner.md
       - PHP CI Runner: general/docker-images/php-ci-runner.md
-      - GitHub Actions Runner: general/docker-images/github-runner.md
+      - CI Runner: general/docker-images/ci-runner.md
       - Helm Deploy: general/docker-images/helm-deploy.md
       - Playwright Runner: general/docker-images/playwright-runner.md
       - ACT Runner: general/docker-images/act-runner.md
@@ -45,7 +45,9 @@ plugins:
         'cicd/docker-registry.md': 'general/cicd/docker-registry.md'
         'cicd/workflow-details.md': 'general/cicd/workflow-details.md'
         'docker-images/act-runner.md': 'general/docker-images/act-runner.md'
-        'docker-images/github-runner.md': 'general/docker-images/github-runner.md'
+        'docker-images/ci-runner.md': 'general/docker-images/ci-runner.md'
+        'docker-images/github-runner.md': 'general/docker-images/ci-runner.md'
+        'general/docker-images/github-runner.md': 'general/docker-images/ci-runner.md'
         'docker-images/helm-deploy.md': 'general/docker-images/helm-deploy.md'
         'docker-images/php-ci-runner.md': 'general/docker-images/php-ci-runner.md'
         'docker-images/playwright-runner.md': 'general/docker-images/playwright-runner.md'

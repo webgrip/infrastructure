@@ -49,14 +49,14 @@ An attestation consists of:
   "_type": "https://in-toto.io/Statement/v0.1",
   "predicateType": "https://cyclonedx.org/bom",
   "subject": [{
-    "name": "ghcr.io/webgrip/github-runner",
+    "name": "ghcr.io/webgrip/ci-runner",
     "digest": {"sha256": "<digest>"}
   }],
   "predicate": { /* CycloneDX SBOM content */ }
 }
 ```
 
-This statement says: "I (the cosign identity) certify that the artifact `ghcr.io/webgrip/github-runner@sha256:<digest>` has the following SBOM."
+This statement says: "I (the cosign identity) certify that the artifact `ghcr.io/webgrip/ci-runner@sha256:<digest>` has the following SBOM."
 
 ## Attestation types we generate
 

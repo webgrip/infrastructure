@@ -34,7 +34,7 @@ gantt
 ```bash
 # Automated security scan script
 #!/bin/bash
-for image in rust-ci-runner github-runner helm-deploy playwright-runner act-runner rust-releaser; do
+for image in rust-ci-runner ci-runner helm-deploy playwright-runner act-runner rust-releaser; do
     echo "Scanning webgrip/$image:latest"
     trivy image "webgrip/$image:latest" --severity HIGH,CRITICAL
 done
@@ -44,7 +44,7 @@ done
 ```bash
 # Performance monitoring script
 #!/bin/bash
-for image in rust-ci-runner github-runner helm-deploy playwright-runner act-runner rust-releaser; do
+for image in rust-ci-runner ci-runner helm-deploy playwright-runner act-runner rust-releaser; do
     echo "Testing $image performance..."
     time docker pull "webgrip/$image:latest"
     time docker run --rm "webgrip/$image:latest" echo "Performance test"
@@ -128,7 +128,7 @@ flowchart TD
 
 declare -A BASE_IMAGES=(
     ["rust-ci-runner"]="rust:1.87.0-slim-bookworm"
-    ["github-runner"]="ghcr.io/actions/actions-runner:2.328.0"
+    ["ci-runner"]="ghcr.io/actions/actions-runner:2.328.0"
     ["helm-deploy"]="alpine:3.21.3"
     ["playwright-runner"]="mcr.microsoft.com/playwright:v1.51.0-noble"
     ["act-runner"]="alpine:3.22.1"
@@ -181,7 +181,7 @@ case $IMAGE_NAME in
     "rust-ci-runner")
         docker run --rm "webgrip/$IMAGE_NAME:test-update" rustc --version
         ;;
-    "github-runner")
+    "ci-runner")
         docker run --rm "webgrip/$IMAGE_NAME:test-update" php --version
         ;;
     "helm-deploy")
@@ -273,7 +273,7 @@ done
 
 IMAGES=(
     "webgrip/rust-ci-runner:latest"
-    "webgrip/github-runner:latest"
+    "webgrip/ci-runner:latest"
     "webgrip/helm-deploy:latest"
     "webgrip/playwright-runner:latest"
     "webgrip/act-runner:latest"
@@ -339,7 +339,7 @@ case $IMAGE_NAME in
         echo "Updating Rust packages..."
         # Add specific package updates to Dockerfile
         ;;
-    "github-runner"|"playwright-runner")
+    "ci-runner"|"playwright-runner")
         # Update system packages
         echo "Updating system packages..."
         # Update package versions in Dockerfile
@@ -368,7 +368,7 @@ echo "Security patch applied. Please review and test before merging."
 #!/bin/bash
 # scripts/optimize-build-times.sh
 
-IMAGES=(rust-ci-runner github-runner helm-deploy playwright-runner act-runner rust-releaser)
+IMAGES=(rust-ci-runner ci-runner helm-deploy playwright-runner act-runner rust-releaser)
 
 echo "Analyzing build performance..."
 
@@ -518,7 +518,7 @@ echo "Synchronizing version information..."
 # Get current image versions from registry
 declare -A CURRENT_VERSIONS
 
-IMAGES=(rust-ci-runner github-runner helm-deploy playwright-runner act-runner rust-releaser)
+IMAGES=(rust-ci-runner ci-runner helm-deploy playwright-runner act-runner rust-releaser)
 
 for image in "${IMAGES[@]}"; do
     # Get image creation date and size
@@ -558,7 +558,7 @@ echo "Running quality assurance checks..."
 
 # 1. Docker image builds
 echo "Testing image builds..."
-for image in rust-ci-runner github-runner helm-deploy playwright-runner act-runner rust-releaser; do
+for image in rust-ci-runner ci-runner helm-deploy playwright-runner act-runner rust-releaser; do
     echo "Building $image..."
     if docker build -q -t "qa-test-$image" "ops/docker/$image/" > /dev/null; then
         echo "✅ $image builds successfully"

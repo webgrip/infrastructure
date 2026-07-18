@@ -24,7 +24,7 @@ The threats we specifically address:
 
 ### 1. Tampered image after CI push (tag mutation)
 
-**Scenario**: An attacker with write access to GHCR (via a compromised token) overwrites `ghcr.io/webgrip/github-runner:latest` with a backdoored image after CI has already signed and pushed the legitimate version.
+**Scenario**: An attacker with write access to GHCR (via a compromised token) overwrites `ghcr.io/webgrip/ci-runner:latest` with a backdoored image after CI has already signed and pushed the legitimate version.
 
 **Mitigation**: The cosign signature is anchored to the image *digest* (SHA-256 of the manifest), not the tag. If the tag is reassigned to a different image, the digest changes and the signature no longer verifies. Additionally, Kyverno pins tags to digests at admission time, so Kubernetes always runs the exact image that was signed.
 
@@ -32,7 +32,7 @@ The threats we specifically address:
 
 **Scenario**: An attacker compromises the GitHub Actions runner or the build workflow, producing a malicious image that is pushed to GHCR.
 
-**Mitigation**: The cosign OIDC certificate is bound to the *exact workflow file path and Git ref* (e.g., `.github/workflows/on_release_published.yml@refs/tags/github-runner-v1.2.3`). An image built by a different workflow or from a different branch will produce a certificate with a different subject — the Kyverno policy will reject it. The Rekor transparency log also provides an append-only audit trail: any signature produced during a compromise would be permanently recorded and detectable.
+**Mitigation**: The cosign OIDC certificate is bound to the *exact workflow file path and Git ref* (e.g., `.github/workflows/on_release_published.yml@refs/tags/ci-runner-v1.2.3`). An image built by a different workflow or from a different branch will produce a certificate with a different subject — the Kyverno policy will reject it. The Rekor transparency log also provides an append-only audit trail: any signature produced during a compromise would be permanently recorded and detectable.
 
 ### 3. Unknown software components
 
@@ -57,7 +57,7 @@ When a GitHub Actions workflow runs with `id-token: write` permission, GitHub's 
 - This token was issued by `https://token.actions.githubusercontent.com`
 - The workflow is running in the `webgrip/infrastructure` repository
 - The workflow file is `.github/workflows/on_release_published.yml`
-- The Git ref is `refs/tags/github-runner-v1.2.3`
+- The Git ref is `refs/tags/ci-runner-v1.2.3`
 - The trigger was a `release` event
 
 ### cosign exchanges OIDC token for a signing certificate

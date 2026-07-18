@@ -73,8 +73,8 @@ kubectl patch clusterpolicy verify-webgrip-images \
 When Kyverno admits a Pod, it rewrites any image tag to include the resolved digest:
 
 ```
-ghcr.io/webgrip/github-runner:1.2.3
-  → ghcr.io/webgrip/github-runner@sha256:abc123...
+ghcr.io/webgrip/ci-runner:1.2.3
+  → ghcr.io/webgrip/ci-runner@sha256:abc123...
 ```
 
 This means the container runtime always pulls the exact image that was signed — tag reassignment after signing has no effect on running workloads.
@@ -124,7 +124,7 @@ In the homelab cluster, policy-reporter aggregates these reports and exposes the
 ```bash
 # Test with an unsigned image (should fail in Enforce mode)
 kubectl run test-unsigned \
-  --image=ghcr.io/webgrip/github-runner:latest \
+  --image=ghcr.io/webgrip/ci-runner:latest \
   --dry-run=server
 
 # Test with a signed image (should succeed)
