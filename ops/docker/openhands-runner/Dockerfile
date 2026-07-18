@@ -11,6 +11,9 @@ ARG UV_IMAGE=${REGISTRY_GHCR}/astral-sh/uv:0.9.2@sha256:6dbd7c42a9088083fa79e414
 ARG NODE_IMAGE=${REGISTRY_DOCKERHUB}/library/node:24-bookworm-slim@sha256:6f7b03f7c2c8e2e784dcf9295400527b9b1270fd37b7e9a7285cf83b6951452d
 # rust stable (matches CI rust:latest) — for the core-rs gates + the wasm32 target.
 ARG RUST_IMAGE=${REGISTRY_DOCKERHUB}/library/rust:1-slim-bookworm@sha256:99e09cb2284e2ddbb73a995deee3e91783fd04d177602ccf6eab326d778ee777
+# docker CLI (client only; the daemon is a DinD sidecar reached via DOCKER_HOST) — for
+# OpenHands' Docker sandbox and docker-based gates. Matches the cluster DinD docker:29.5.3.
+ARG DOCKER_IMAGE=${REGISTRY_DOCKERHUB}/library/docker:29.5.3-cli@sha256:11e1133c30f3ceb73c6bdc7dfb78b3f9ed8e8e0d1d0400e91c5ec2eb240bf2ff
 # OpenHands is a Python tool; base on the matching CPython slim image. python 3.12 also
 # matches CI's python:3.12 for the domain scripts, so one interpreter serves both.
 ARG BASE_IMAGE=${REGISTRY_DOCKERHUB}/library/python:3.12-slim-bookworm@sha256:d50fb7611f86d04a3b0471b46d7557818d88983fc3136726336b2a4c657aa30b
@@ -18,6 +21,7 @@ ARG BASE_IMAGE=${REGISTRY_DOCKERHUB}/library/python:3.12-slim-bookworm@sha256:d5
 FROM ${UV_IMAGE} AS uv
 FROM ${NODE_IMAGE} AS node
 FROM ${RUST_IMAGE} AS rust
+FROM ${DOCKER_IMAGE} AS docker
 
 FROM ${BASE_IMAGE}
 
@@ -91,13 +95,21 @@ RUN npm install -g "@moonrepo/cli@${MOON_VERSION}" "@fission-ai/openspec@${OPENS
 RUN pip install --no-cache-dir "pyyaml==${PYYAML_VERSION}" \
  && python3 -c "import yaml; print('pyyaml', yaml.__version__)"
 
+# --- docker CLI (Slice C) ----------------------------------------------------------------
+# Client + buildx/compose plugins from the pinned official image. The daemon is a privileged
+# DinD sidecar in the k8s Job (mirrors forgejo-runner/app/scaledjob.yaml), reached at runtime
+# via DOCKER_HOST — this image ships no daemon. OpenHands starts its sandbox against it.
+COPY --from=docker /usr/local/bin/docker /usr/local/bin/docker
+COPY --from=docker /usr/local/libexec/docker/cli-plugins /usr/local/libexec/docker/cli-plugins
+RUN docker --version
+
 COPY ./docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 
 WORKDIR /workspace
 
 LABEL org.opencontainers.image.title="WebGrip OpenHands Runner" \
-    org.opencontainers.image.description="Headless OpenHands agent runtime (SDK v1.21.0) with the erfbeeld gate toolchain (node 24, rust stable + wasm32, python 3.12 + pyyaml, moon, openspec) for the dark factory — runs 'openhands --headless' against the metered LiteLLM plane with a per-run x-litellm-trace-id" \
+    org.opencontainers.image.description="Headless OpenHands agent runtime (SDK v1.21.0) with the erfbeeld gate toolchain (node 24, rust stable + wasm32, python 3.12 + pyyaml, moon, openspec) and a docker CLI for the DinD sandbox — runs 'openhands --headless' against the metered LiteLLM plane with a per-run x-litellm-trace-id" \
     org.opencontainers.image.source="https://github.com/webgrip/infrastructure" \
     org.opencontainers.image.url="https://github.com/webgrip/infrastructure" \
     org.opencontainers.image.documentation="https://github.com/webgrip/infrastructure/tree/main/docs/techdocs" \

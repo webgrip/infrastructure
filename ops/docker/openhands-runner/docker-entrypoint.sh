@@ -34,5 +34,23 @@ export LLM_EXTRA_HEADERS="{\"x-litellm-trace-id\":\"${LLM_TRACE_ID}\"}"
 echo "openhands-runner: model=${LLM_MODEL} base=${LLM_BASE_URL} trace-id=${LLM_TRACE_ID}" >&2
 echo "openhands-runner: $(openhands --version 2>/dev/null | head -1)" >&2
 
+# If a Docker sandbox host is wired (the in-cluster DinD sidecar sets DOCKER_HOST), wait for
+# the daemon so OpenHands' runtime init doesn't race the sidecar's startup. Skipped when
+# DOCKER_HOST is unset (e.g. local runs with an ambient daemon). Never fatal — warn and let
+# OpenHands surface a clear error if the daemon truly never comes up.
+if [[ -n "${DOCKER_HOST:-}" ]]; then
+  echo "openhands-runner: waiting for docker daemon at ${DOCKER_HOST}…" >&2
+  for i in $(seq 1 30); do
+    if docker info >/dev/null 2>&1; then
+      echo "openhands-runner: docker daemon ready ($(docker version --format '{{.Server.Version}}' 2>/dev/null))" >&2
+      break
+    fi
+    if [[ $i -eq 30 ]]; then
+      echo "openhands-runner: WARN docker daemon not ready after 30s; continuing" >&2
+    fi
+    sleep 1
+  done
+fi
+
 # --override-with-envs makes OpenHands read LLM_* (incl. LLM_EXTRA_HEADERS) from the env above.
 exec openhands --override-with-envs "$@"
