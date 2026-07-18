@@ -48,5 +48,7 @@ tip — the analyzer still picks up every unreleased commit since the last tag.
 
 **Transient release-job failures:** action resolution clones `actions/*` from
 `data.forgejo.org` at job start; a WAN hiccup there kills the job in under a minute
-(e.g. the first v1.0.2 attempt died at 43s before semantic-release even ran). Re-trigger
+(e.g. v1.0.2 attempt 1 died at 43s on action resolution; attempt 2 hit the in-cluster
+Harbor mid-rollout while pulling its proxied base image -- wait for the harbor HelmRelease
+to be Ready before re-triggering). Re-trigger
 with any commit touching this directory — unreleased fix commits are picked up cumulatively.
