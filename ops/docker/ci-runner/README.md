@@ -45,3 +45,8 @@ refuses to publish when that sha is behind the remote branch tip — and exits *
 (runs can wait 15+ min) any concurrent push to `main` silently eats the release: job success,
 no tag. Fix: land another commit touching this directory to re-run the release from the new
 tip — the analyzer still picks up every unreleased commit since the last tag.
+
+**Transient release-job failures:** action resolution clones `actions/*` from
+`data.forgejo.org` at job start; a WAN hiccup there kills the job in under a minute
+(e.g. the first v1.0.2 attempt died at 43s before semantic-release even ran). Re-trigger
+with any commit touching this directory — unreleased fix commits are picked up cumulatively.
