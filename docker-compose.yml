@@ -17,9 +17,9 @@ services:
     build:
       context: ops/docker/rust-ci-runner
       dockerfile: Dockerfile
-  openhands-runner:
+  agent-runner:
     build:
-      context: ops/docker/openhands-runner
+      context: ops/docker/agent-runner
       dockerfile: Dockerfile
   rust-releaser:
     image: aaaaaa/rust-releaser:latest
