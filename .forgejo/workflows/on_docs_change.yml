@@ -2,9 +2,9 @@ name: '[Workflow] On Documentation Change'
 
 # Forgejo mirror of .github/workflows/on_docs_change.yml. GitHub deploys to GitHub Pages; the
 # Forgejo path has no native Pages, so it publishes the built site to Codeberg Pages — the interim,
-# off-site host (ADR-0022). The deploy reusable force-pushes the site to a Codeberg repo's `pages`
+# off-site host (ADR-0038; ADR-0039 = the later in-cluster Backstage target). The deploy reusable force-pushes the site to a Codeberg repo's `pages`
 # branch using a scoped CODEBERG_TOKEN (provisioned as an org Actions secret from OpenBao). The
-# in-cluster Backstage TechDocs surface is the later target (ADR-0023).
+# in-cluster Backstage TechDocs surface is the later target (ADR-0039).
 
 on:
   push:
@@ -35,7 +35,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     with:
       # Handoff: create this NON-mirror Codeberg repo (a pull-mirror's pages branch can't be pushed),
-      # set DNS `docs.webgrip.dev CNAME webgrip.codeberg.page`, and seed the token (see ADR-0022 §Ops).
+      # set DNS `docs.webgrip.dev CNAME webgrip.codeberg.page`, and seed the token (see ADR-0038 §Ops).
       codeberg-repo: infrastructure-techdocs
       domain: docs.webgrip.dev
     secrets:
