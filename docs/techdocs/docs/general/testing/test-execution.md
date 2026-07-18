@@ -752,5 +752,5 @@ npx playwright show-trace test-results/example-test/trace.zip
 > **Assumption**: Test execution primarily occurs in containerized environments with reliable network connectivity. High-latency or unreliable network conditions may require additional timeout and retry configuration. Validation needed: Confirm network and infrastructure requirements for test execution environments.
 
 **Maintainer**: [WebGrip Ops Team](https://github.com/orgs/webgrip/teams/ops)  
-**Configuration**: [`tests/playwright-runner/playwright.config.ts`](../../../../../tests/playwright-runner/playwright.config.ts)  
+**Configuration**: [`tests/playwright-runner/playwright.config.ts`](https://github.com/webgrip/infrastructure/blob/main/tests/playwright-runner/playwright.config.ts)  
 **Container**: [webgrip/playwright-runner](../docker-images/playwright-runner.md)

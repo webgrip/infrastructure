@@ -104,7 +104,7 @@ tests/playwright-runner/
 
 ### Playwright Configuration File
 
-Current configuration ([`playwright.config.ts`](../../../../../tests/playwright-runner/playwright.config.ts)):
+Current configuration ([`playwright.config.ts`](https://github.com/webgrip/infrastructure/blob/main/tests/playwright-runner/playwright.config.ts)):
 
 ```typescript
 export default defineConfig({
@@ -721,5 +721,5 @@ npx playwright test --project=chromium
 > **Assumption**: Tests primarily target web applications built with standard technologies (HTML, CSS, JavaScript, PHP). Complex SPA frameworks may require additional configuration and custom waiting strategies. Validation needed: Confirm application architecture and testing requirements with development teams.
 
 **Maintainer**: [WebGrip Ops Team](https://github.com/orgs/webgrip/teams/ops)  
-**Configuration**: [`tests/playwright-runner/playwright.config.ts`](../../../../../tests/playwright-runner/playwright.config.ts)  
+**Configuration**: [`tests/playwright-runner/playwright.config.ts`](https://github.com/webgrip/infrastructure/blob/main/tests/playwright-runner/playwright.config.ts)  
 **Container**: [webgrip/playwright-runner](../docker-images/playwright-runner.md)

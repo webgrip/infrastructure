@@ -326,7 +326,7 @@ module.exports = {
 
 ### Security Configuration
 
-The image includes a custom seccomp profile ([`seccomp_profile.json`](../../../../../ops/docker/playwright-runner/seccomp_profile.json)) that allows user namespaces required for browser sandboxing:
+The image includes a custom seccomp profile ([`seccomp_profile.json`](https://github.com/webgrip/infrastructure/blob/main/ops/docker/playwright-runner/seccomp_profile.json)) that allows user namespaces required for browser sandboxing:
 
 ```json
 {

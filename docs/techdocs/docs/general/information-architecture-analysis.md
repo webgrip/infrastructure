@@ -8,7 +8,7 @@ The `webgrip/infrastructure` repository serves as a centralized CI/CD infrastruc
 - 6 specialized Docker images in [`ops/docker/`](../../../../ops/docker)
 - GitHub Actions automation in [`.github/workflows/`](../../../../.github/workflows)
 - Playwright testing infrastructure in [`tests/playwright-runner/`](../../../../tests/playwright-runner)
-- Backstage catalog integration via [`catalog-info.yml`](../../../../catalog-info.yml)
+- Backstage catalog integration via [`catalog-info.yml`](https://github.com/webgrip/infrastructure/blob/main/catalog-info.yml)
 
 ## Proposed Information Architecture Alternatives
 

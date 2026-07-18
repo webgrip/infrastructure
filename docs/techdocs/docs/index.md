@@ -64,7 +64,7 @@ infrastructure/
 
 - **Issues**: Report problems or request features via [GitHub Issues](https://github.com/webgrip/infrastructure/issues)
 - **Discussions**: Ask questions in [GitHub Discussions](https://github.com/webgrip/infrastructure/discussions)
-- **Team**: Owned by `group:webgrip/ops` (see [catalog-info.yml](../../../catalog-info.yml))
+- **Team**: Owned by `group:webgrip/ops` (see [catalog-info.yml](https://github.com/webgrip/infrastructure/blob/main/catalog-info.yml))
 
 ---
 
