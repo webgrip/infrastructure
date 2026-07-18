@@ -63,8 +63,9 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
 # This "fixes" a "bug" that causes errors on self-hosted runners when runner ghcp agents workloads
 # The problem is that the workload expects codeql to be installed, but it's not present by default
 
-# Run https://github.com/actions/runner-images/blob/main/images/ubuntu/scripts/build/install-codeql-bundle.sh
-RUN bash -c "$(curl -fsSL https://raw.githubusercontent.com/actions/runner-images/main/images/ubuntu/scripts/build/install-codeql-bundle.sh)"
+# Pinned to a commit SHA (was `main`): an unpinned script made the image irreproducible and
+# handed upstream a silent code-execution path into every rebuild. Renovate can bump the pin.
+RUN bash -c "$(curl -fsSL https://raw.githubusercontent.com/actions/runner-images/60599408e44b8b49421b7c60c1f8bb4e1abedbd0/images/ubuntu/scripts/build/install-codeql-bundle.sh)"
 
 ARG DOTNET_CHANNEL=9.0
 ENV DOTNET_INSTALL_DIR=/opt/dotnet \
