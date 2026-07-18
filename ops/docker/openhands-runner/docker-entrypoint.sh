@@ -92,6 +92,40 @@ fi
 echo "openhands-runner: model=${LLM_MODEL} base=${LLM_BASE_URL} trace-id=${LLM_TRACE_ID}" >&2
 echo "openhands-runner: $(openhands --version 2>/dev/null | head -1)" >&2
 
+# --- skills loadout (Slice E / #268) -------------------------------------------------------
+# OpenHands self-registers any directory under $HOME/.openhands/skills/installed (its metadata
+# file is self-healing), so delivery is a plain copy — no install API and no network for the
+# baked core. Repo-committed skills (AGENTS.md, .openhands/skills/) are separate and always-on;
+# these installed ones are progressive-disclosure, which is what we want for a loadout.
+SKILLS_DIR="${HOME:-/root}/.openhands/skills/installed"
+mkdir -p "${SKILLS_DIR}"
+if [[ -d /opt/webgrip/skills ]]; then
+  cp -r /opt/webgrip/skills/. "${SKILLS_DIR}/" 2>/dev/null || true
+fi
+# Per-ticket extras: the dispatcher sets OPENHANDS_SKILLS_PROFILE (comma-separated) from the
+# ticket's labels. Failure here is never fatal — the baked core still applies.
+if [[ -n "${OPENHANDS_SKILLS_PROFILE:-}" ]]; then
+  echo "openhands-runner: adding profile skills: ${OPENHANDS_SKILLS_PROFILE}" >&2
+  _skills_tmp="$(mktemp -d)"
+  if git clone --depth 1 --branch "${OPENHANDS_SKILLS_REF:-main}" \
+       "${OPENHANDS_SKILLS_REPO:?OPENHANDS_SKILLS_REPO unset}" "${_skills_tmp}" >/dev/null 2>&1; then
+    IFS=',' read -ra _want <<< "${OPENHANDS_SKILLS_PROFILE}"
+    for _s in "${_want[@]}"; do
+      _s="${_s// /}"
+      [[ -z "${_s}" ]] && continue
+      if [[ -d "${_skills_tmp}/skills/${_s}" ]]; then
+        cp -r "${_skills_tmp}/skills/${_s}" "${SKILLS_DIR}/" && echo "  + ${_s}" >&2
+      else
+        echo "  WARN profile skill '${_s}' not in the marketplace — skipped" >&2
+      fi
+    done
+  else
+    echo "openhands-runner: WARN could not clone the skills repo; continuing with baked core" >&2
+  fi
+  rm -rf "${_skills_tmp}"
+fi
+echo "openhands-runner: skills available: $(ls -1 "${SKILLS_DIR}" 2>/dev/null | tr '\n' ' ')" >&2
+
 # If a Docker sandbox host is wired (the in-cluster DinD sidecar sets DOCKER_HOST), wait for
 # the daemon so OpenHands' runtime init doesn't race the sidecar's startup. Skipped when
 # DOCKER_HOST is unset (e.g. local runs with an ambient daemon). Never fatal.

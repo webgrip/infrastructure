@@ -41,6 +41,13 @@ ARG MOON_VERSION=2.4.4
 ARG OPENSPEC_VERSION=1.6.0
 # renovate: datasource=pypi depName=pyyaml
 ARG PYYAML_VERSION=6.0.3
+# Skills loadout (Slice E / board #268). The core set is baked from the webgrip marketplace
+# at BUILD time so a run needs no network for its core skills; per-ticket extras are cloned
+# at runtime by the entrypoint when OPENHANDS_SKILLS_PROFILE is set. CI can override
+# SKILLS_REPO with the in-cluster URL (http://forgejo-http.forgejo.svc.cluster.local:3000/...).
+ARG SKILLS_REPO=https://forgejo.webgrip.dev/webgrip/webgrip-ai-skills.git
+ARG SKILLS_REF=main
+ARG SKILLS_CORE="guard-secrets adr-writer vikunja-product-owner skill-usage"
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
@@ -102,6 +109,28 @@ RUN pip install --no-cache-dir "pyyaml==${PYYAML_VERSION}" \
 COPY --from=docker /usr/local/bin/docker /usr/local/bin/docker
 COPY --from=docker /usr/local/libexec/docker/cli-plugins /usr/local/libexec/docker/cli-plugins
 RUN docker --version
+
+# --- baked core skills (Slice E) ---------------------------------------------------------
+# OpenHands discovers skills by DIRECTORY: anything under $HOME/.openhands/skills/installed
+# is self-registered (its metadata file is self-healing — "add entries for extension
+# directories that were manually copied in"). So delivery is a plain copy, no install API.
+# We stage the core at /opt/webgrip/skills; the entrypoint copies it into the run's real
+# $HOME (which varies: root locally, an emptyDir in-cluster).
+RUN git clone --depth 1 --branch "${SKILLS_REF}" "${SKILLS_REPO}" /tmp/skills-src \
+ && mkdir -p /opt/webgrip/skills \
+ && for s in ${SKILLS_CORE}; do \
+      if [ -d "/tmp/skills-src/skills/${s}" ]; then \
+        cp -r "/tmp/skills-src/skills/${s}" /opt/webgrip/skills/; \
+      else \
+        echo "core skill '${s}' not found in the marketplace" >&2; exit 1; \
+      fi; \
+    done \
+ && rm -rf /tmp/skills-src \
+ && echo "baked core skills:" && ls -1 /opt/webgrip/skills
+
+# Runtime defaults for the per-ticket loadout, mirroring what was baked.
+ENV OPENHANDS_SKILLS_REPO=${SKILLS_REPO} \
+    OPENHANDS_SKILLS_REF=${SKILLS_REF}
 
 COPY ./docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh
