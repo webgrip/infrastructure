@@ -62,8 +62,8 @@ elif [[ -n "${LITELLM_MASTER_KEY:-}" ]]; then
 import json, os
 models = [m.strip() for m in os.environ["KEY_MODELS"].split(",") if m.strip()]
 print(json.dumps({
-    # key_alias is REQUIRED by the proxy's hardened /key/generate (400 without it —
-    # run #31's failure). The per-run trace id is unique, which aliases must be.
+    # key_alias is REQUIRED by the hardened /key/generate endpoint (400 without it,
+    # see run 31). Aliases must be unique; the per-run trace id is.
     "key_alias": os.environ["TRACE"],
     "models": models,
     "max_budget": float(os.environ["BUDGET"]),
