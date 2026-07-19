@@ -51,7 +51,7 @@ ARG PYYAML_VERSION=6.0.3
 # time so a run needs no network for its core skills; per-ticket extras are cloned at runtime
 # by the entrypoint when OPENHANDS_SKILLS_PROFILE is set. CI can override SKILLS_REPO with
 # the in-cluster URL (http://forgejo-http.forgejo.svc.cluster.local:3000/...).
-ARG SKILLS_REPO=https://forgejo.webgrip.dev/webgrip/webgrip-ai-skills.git
+ARG SKILLS_REPO=https://forgejo.webgrip.dev/webgrip/ai-skills.git
 ARG SKILLS_REF=main
 ARG SKILLS_CORE="guard-secrets adr-writer vikunja-product-owner skill-usage"
 
