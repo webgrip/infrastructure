@@ -32,11 +32,17 @@ inputs:
   cosign-version:
     description: "cosign release to install"
     required: false
+    # Deliberately held on 2.x: cosign 3.x changes the default bundle/attestation format and the
+    # verification surface, so it must be rolled out together with the Kyverno image-verify policy
+    # and anything already consuming these attestations. Renovate will raise the major as a PR —
+    # treat it as a coordinated migration, not a version bump.
+    # renovate: datasource=github-releases depName=sigstore/cosign
     default: "v2.4.3"
   syft-version:
     description: "Syft release to install"
     required: false
-    default: "v1.21.0"
+    # renovate: datasource=github-releases depName=anchore/syft
+    default: "v1.48.0"
   openbao-addr:
     description: "In-cluster OpenBao address (Vault-compatible API)"
     required: false
