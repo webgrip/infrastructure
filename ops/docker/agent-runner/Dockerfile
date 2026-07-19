@@ -34,7 +34,7 @@ ARG IMAGE_CREATED=1970-01-01T00:00:00Z
 ARG IMAGE_VERSION=dev
 ARG IMAGE_REVISION=unknown
 
-# OpenHands CLI (bundles the Software Agent SDK v1.21.0). Pinned + released — never @next
+# OpenHands CLI (bundles the Software Agent SDK). Pinned + released — never @next
 # (homelab-cluster ADR-0047: an unattended factory does not run on a self-updating beta).
 # The image NAME is deliberately harness-neutral so a future runtime swap is a content
 # change, not a rename of every manifest and pull-ref.
@@ -124,7 +124,7 @@ RUN chmod +x /usr/local/bin/docker-entrypoint.sh
 WORKDIR /workspace
 
 LABEL org.opencontainers.image.title="WebGrip Agent Runner" \
-    org.opencontainers.image.description="Dark-factory agent runner: headless OpenHands (SDK v1.21.0) with a per-run LiteLLM key, a skills loadout, and a docker CLI for its DinD sandbox. Language gates run in CI's own images rather than being baked, so the image stays small and the gates match CI exactly." \
+    org.opencontainers.image.description="Dark-factory agent runner: headless OpenHands with a per-run LiteLLM key, a skills loadout, and a docker CLI for its DinD sandbox. Language gates run in CI's own images rather than being baked, so the image stays small and the gates match CI exactly." \
     org.opencontainers.image.source="https://github.com/webgrip/infrastructure" \
     org.opencontainers.image.url="https://github.com/webgrip/infrastructure" \
     org.opencontainers.image.documentation="https://github.com/webgrip/infrastructure/tree/main/docs/techdocs" \
