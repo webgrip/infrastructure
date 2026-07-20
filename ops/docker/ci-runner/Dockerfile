@@ -120,6 +120,20 @@ RUN curl -fsSL "https://deb.nodesource.com/setup_${NODE_MAJOR}.x" | bash - && \
     rm -rf /var/lib/apt/lists/* && \
     node --version && npm --version
 
+# Restore the GLIBC node20 external the actions-runner base dropped. Base 2.335.x ships
+# ONLY externals/node24_alpine (musl): container-mode JS actions (checkout@v4 declares
+# node20) then have no node to inject into glibc job containers — rust:latest/php:8.5-cli
+# jobs die with 'exec: "node": executable file not found' while alpine jobs keep working
+# (observed 2026-07-19/20, nuala runs 30-37, verified in the dind daemon logs). Official
+# glibc build, laid out exactly where forgejo-runner looks.
+# renovate: datasource=node-version depName=node versioning=node
+ARG EXTERNAL_NODE20_VERSION=20.19.5
+RUN mkdir -p /home/runner/externals/node20 && \
+    curl -fsSL "https://nodejs.org/dist/v${EXTERNAL_NODE20_VERSION}/node-v${EXTERNAL_NODE20_VERSION}-linux-x64.tar.gz" \
+      | tar -xz --strip-components=1 -C /home/runner/externals/node20 && \
+    chown -R runner:runner /home/runner/externals/node20 && \
+    /home/runner/externals/node20/bin/node --version
+
 # PyYAML for CI that parses YAML from python (e.g. webgrip/ai-skills' plugin test suites).
 # From apt, not pip: the base python3 is externally-managed (PEP 668), so pip would need
 # --break-system-packages.
