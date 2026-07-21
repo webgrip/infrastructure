@@ -3,8 +3,13 @@ ARG COMPOSER_IMAGE=${REGISTRY_DOCKERHUB}/library/composer:2@sha256:1b73755de4f19
 ARG PHP_IMAGE=${REGISTRY_DOCKERHUB}/library/php:8.5-cli@sha256:f7476cffd8d6c48daa07fd80a58b85f97da095ad5a03fcf3361fd872122e3d91
 # renovate: datasource=github-releases depName=extism/extism
 ARG EXTISM_VERSION=1.30.0
+# Node is not a PHP tool, but Forgejo JS actions (checkout@v4) are exec'd INSIDE the job
+# container, so a container without node fails on its first step. Digest-pinned, glibc
+# matched to the php Debian base.
+ARG NODE_IMAGE=${REGISTRY_DOCKERHUB}/library/node:24-bookworm-slim@sha256:6f7b03f7c2c8e2e784dcf9295400527b9b1270fd37b7e9a7285cf83b6951452d
 
 FROM ${COMPOSER_IMAGE} AS composer
+FROM ${NODE_IMAGE} AS node
 FROM ${PHP_IMAGE}
 
 ARG COMPOSER_IMAGE
@@ -19,6 +24,10 @@ ENV DEBIAN_FRONTEND=noninteractive
 WORKDIR /workspace
 
 COPY --from=composer /usr/bin/composer /usr/local/bin/composer
+COPY --from=node /usr/local/bin/node /usr/local/bin/node
+COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
+RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+ && ln -sf /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx
 
 RUN apt-get update -yq \
  && apt-get install -y --no-install-recommends \
