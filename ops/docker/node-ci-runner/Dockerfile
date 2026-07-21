@@ -40,4 +40,5 @@ LABEL org.opencontainers.image.title="WebGrip Node CI Runner" \
     org.opencontainers.image.version="${IMAGE_VERSION}" \
     org.opencontainers.image.revision="${IMAGE_REVISION}"
 
+# (Build re-triggered after the initial release run was cancelled by push concurrency.)
 CMD ["bash"]
