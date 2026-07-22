@@ -9,7 +9,8 @@ name: '[Workflow] On Release Published'
 #     and uploads the SBOM to Dependency-Track — see the local
 #     .forgejo/actions/cosign-sign-attest. GitHub-only bits (SLSA build provenance,
 #     Trivy SARIF -> GitHub Security tab) have no Forgejo analog and are omitted.
-# Dual-publish: the .github/ pipeline keeps pushing to GHCR, untouched.
+# GHCR: the .forgejo mirror-to-GHCR + GHCR signing jobs were removed (Harbor is the source of
+# truth). The .github/ pipeline still publishes to GHCR, untouched.
 
 concurrency:
   group: release-${{ github.ref }}-${{ github.event.release.id || inputs.tag }}
@@ -117,88 +118,13 @@ jobs:
       HARBOR_ROBOT_USER: ${{ secrets.HARBOR_ROBOT_USER }}
       HARBOR_ROBOT_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
 
-  # Dual-publish to GHCR — as a REGISTRY COPY of the Harbor image, not a second build.
-  #
-  # This used to be a full second `docker build` of the same context with the same build-args on the
-  # same single platform, i.e. a byte-identical image built twice. That cost a whole build per
-  # release and, because Sign & Attest needed BOTH distributes, put the slower of the two on the
-  # critical path. Copying the manifest instead takes seconds.
-  #
-  # It also makes the two registries share ONE digest, which is what we actually want for supply
-  # chain: a single artifact identity to sign, attest and record in Dependency-Track, rather than
-  # two digests for the same bytes that have to be reasoned about separately.
-  #
-  # `docker buildx imagetools create` is the only registry-copy tool in the ci-runner image (no
-  # crane/skopeo/regctl/oras) — hence the explicit verify step rather than trusting it silently.
-  # Requires a GitHub PAT with write:packages as Forgejo org secrets GHCR_USERNAME/GHCR_TOKEN.
-  release-mirror-ghcr:
-    name: 'Mirror to GHCR'
-    needs: [parse-release-tag, release-distribute-harbor]
-    runs-on: docker
-    permissions:
-      contents: read
-    steps:
-      - name: Copy the Harbor manifest to GHCR
-        shell: bash
-        env:
-          HARBOR_USER: ${{ secrets.HARBOR_ROBOT_USER }}
-          HARBOR_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
-          GHCR_USER: ${{ secrets.GHCR_USERNAME }}
-          GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
-          IMAGE: ${{ needs.parse-release-tag.outputs.image }}
-          VERSION: ${{ needs.parse-release-tag.outputs.version }}
-          IS_PRERELEASE: ${{ needs.parse-release-tag.outputs.is_prerelease }}
-        run: |
-          set -euo pipefail
-          # The Harbor robot username contains a literal '$' (robot$webgrip+ci) — keep it in an env
-          # var and off argv so neither the shell nor the log mangles it.
-          printf '%s' "$HARBOR_TOKEN" | docker login harbor.webgrip.dev -u "$HARBOR_USER" --password-stdin
-          printf '%s' "$GHCR_TOKEN"   | docker login ghcr.io -u "$GHCR_USER" --password-stdin
-
-          src="harbor.webgrip.dev/webgrip/${IMAGE}:${VERSION}"
-          tags=(--tag "ghcr.io/webgrip/${IMAGE}:${VERSION}")
-          # :latest only on a FINAL release, matching the Harbor tag policy above.
-          if [[ "$IS_PRERELEASE" != "true" ]]; then
-            tags+=(--tag "ghcr.io/webgrip/${IMAGE}:latest")
-          fi
-
-          docker buildx imagetools create "${tags[@]}" "$src"
-
-      - name: Verify the copy landed and digests match
-        shell: bash
-        env:
-          IMAGE: ${{ needs.parse-release-tag.outputs.image }}
-          VERSION: ${{ needs.parse-release-tag.outputs.version }}
-        run: |
-          set -euo pipefail
-          # A silent no-op copy would leave GHCR serving a stale (or absent) image while the release
-          # reports success — the same failure shape as the non-fatal Dependency-Track upload. Assert
-          # instead: both registries must resolve to the SAME digest.
-          harbor_digest="$(docker buildx imagetools inspect "harbor.webgrip.dev/webgrip/${IMAGE}:${VERSION}" --format '{{.Manifest.Digest}}')"
-          ghcr_digest="$(docker buildx imagetools inspect "ghcr.io/webgrip/${IMAGE}:${VERSION}" --format '{{.Manifest.Digest}}')"
-          echo "harbor: $harbor_digest"
-          echo "ghcr:   $ghcr_digest"
-          [[ "$harbor_digest" == "$ghcr_digest" ]] \
-            || { echo "::error::GHCR mirror digest does not match Harbor — the copy did not do what we think"; exit 1; }
-
   # ── Supply chain security ──────────────────────────────────────────────────
   # cosign signing + CycloneDX SBOM attestation via OpenBao Transit (the key never
   # leaves OpenBao; the runner authenticates with its k8s ServiceAccount) + a
   # Dependency-Track upload. Runs on the in-cluster runner so it can reach Harbor
   # (LAN-only), OpenBao, and Dependency-Track. Signs prereleases and finals alike.
-  # Signing is TWO parallel jobs, one per registry — previously both ran as sequential steps of a
-  # single job that also waited on both distributes. Two consequences of that shape, both fixed here:
-  #   - Harbor signing was gated on the GHCR build finishing, despite not needing it at all.
-  #   - The whole install-cosign / install-syft / syft-catalog sequence ran twice back to back, and
-  #     syft cataloguing a multi-hundred-MB image is the dominant cost of this step.
-  # Split, Harbor signing starts the moment the Harbor build lands, and the two syft runs overlap.
-  #
-  # NOT a matrix: the two registries need different secrets, and resolving those through
-  # `secrets[matrix.*]` is fragile on Forgejo. Two explicit jobs are longer but honest.
-  #
-  # Both sign the SAME digest now that GHCR is a copy rather than a rebuild. The signature itself is
-  # still per-registry — cosign stores it alongside the image — so each registry gets its own signing
-  # pass against one shared artifact identity.
+  # Harbor-only signing. (The GHCR mirror + GHCR signing were removed — Harbor is the source of
+  # truth and every consumer pulls through it. The .github/ pipeline still publishes to GHCR.)
   release-sign-harbor:
     name: 'Sign & Attest (Harbor)'
     needs: [parse-release-tag, release-distribute-harbor]
@@ -221,25 +147,4 @@ jobs:
         env:
           REGISTRY_USERNAME: ${{ secrets.HARBOR_ROBOT_USER }}
           REGISTRY_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
-          DT_API_KEY: ${{ secrets.DT_API_KEY }}
-
-  release-sign-ghcr:
-    name: 'Sign & Attest (GHCR)'
-    # Needs the MIRROR, not the Harbor build: the GHCR tag only exists once the copy has run.
-    needs: [parse-release-tag, release-mirror-ghcr]
-    runs-on: docker
-    enable-openid-connect: true
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-      - name: Sign, attest and SBOM (GHCR)
-        uses: ./.forgejo/actions/cosign-sign-attest
-        with:
-          registry: ghcr.io
-          image-name: ghcr.io/webgrip/${{ needs.parse-release-tag.outputs.image }}
-          image-version: ${{ needs.parse-release-tag.outputs.version }}
-        env:
-          REGISTRY_USERNAME: ${{ secrets.GHCR_USERNAME }}
-          REGISTRY_TOKEN: ${{ secrets.GHCR_TOKEN }}
           DT_API_KEY: ${{ secrets.DT_API_KEY }}

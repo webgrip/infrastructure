@@ -23,6 +23,29 @@ on:
       - '.forgejo/workflows/on_release_published.yml'
 
 jobs:
+  # Guard: every ops/docker/<image> dir MUST carry a .releaserc.cjs hardcoding
+  # tagFormat: '<image>-v${version}'. Without it, `npx semantic-release` (run bare in the
+  # per-image release, no --config) falls back to the built-in default tagFormat 'v${version}',
+  # cuts ROOT tags, and never emits a version -> the image is never built/pushed/signed. This
+  # already bit two new image dirs (erfbeeld-ci, node-ci-runner) silently. Fail loudly instead.
+  guard-releaserc:
+    name: 'Guard: per-image .releaserc.cjs present'
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - shell: bash
+        run: |
+          set -euo pipefail
+          missing=0
+          for d in ops/docker/*/; do
+            if [ ! -f "${d}.releaserc.cjs" ]; then
+              echo "::error::${d} has no .releaserc.cjs — it will cut a root v* tag and never release its image. Add one: const base = require('../../../.releaserc.js'); module.exports = { ...base, tagFormat: '$(basename "$d")-v\${version}' };"
+              missing=1
+            fi
+          done
+          [ "$missing" -eq 0 ] && echo "all ops/docker/* dirs carry a .releaserc.cjs"
+          exit "$missing"
+
   # NB: the caller job id must NOT equal the reusable workflow's inner job id. Forgejo v15
   # flattens an expanded reusable workflow's inner jobs into the caller's graph; when the ids
   # collide the resulting plan has no dependency-free job and Forgejo rejects the workflow with
