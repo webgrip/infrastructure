@@ -59,6 +59,17 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
+# Helm, baked in: CI jobs currently run azure/setup-helm per job — a WAN download plus an
+# action clone on every run. With helm on PATH the shared reusables' setup-helm fallback
+# becomes a no-op.
+# renovate: datasource=github-releases depName=helm/helm
+ARG HELM_VERSION=3.21.3
+RUN curl -fsSL "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz" \
+      | tar -xz -C /tmp linux-amd64/helm && \
+    install -m 0755 /tmp/linux-amd64/helm /usr/local/bin/helm && \
+    rm -rf /tmp/linux-amd64 && \
+    helm version --short
+
 # https://github.com/orgs/community/discussions/177903
 # This "fixes" a "bug" that causes errors on self-hosted runners when runner ghcp agents workloads
 # The problem is that the workload expects codeql to be installed, but it's not present by default
@@ -148,5 +159,27 @@ RUN apt-get update && \
 ARG CLAUDE_CODE_VERSION=2.1.214
 RUN npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" && \
     npm cache clean --force
+
+# Prebaked semantic-release toolchain. The webgrip/workflows semantic-release composites
+# npm-install exactly this set on every release job (~4 min measured per run); when
+# SEMREL_PREBAKED is set and the directory exists they skip the install and put
+# $SEMREL_PREBAKED/.bin on PATH instead. Versions pinned exactly (--save-exact) so the
+# baked tree mirrors what the composites would have installed.
+RUN mkdir -p /opt/semrel && \
+    cd /opt/semrel && \
+    npm init -y > /dev/null && \
+    npm install --save-exact --no-audit --no-fund \
+      semantic-release@24.2.7 \
+      semantic-release-monorepo@8.0.2 \
+      @semantic-release/commit-analyzer@13.0.0 \
+      @semantic-release/exec@7.0.3 \
+      @semantic-release/git@10.0.1 \
+      @semantic-release/changelog@6.0.3 \
+      @saithodev/semantic-release-gitea@2.1.0 \
+      @semantic-release/release-notes-generator@14.0.0 \
+      conventional-changelog-conventionalcommits@7.0.2 \
+      semantic-release-helm3@2.10.0 && \
+    npm cache clean --force
+ENV SEMREL_PREBAKED=/opt/semrel/node_modules
 
 USER runner

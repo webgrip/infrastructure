@@ -25,6 +25,7 @@ RUN cargo install --locked cargo-binstall
 
 # 1.3 Grab the Rust CLI helpers
 #     – everything **except** cargo-sort (see 1.4)
+#     sccache: shared compilation cache for CI; enabled per-workflow via RUSTC_WRAPPER.
 RUN set -eux; \
     cargo binstall --no-confirm \
       cargo-audit \
@@ -33,7 +34,8 @@ RUN set -eux; \
       cargo-udeps \
       cargo-msrv \
       cargo-nextest \
-      cargo-tarpaulin
+      cargo-tarpaulin \
+      sccache
 
 # 1.4 cargo-sort: build **from source** so it targets Bookworm’s glibc 2.37
 RUN cargo install --locked cargo-sort
