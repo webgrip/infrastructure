@@ -1,5 +1,18 @@
 const noteKeywords = ['BREAKING CHANGE', 'BREAKING CHANGES', 'BREAKING'];
 
+// The pinned conventionalcommits preset (7.0.2) ships a header regex that accepts neither a
+// comma in the scope nor the `!` breaking marker: `feat(a,b): x` and `feat!: x` parse as
+// type-less and release NOTHING — silently. That dropped rust-ci-runner's helm/sccache feat
+// (e0e1c82: scope `ci-runner,rust-ci-runner`) without a trace. Override both patterns:
+// any characters allowed inside the scope parens, optional `!` (which escalates to major).
+// Verified against @semantic-release/commit-analyzer@13.0.0 + preset 7.0.2 — remove these
+// overrides only when the preset is bumped to a version whose defaults pass the same matrix.
+const parserOpts = {
+    noteKeywords,
+    headerPattern: /^(\w*)(?:\(([^)]*)\))?!?: (.+)$/,
+    breakingHeaderPattern: /^(\w*)(?:\(([^)]*)\))?!: (.+)$/,
+};
+
 const branches = [
     'main',
     {
@@ -17,7 +30,7 @@ const commitAnalyzerConfig = [
             { type: 'bugfix', release: 'patch' },
             { type: 'hotfix', release: 'patch' },
         ],
-        parserOpts: { noteKeywords },
+        parserOpts,
     },
 ];
 
@@ -39,7 +52,7 @@ const releaseNotesGeneratorConfig = [
                 { type: 'test', section: 'Tests', hidden: false },
             ],
         },
-        parserOpts: { noteKeywords },
+        parserOpts,
     },
 ];
 
