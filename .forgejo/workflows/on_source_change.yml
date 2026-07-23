@@ -70,6 +70,10 @@ jobs:
       contents: write
     strategy:
       fail-fast: false
+      # Serialize: each release job pushes a chore(release) version-bump commit back to main,
+      # so two jobs releasing concurrently race — the loser's push is rejected non-fast-forward
+      # and its release silently never cuts (bit ci-runner in run 124/125). One at a time.
+      max-parallel: 1
       matrix:
         include: ${{ fromJson(needs.changed-images.outputs.matrix) }}
     # In-cluster Forgejo has a single ephemeral DinD runner pool advertising `docker`.
