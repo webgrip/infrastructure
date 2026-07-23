@@ -102,14 +102,25 @@ runs:
         [[ "$DIGEST" == sha256:* ]] || { echo "::error::could not resolve digest for $IMAGE_REF"; exit 1; }
         echo "image-with-digest=${IMAGE_NAME}@${DIGEST}" >> "$GITHUB_OUTPUT"
 
-    - name: "Generate SBOM (Syft: CycloneDX + SPDX)"
+    - name: "Generate SBOM (Syft: CycloneDX)"
       id: sbom
       shell: bash
       env:
         IMAGE: ${{ steps.digest.outputs.image-with-digest }}
+        # The job runs inside the runner's dind sidecar, whose cgroup is capped at 3Gi. Syft's
+        # default parallelism (one worker per CPU) cataloging a multi-GB toolchain image
+        # (rust-ci-runner, tauri-ci-runner) blows past that and the kernel kills it silently —
+        # the step log just stops after 15-25 min (runs 102/104/123). Single-threaded
+        # cataloging bounds peak RSS; it's slower but survives.
+        SYFT_PARALLELISM: "1"
       run: |
         set -euo pipefail
-        syft "$IMAGE" -o "cyclonedx-json=sbom.cdx.json" -o "spdx-json=sbom.spdx.json"
+        # registry: source — pull layers straight from Harbor into syft's temp dir instead of
+        # routing through the dind daemon (which would store a second full copy of the image).
+        # SPDX output dropped: nothing consumed sbom.spdx.json (cosign attests the CycloneDX,
+        # Dependency-Track ingests CycloneDX) and serializing a second whole-image document
+        # roughly doubles syft's memory footprint.
+        syft "registry:$IMAGE" -o "cyclonedx-json=sbom.cdx.json"
         echo "components=$(jq '.components | length' sbom.cdx.json)" >> "$GITHUB_OUTPUT"
 
     - name: Sign & attest via Forgejo OIDC -> OpenBao Transit
