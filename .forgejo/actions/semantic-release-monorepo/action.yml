@@ -158,7 +158,28 @@ runs:
         # (which spreads the shared .releaserc.js). GITEA_URL is set above, so that config selects
         # the Gitea/Forgejo publish plugin. (semantic-release has no --config flag; the package
         # config always wins via cosmiconfig regardless, so plugin selection lives in the config.)
-        npx semantic-release
+        #
+        # Retry loop: when several images release from one push, each job's @semantic-release/git
+        # version-bump push-back races the others — the loser is rejected non-fast-forward and,
+        # unretried, its release silently never cuts (runs 124/125/127; strategy.max-parallel is
+        # ignored by Forgejo, so jobs DO run concurrently). The race always loses in `prepare`,
+        # BEFORE the tag exists, so a retry is safe: hard-reset onto the moved main (dropping the
+        # stray local bump commit from the failed attempt) and rerun. The rerun's verifyRelease
+        # build re-uses the still-warm buildx builder, so it's cheap.
+        for attempt in 1 2 3; do
+          set +e
+          npx semantic-release 2>&1 | tee /tmp/semrel.log
+          rc=${PIPESTATUS[0]}
+          set -e
+          [ "$rc" -eq 0 ] && break
+          if [ "$attempt" -lt 3 ] && grep -Eq 'fetch first|non-fast-forward' /tmp/semrel.log; then
+            echo "::warning::version-bump push-back raced a concurrent release job (attempt ${attempt}); resetting onto updated main and retrying"
+            git -C "$GITHUB_WORKSPACE" fetch origin "$GITHUB_REF_NAME"
+            git -C "$GITHUB_WORKSPACE" reset --hard "origin/$GITHUB_REF_NAME"
+            continue
+          fi
+          exit "$rc"
+        done
 
     # Forgejo does NOT emit a `release` Actions event for a release created inside a CI job
     # (loop-prevention), so on_release_published.yml never auto-fires here. Dispatch it explicitly
