@@ -20,6 +20,10 @@ inputs:
   package-name:
     description: "Package name used for tag prefix, e.g. helm-deploy"
     required: true
+  config-version:
+    description: "Pin of @webgrip/semantic-release-config to install (npm dist-tag or semver range)"
+    required: false
+    default: "1"
   registry:
     description: "Registry the verifyRelease build caches against (must match the publish path's registry)"
     required: false
@@ -143,21 +147,34 @@ runs:
 
         cd "$pkg_dir"
 
-        npm install --no-save --no-audit --no-fund \
-          semantic-release@24.2.7 \
-          semantic-release-monorepo@8.0.2 \
-          @semantic-release/commit-analyzer@13.0.0 \
-          @semantic-release/exec@7.0.3 \
-          @semantic-release/npm@12.0.1 \
-          @semantic-release/git@10.0.1 \
-          @saithodev/semantic-release-gitea \
-          @semantic-release/release-notes-generator@14.0.0 \
-          conventional-changelog-conventionalcommits@7.0.2
+        # Baseline: start every image from 0.0.0 (semantic-release otherwise hardcodes the first
+        # release to 1.0.0, ignoring the bump type). Idempotent — a no-op for images that already
+        # carry <name>-v* tags; matters only when a brand-new image dir releases for the first time.
+        seed_prefix="${pkg_name}-v"
+        if [[ -z "$(git tag -l "${seed_prefix}[0-9]*")" ]]; then
+          root="$(git rev-list --max-parents=0 HEAD | tail -1)"
+          echo "No ${seed_prefix}* tag yet; seeding ${seed_prefix}0.0.0 at root commit ${root}."
+          git tag "${seed_prefix}0.0.0" "${root}"
+          git push origin "${seed_prefix}0.0.0"
+        else
+          echo "Release tags already exist (${seed_prefix}*); skipping baseline seed."
+        fi
+
+        # Plugin shape lives once in @webgrip/semantic-release-config; each ops/docker/<image>/
+        # .releaserc.cjs is a small makeConfig() that requires it. Its deps (semantic-release + all
+        # plugins, incl. @semantic-release/npm for the commit-back) install with it into this
+        # package's node_modules — replacing the previous hand-pinned plugin list.
+        forge_url="${{ vars.FORGEJO_INSTANCE_URL || 'https://forgejo.webgrip.dev' }}"
+        forge_host="${forge_url#http*://}"
+        npm config set "@webgrip:registry" "${forge_url}/api/packages/webgrip/npm/"
+        npm config set "//${forge_host}/api/packages/webgrip/npm/:_authToken" "${GITEA_TOKEN}"
+        npm install --no-save --no-package-lock \
+          "@webgrip/semantic-release-config@${{ inputs.config-version }}"
 
         # cwd is the package dir, so semantic-release discovers ops/docker/<image>/.releaserc.cjs
-        # (which spreads the shared .releaserc.js). GITEA_URL is set above, so that config selects
-        # the Gitea/Forgejo publish plugin. (semantic-release has no --config flag; the package
-        # config always wins via cosmiconfig regardless, so plugin selection lives in the config.)
+        # (a makeConfig() from @webgrip/semantic-release-config). SEMANTIC_RELEASE_GITEA + GITEA_URL
+        # are set above, so that config publishes via @saithodev/semantic-release-gitea. (semantic-
+        # release has no --config flag; the package config always wins via cosmiconfig from cwd.)
         #
         # Retry loop: when several images release from one push, each job's @semantic-release/git
         # version-bump push-back races the others — the loser is rejected non-fast-forward and,
@@ -197,7 +214,7 @@ runs:
         TAG: ${{ steps.semantic-release.outputs.version }}
         REF: ${{ github.ref_name }}
         REPO: ${{ github.repository }}
-        IS_PRERELEASE: ${{ startsWith(github.ref, 'refs/heads/release/') && 'true' || 'false' }}
+        IS_PRERELEASE: ${{ github.ref != 'refs/heads/main' && 'true' || 'false' }}
       run: |
         set -euo pipefail
         echo "Dispatching on_release_published.yml for tag=${TAG} ref=${REF} prerelease=${IS_PRERELEASE}"
@@ -222,7 +239,7 @@ runs:
         TAG: ${{ steps.semantic-release.outputs.version }}
         REPO: ${{ github.repository }}
         BRANCH: ${{ github.ref_name }}
-        IS_PRERELEASE: ${{ startsWith(github.ref, 'refs/heads/release/') && 'true' || 'false' }}
+        IS_PRERELEASE: ${{ github.ref != 'refs/heads/main' && 'true' || 'false' }}
       run: |
         set -uo pipefail   # deliberately NOT -e: best-effort
         notes="$(curl -fsS -H "Authorization: token ${GITEA_TOKEN}" \
