@@ -7,7 +7,9 @@ ARG IMAGE_VERSION=dev
 ARG IMAGE_REVISION=unknown
 ARG TECHDOCS_BUILDER
 
-COPY ./ops/docker/mkdocs-runner/docker-entrypoint.sh ./docker-entrypoint.sh
+# Build context is this directory (CI passes docker-context: ops/docker/<image>; docker-compose
+# and the verifyRelease gate build from here too) — paths must be context-relative.
+COPY docker-entrypoint.sh ./docker-entrypoint.sh
 
 LABEL org.opencontainers.image.title="WebGrip MkDocs Runner" \
     org.opencontainers.image.description="MkDocs runner image for serving TechDocs locally" \

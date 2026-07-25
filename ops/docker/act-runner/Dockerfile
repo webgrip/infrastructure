@@ -1,3 +1,4 @@
+# Release re-entry touch: run 135 dropped this train (npm 404); the matrix is push-diff.
 ARG REGISTRY_DOCKERHUB=docker.io
 ARG BASE_IMAGE=${REGISTRY_DOCKERHUB}/library/alpine:3.23.4@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11
 FROM ${BASE_IMAGE}
