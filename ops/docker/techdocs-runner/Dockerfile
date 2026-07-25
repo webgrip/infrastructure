@@ -11,11 +11,9 @@ RUN apk add --no-cache \
     python3 \
     py3-pip
 
-COPY --from=techdocs /usr/local /usr/local
-COPY --from=techdocs /opt/plantuml.jar /opt/plantuml.jar
-COPY --from=techdocs /usr/local/bin/plantuml /usr/local/bin/plantuml
-
-COPY ./ops/docker/techdocs-runner/docker-entrypoint.sh ./docker-entrypoint.sh
+# Build context is this directory (CI passes docker-context: ops/docker/<image>; docker-compose
+# and the verifyRelease gate build from here too) — paths must be context-relative.
+COPY docker-entrypoint.sh ./docker-entrypoint.sh
 
 LABEL org.opencontainers.image.title="WebGrip TechDocs Runner" \
     org.opencontainers.image.description="TechDocs runtime image for building and serving documentation" \
