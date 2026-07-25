@@ -70,6 +70,15 @@ runs:
         path: ~/.npm
         key: ${{ runner.os }}-npm-semrel-24.2.7
 
+    # Node 24's bundled npm (11.16) intermittently requests scoped-package tarballs with the
+    # scope's %2F decoded to a literal slash — Forgejo's npm route 404s that form (the encoded
+    # form serves fine), which killed 4/13 release jobs in run 135 on the
+    # @webgrip/semantic-release-config download. Pin an npm from before the URL normalization
+    # change until the Forgejo registry tolerates decoded slashes, then unpin.
+    - name: Pin npm (Forgejo rejects decoded %2F in scoped tarball URLs)
+      shell: bash
+      run: npm install -g npm@11.4.2
+
     # When Harbor creds are provided, set up buildx (docker-container driver — supports
     # `cache-from type=registry`) + log in (the Harbor :cache repo needs auth to pull), then
     # export BUILD_CACHE_REF. .releaserc.js keys on BUILD_CACHE_REF to run the cached buildx
