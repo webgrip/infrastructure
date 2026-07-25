@@ -40,8 +40,11 @@ inputs:
 
 outputs:
   version:
-    description: "The new version number (from exec plugin writing to $GITHUB_OUTPUT)"
+    description: "Bare semver of the release (from the exec successCmd writing to $GITHUB_OUTPUT; empty if none)"
     value: ${{ steps.semantic-release.outputs.version }}
+  tag:
+    description: "Full git tag of the release, e.g. rust-ci-runner-v1.4.0 (empty if none)"
+    value: ${{ steps.semantic-release.outputs.tag }}
 
 runs:
   using: "composite"
@@ -196,18 +199,18 @@ runs:
 
     # Forgejo does NOT emit a `release` Actions event for a release created inside a CI job
     # (loop-prevention), so on_release_published.yml never auto-fires here. Dispatch it explicitly
-    # for the tag we just cut. steps.semantic-release.outputs.version is ALREADY the full namespaced
-    # tag "<image>-v<version>" (e.g. techdocs-builder-v1.2.14) — semantic-release-monorepo emits the
-    # tagFormat-prefixed value, NOT a bare semver — which is exactly the format parse-release-tag
-    # requires (^(.+)-v(.+)$). Pass it through verbatim; do NOT prepend the package name (that doubles
-    # the prefix -> techdocs-builder-vtechdocs-builder-v1.2.14). Empty on a non-releasing run -> no-op.
+    # for the tag we just cut, using the `tag` output — the shared config's exec successCmd writes
+    # tag=${nextRelease.gitTag}, the full "<image>-v<semver>" form parse-release-tag requires
+    # (^(.+)-v(.+)$). NB: `version` is BARE semver under @webgrip/semantic-release-config — passing
+    # it here broke the build dispatch (runs 1074/1075: parse-release-tag can't match "0.1.0").
+    # Empty on a non-releasing run -> step skipped.
     - name: Trigger image build + sign (on_release_published)
-      if: ${{ steps.semantic-release.outputs.version != '' }}
+      if: ${{ steps.semantic-release.outputs.tag != '' }}
       shell: bash
       env:
         GITEA_URL: ${{ vars.FORGEJO_INSTANCE_URL || github.server_url }}
         GITEA_TOKEN: ${{ inputs.token || github.token }}
-        TAG: ${{ steps.semantic-release.outputs.version }}
+        TAG: ${{ steps.semantic-release.outputs.tag }}
         REF: ${{ github.ref_name }}
         REPO: ${{ github.repository }}
         IS_PRERELEASE: ${{ github.ref != 'refs/heads/main' && 'true' || 'false' }}
@@ -226,13 +229,13 @@ runs:
     # never fails the release or blocks the Harbor build — unlike @semantic-release/github inline, which
     # would abort the whole run. Notes are read back from the Forgejo release so they match exactly.
     - name: Mirror release to GitHub (best-effort)
-      if: ${{ steps.semantic-release.outputs.version != '' && inputs.github-release-token != '' }}
+      if: ${{ steps.semantic-release.outputs.tag != '' && inputs.github-release-token != '' }}
       shell: bash
       env:
         GITEA_URL: ${{ vars.FORGEJO_INSTANCE_URL || github.server_url }}
         GITEA_TOKEN: ${{ inputs.token || github.token }}
         GH_TOKEN: ${{ inputs.github-release-token }}
-        TAG: ${{ steps.semantic-release.outputs.version }}
+        TAG: ${{ steps.semantic-release.outputs.tag }}
         REPO: ${{ github.repository }}
         BRANCH: ${{ github.ref_name }}
         IS_PRERELEASE: ${{ github.ref != 'refs/heads/main' && 'true' || 'false' }}
