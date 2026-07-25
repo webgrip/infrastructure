@@ -76,6 +76,27 @@ COPY --from=uv /uv /uvx /usr/local/bin/
 RUN uv tool install "openhands==${OPENHANDS_VERSION}" \
  && openhands --version
 
+# The CLI hardcodes load_public_skills=True — a startup git-sync of
+# github.com/OpenHands/extensions with NO opt-out (their #483 died stale; the
+# SDK's own default is False). Our runners have no GitHub egress by policy, so
+# every run burned ~5 min of git timeouts, and unvetted third-party skills are
+# unwanted in metered runs anyway (VIK-590). Patch the installed CLI back to
+# the SDK default; the greps fail THIS BUILD loudly if an upstream release
+# moves or rewords the line, so behavior can never silently revert. Drop this
+# when a CLI release ships a real knob.
+RUN AGENT_STORE="$(find /root/.local/share/uv/tools/openhands -name agent_store.py -path '*/openhands_cli/*')" \
+ && test -n "${AGENT_STORE}" \
+ && grep -q 'load_public_skills=True' "${AGENT_STORE}" \
+ && sed -i 's/load_public_skills=True/load_public_skills=False/' "${AGENT_STORE}" \
+ && grep -q 'load_public_skills=False' "${AGENT_STORE}" \
+ && ! grep -q 'load_public_skills=True' "${AGENT_STORE}" \
+ && openhands --version
+
+# LiteLLM (inside OpenHands) fetches its model-cost map from raw.githubusercontent.com
+# at startup; offline that's a wasted timeout before the documented fallback to the
+# bundled map. Pin to the local map outright (VIK-590).
+ENV LITELLM_LOCAL_MODEL_COST_MAP=True
+
 # --- Node 24 (agent workflow tooling only) ------------------------------------------------
 COPY --from=node /usr/local/bin/node /usr/local/bin/node
 COPY --from=node /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/npm
