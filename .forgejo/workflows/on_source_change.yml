@@ -17,7 +17,6 @@ on:
       - '**'
     paths:
       - 'ops/docker/**'
-      - '.releaserc.js'
       - '.forgejo/actions/semantic-release-monorepo/action.yml'
       - '.forgejo/workflows/on_source_change.yml'
       - '.forgejo/workflows/on_release_published.yml'
@@ -39,7 +38,7 @@ jobs:
           missing=0
           for d in ops/docker/*/; do
             if [ ! -f "${d}.releaserc.cjs" ]; then
-              echo "::error::${d} has no .releaserc.cjs — it will cut a root v* tag and never release its image. Add one: const base = require('../../../.releaserc.js'); module.exports = { ...base, tagFormat: '$(basename "$d")-v\${version}' };"
+              echo "::error::${d} has no .releaserc.cjs — it will cut a root v* tag and never release its image. Add one: const { makeConfig, dockerVerifyGate } = require('@webgrip/semantic-release-config'); module.exports = makeConfig({ monorepo: true, manifest: 'npm', verifyReleaseCmd: dockerVerifyGate() }); (tag prefix comes from this dir's package.json name)"
               missing=1
             fi
           done
@@ -63,7 +62,7 @@ jobs:
     needs: [changed-images]
     if: >
       always()
-      && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/release/'))
+      && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development')
       && needs.changed-images.result == 'success'
       && needs.changed-images.outputs.matrix != '[]'
     permissions:
