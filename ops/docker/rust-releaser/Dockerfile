@@ -1,4 +1,5 @@
-# Release re-entry touch: run 141 sibling-bump race (mkdocs/techdocs) / run 135 daemon load (rust-releaser).
+# Release re-entry touch: attempt 3 — run 135 died to daemon overload, run 145 to the
+# push-main concurrency cancel. Merge this while main is quiet; the verify build needs ~40 min.
 ###############################################################################
 # Base image: Node 22 on Debian 12 (bookworm-slim)
 ###############################################################################
