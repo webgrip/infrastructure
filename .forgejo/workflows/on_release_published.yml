@@ -19,10 +19,10 @@ concurrency:
 on:
   release:
     types: [published]
-  # Forgejo adaptation: a release created from inside a CI job does NOT emit a `release`
-  # Actions event (loop-prevention), so the .forgejo semantic-release action dispatches this
-  # workflow explicitly after cutting a release. The `release` trigger still serves manual UI
-  # releases. (The .github side needs no dispatch — its App-token release does fire the event.)
+  # CI-cut releases fire the `release` trigger natively: they are created with the
+  # webgrip-ci bot PAT, and only same-token actions are loop-suppressed. (Same event path
+  # as the .github App-token side.) workflow_dispatch remains for manual re-publish or
+  # backfill of an existing tag.
   workflow_dispatch:
     inputs:
       tag:

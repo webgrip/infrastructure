@@ -2,7 +2,9 @@ name: '[Workflow] On Source Change'
 
 # Forgejo mirror of .github/workflows/on_source_change.yml. Adaptations:
 #   - determine-changed-directories + semantic-release resolve against the .forgejo/ tree
-#   - GitHub App token minting is dropped; the CI bot's FORGEJO_TOKEN is used instead
+#   - GitHub App token minting is dropped; the CI bot's WEBGRIP_CI_TOKEN is used instead
+#     (NOT secrets.FORGEJO_TOKEN — that resolves to the built-in per-job token, which
+#     attributes releases to Ghost and suppresses the native `release` event)
 #   - semantic-release publishes via the Gitea/Forgejo plugin (the action sets GITEA_URL, so the
 #     shared .releaserc.js selects @saithodev/semantic-release-gitea over @semantic-release/github)
 # Releases created here trigger .forgejo/workflows/on_release_published.yml, which builds
@@ -82,17 +84,17 @@ jobs:
       # Local `uses: ./…` actions require the repo on disk first; without this the runner
       # cannot read the action ("failed to read action … no files found … action.yml").
       # Mirrors the .github job's checkout (adapted: checkout v5, since v6 is broken on
-      # non-GitHub runners, and the CI bot's FORGEJO_TOKEN instead of a GitHub App token).
+      # non-GitHub runners, and the CI bot's WEBGRIP_CI_TOKEN instead of a GitHub App token).
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0 # semantic-release requires all commits/tags
-          token: ${{ secrets.FORGEJO_TOKEN }}
+          token: ${{ secrets.WEBGRIP_CI_TOKEN }}
       - name: Semantic Release (image)
         uses: ./.forgejo/actions/semantic-release-monorepo
         with:
           package-path: ${{ matrix.path }}
           package-name: ${{ matrix.basename }}
-          token: ${{ secrets.FORGEJO_TOKEN }}
+          token: ${{ secrets.WEBGRIP_CI_TOKEN }}
           # Lets the verifyRelease build reuse the Harbor buildx layer-cache that
           # on_release_published writes, instead of a cold full rebuild every release.
           harbor-robot-user: ${{ secrets.HARBOR_ROBOT_USER }}

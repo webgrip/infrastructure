@@ -214,31 +214,12 @@ runs:
           exit "$rc"
         done
 
-    # Forgejo does NOT emit a `release` Actions event for a release created inside a CI job
-    # (loop-prevention), so on_release_published.yml never auto-fires here. Dispatch it explicitly
-    # for the tag we just cut, using the `tag` output — the shared config's exec successCmd writes
-    # tag=${nextRelease.gitTag}, the full "<image>-v<semver>" form parse-release-tag requires
-    # (^(.+)-v(.+)$). NB: `version` is BARE semver under @webgrip/semantic-release-config — passing
-    # it here broke the build dispatch (runs 1074/1075: parse-release-tag can't match "0.1.0").
-    # Empty on a non-releasing run -> step skipped.
-    - name: Trigger image build + sign (on_release_published)
-      if: ${{ steps.semantic-release.outputs.tag != '' }}
-      shell: bash
-      env:
-        GITEA_URL: ${{ vars.FORGEJO_INSTANCE_URL || github.server_url }}
-        GITEA_TOKEN: ${{ inputs.token || github.token }}
-        TAG: ${{ steps.semantic-release.outputs.tag }}
-        REF: ${{ github.ref_name }}
-        REPO: ${{ github.repository }}
-        IS_PRERELEASE: ${{ github.ref != 'refs/heads/main' && 'true' || 'false' }}
-      run: |
-        set -euo pipefail
-        echo "Dispatching on_release_published.yml for tag=${TAG} ref=${REF} prerelease=${IS_PRERELEASE}"
-        curl -fsS -X POST \
-          -H "Authorization: token ${GITEA_TOKEN}" \
-          -H "Content-Type: application/json" \
-          "${GITEA_URL%/}/api/v1/repos/${REPO}/actions/workflows/on_release_published.yml/dispatches" \
-          -d "{\"ref\":\"${REF}\",\"inputs\":{\"tag\":\"${TAG}\",\"is_prerelease\":\"${IS_PRERELEASE}\"}}"
+    # No manual dispatch of on_release_published.yml: releases are created with the
+    # webgrip-ci bot PAT (inputs.token), and only same-token actions are loop-suppressed —
+    # the native `release` event fires and on_release_published's release-event path
+    # handles tag + prerelease (the same path the .github App-token side always used).
+    # The old dispatch step would now double-fire alongside the event, and 403s under
+    # the bot token (ploeg run 48 precedent).
 
     # Mirror the just-cut release onto the GitHub mirror's Releases tab. Forgejo stays the SOLE release
     # authority (it decided the version + created the canonical Release); this only REFLECTS that object
