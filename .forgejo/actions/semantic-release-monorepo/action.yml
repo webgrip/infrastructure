@@ -185,24 +185,32 @@ runs:
         # config always wins via cosmiconfig regardless, so plugin selection lives in the config.)
         #
         # Retry loop: when several images release from one push, each job's @semantic-release/git
-        # version-bump push-back races the others — the loser is rejected non-fast-forward and,
-        # unretried, its release silently never cuts (runs 124/125/127; strategy.max-parallel is
-        # ignored by Forgejo, so jobs DO run concurrently). The race always loses in `prepare`,
-        # BEFORE the tag exists, so a retry is safe: hard-reset onto the moved main (dropping the
-        # stray local bump commit from the failed attempt) and rerun. The rerun's verifyRelease
-        # build re-uses the still-warm buildx builder, so it's cheap.
+        # version-bump push-back races the others (strategy.max-parallel is ignored by Forgejo,
+        # so jobs DO run concurrently). The race has TWO symptoms, both losing BEFORE the tag
+        # exists, so a hard-reset onto the moved main + rerun is safe:
+        #   - non-fast-forward: the push-back itself is rejected, rc != 0 (runs 124/125/127)
+        #   - behind-remote: semantic-release's up-to-date check sees main moved by a sibling's
+        #     bump commit and exits 0 WITHOUT publishing ("The local branch main is behind the
+        #     remote one") — run 141 silently dropped mkdocs-runner and techdocs-runner 1.0.1
+        #     this way, because an rc-only check treats it as success.
+        # The rerun's verifyRelease build re-uses the still-warm buildx builder, so it's cheap.
         for attempt in 1 2 3; do
           set +e
           npx semantic-release 2>&1 | tee /tmp/semrel.log
           rc=${PIPESTATUS[0]}
           set -e
-          [ "$rc" -eq 0 ] && break
-          if [ "$attempt" -lt 3 ] && grep -Eq 'fetch first|non-fast-forward' /tmp/semrel.log; then
-            echo "::warning::version-bump push-back raced a concurrent release job (attempt ${attempt}); resetting onto updated main and retrying"
+          if [ "$rc" -eq 0 ] && ! grep -q 'is behind the remote one' /tmp/semrel.log; then
+            break
+          fi
+          if [ "$attempt" -lt 3 ] && grep -Eq 'fetch first|non-fast-forward|is behind the remote one' /tmp/semrel.log; then
+            echo "::warning::a concurrent release job moved ${GITHUB_REF_NAME} mid-run (attempt ${attempt}); resetting onto the updated branch and retrying"
             git -C "$GITHUB_WORKSPACE" fetch origin "$GITHUB_REF_NAME"
             git -C "$GITHUB_WORKSPACE" reset --hard "origin/$GITHUB_REF_NAME"
             continue
           fi
+          # Retries exhausted or a non-retryable error. rc can still be 0 here (behind-remote on
+          # the last attempt) — that's a DROPPED release, not a success; fail loudly.
+          [ "$rc" -eq 0 ] && rc=1
           exit "$rc"
         done
 
