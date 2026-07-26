@@ -1,3 +1,4 @@
+# Release re-entry touch: run 141 sibling-bump race (mkdocs/techdocs) / run 135 daemon load (rust-releaser).
 ARG REGISTRY_GHCR=ghcr.io
 ARG TECHDOCS_BUILDER=${REGISTRY_GHCR}/webgrip/techdocs-builder:1.2.7@sha256:ac891abd9e03fe3384b4d9d48f448f268aa7d8250ceb2a0c4a26029569df5632
 FROM ${TECHDOCS_BUILDER} AS techdocs

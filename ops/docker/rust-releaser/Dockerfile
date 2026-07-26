@@ -1,3 +1,4 @@
+# Release re-entry touch: run 141 sibling-bump race (mkdocs/techdocs) / run 135 daemon load (rust-releaser).
 ###############################################################################
 # Base image: Node 22 on Debian 12 (bookworm-slim)
 ###############################################################################
