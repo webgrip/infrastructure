@@ -71,6 +71,17 @@ RUN curl -fsSL "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz" \
     rm -rf /tmp/linux-amd64 && \
     helm version --short
 
+# yq: the shared semantic-release config (manifest:'helm') bumps Chart.yaml version/appVersion
+# with it — without yq on the runner, helm-repo releases die in prepare with "yq: not found"
+# (common-charts run 3, exit 127). The composites carry a download fallback; baking it here
+# makes that a no-op.
+# renovate: datasource=github-releases depName=mikefarah/yq
+ARG YQ_VERSION=4.44.3
+RUN curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64" \
+      -o /usr/local/bin/yq && \
+    chmod 0755 /usr/local/bin/yq && \
+    yq --version
+
 # https://github.com/orgs/community/discussions/177903
 # This "fixes" a "bug" that causes errors on self-hosted runners when runner ghcp agents workloads
 # The problem is that the workload expects codeql to be installed, but it's not present by default
