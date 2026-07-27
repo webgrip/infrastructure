@@ -201,7 +201,10 @@ runs:
         # The rerun's verifyRelease build re-uses the still-warm buildx builder, so it's cheap.
         for attempt in 1 2 3; do
           set +e
-          npx semantic-release 2>&1 | tee /tmp/semrel.log
+          # Direct binary, NOT `npx`: npx reifies node_modules from the dep-less --no-save
+          # package.json and prunes @webgrip/semantic-release-config + semantic-release-monorepo as
+          # extraneous → "Cannot find module" (the shared composite hit this: erfbeeld runs 116/1069).
+          ./node_modules/.bin/semantic-release 2>&1 | tee /tmp/semrel.log
           rc=${PIPESTATUS[0]}
           set -e
           if [ "$rc" -eq 0 ] && ! grep -q 'is behind the remote one' /tmp/semrel.log; then
