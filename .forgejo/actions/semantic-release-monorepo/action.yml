@@ -176,8 +176,13 @@ runs:
         forge_host="${forge_url#http*://}"
         npm config set "@webgrip:registry" "${forge_url}/api/packages/webgrip/npm/"
         npm config set "//${forge_host}/api/packages/webgrip/npm/:_authToken" "${GITEA_TOKEN}"
+        # semantic-release-monorepo is an install-on-demand PEER of the config since its 1.1.0
+        # (npm-audit cleanup demoted it, assuming no org repo used monorepo mode — every image
+        # train here does; run 153 failed on the config's fail-loud guard). ^8.0.2 mirrors the
+        # range the config bundled through 1.0.x and now carries as a devDependency.
         npm install --no-save --no-package-lock \
-          "@webgrip/semantic-release-config@${{ inputs.config-version }}"
+          "@webgrip/semantic-release-config@${{ inputs.config-version }}" \
+          "semantic-release-monorepo@^8.0.2"
 
         # cwd is the package dir, so semantic-release discovers ops/docker/<image>/.releaserc.cjs
         # (a makeConfig() from @webgrip/semantic-release-config). GITEA_URL is set above, so it selects
