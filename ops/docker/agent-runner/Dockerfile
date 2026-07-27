@@ -59,6 +59,9 @@ ARG SKILLS_CORE="guard-secrets adr-writer vikunja-product-owner skill-usage"
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
     OPENHANDS_SUPPRESS_BANNER=1 \
+    # headless runner: dependency DeprecationWarnings (authlib->joserfc et al) are
+    # upstream's to fix and only pollute the run logs here.
+    PYTHONWARNINGS=ignore::DeprecationWarning \
     # uv: link tool executables into a PATH dir, use the base image's CPython, no network
     # Python fetches, no build cache layer.
     UV_TOOL_BIN_DIR=/usr/local/bin \
@@ -91,7 +94,12 @@ RUN AGENT_STORE="$(find /root/.local/share/uv/tools/openhands -name agent_store.
  && sed -i 's/load_public_skills=True/load_public_skills=False/' "${AGENT_STORE}" \
  && grep -q 'load_public_skills=False' "${AGENT_STORE}" \
  && ! grep -q 'load_public_skills=True' "${AGENT_STORE}" \
- && openhands --version
+ # Bake the version banner: `openhands --version` at runtime is a full cold import
+ # of the CLI tree — measured at 2m20s under the in-cluster worker's CPU limit
+ # (ploeg silver run, 2026-07-27) just to log one line. The entrypoint cats this
+ # file instead. test -s keeps the broken-CLI build guard the invocation provided.
+ && openhands --version | head -1 > /etc/openhands-version \
+ && test -s /etc/openhands-version
 
 # LiteLLM (inside OpenHands) fetches its model-cost map from raw.githubusercontent.com
 # at startup; offline that's a wasted timeout before the documented fallback to the

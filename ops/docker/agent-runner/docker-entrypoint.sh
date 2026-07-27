@@ -51,7 +51,7 @@ revoke_key() {
 }
 
 if [[ -n "${LLM_API_KEY:-}" ]]; then
-  echo "openhands-runner: using caller-supplied LLM_API_KEY (no minting)" >&2
+  echo "openhands-runner: using caller-supplied LLM_API_KEY (mint/revoke owned by the caller)" >&2
 elif [[ -n "${LITELLM_MASTER_KEY:-}" ]]; then
   key_model="${LLM_MODEL#litellm_proxy/}"; key_model="${key_model#openai/}"
   body="$(KEY_MODELS="${LITELLM_KEY_MODELS:-$key_model}" \
@@ -93,7 +93,9 @@ else
 fi
 
 echo "openhands-runner: model=${LLM_MODEL} base=${LLM_BASE_URL} trace-id=${LLM_TRACE_ID}" >&2
-echo "openhands-runner: $(openhands --version 2>/dev/null | head -1)" >&2
+# Baked at image build — invoking `openhands --version` here cold-imports the whole
+# CLI tree (2m20s at the in-cluster CPU limit). Fallback covers pre-bake images.
+echo "openhands-runner: $(cat /etc/openhands-version 2>/dev/null || openhands --version 2>/dev/null | head -1)" >&2
 
 # --- skills loadout (Slice E / #268) -------------------------------------------------------
 # OpenHands self-registers any directory under $HOME/.openhands/skills/installed (its metadata
