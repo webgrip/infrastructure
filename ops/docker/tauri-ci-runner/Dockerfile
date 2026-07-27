@@ -9,7 +9,7 @@
 # this layer is exactly the GUI toolkit delta.
 ARG REGISTRY_WEBGRIP=harbor.webgrip.dev/webgrip
 # renovate: datasource=docker depName=harbor.webgrip.dev/webgrip/rust-ci-runner
-ARG RUST_CI_RUNNER_VERSION=1.3.0
+ARG RUST_CI_RUNNER_VERSION=1.4.0
 
 FROM ${REGISTRY_WEBGRIP}/rust-ci-runner:${RUST_CI_RUNNER_VERSION}
 
