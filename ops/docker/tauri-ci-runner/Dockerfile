@@ -1,3 +1,4 @@
+# Release re-entry: run 158 died on fringe/VIP contention (hardened in homelab-cluster#444).
 # Tauri CI job image: rust-ci-runner + the webkit2gtk/gtk3 headers a Tauri 2 shell
 # compile-gate needs. Kept as a SEPARATE image on purpose — these are ~600 MB of GUI
 # headers only the tauri gates want; baking them into the shared rust-ci-runner would

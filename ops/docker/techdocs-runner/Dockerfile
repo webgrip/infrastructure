@@ -1,3 +1,4 @@
+# Release re-entry: run 158 died on fringe/VIP contention (hardened in homelab-cluster#444).
 # First-party base straight from the Harbor webgrip project (same pattern as tauri-ci-runner):
 # the old ${REGISTRY_GHCR} route stopped receiving new techdocs-builder versions when the GHCR
 # mirror was disabled, freezing this base at 1.2.7 while Harbor moved on.
