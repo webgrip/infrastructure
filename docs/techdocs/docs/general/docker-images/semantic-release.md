@@ -109,8 +109,10 @@ That keeps environment needs in an image instead of in ad-hoc job steps.
 
 ## Maintenance
 
-The npm dependency sets live in `ops/docker/semantic-release*/toolchain/` — **not** in each image
-dir's own `package.json`, which is the release manifest for that image's train. See
+Each image dir's `package.json` is both the release manifest for that image's train (its `name` is
+the tag prefix, its `version` is bumped by semantic-release) and the toolchain manifest whose
+`dependencies` are baked in. npm tolerates both collisions that creates — a root version ahead of
+the lockfile's, and a package depending on its own name. See
 [`ops/docker/semantic-release/README.md`](../../../../../ops/docker/semantic-release/README.md) for
 how to regenerate a lockfile.
 

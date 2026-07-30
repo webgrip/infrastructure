@@ -30,23 +30,29 @@ run, and install nothing. `NODE_PATH` is not decoration; a consumer's `.releaser
 workspace only unless `NODE_PATH` says otherwise.
 
 Unlike every other image here, the npm dependency set is **locked** (`npm ci` against a committed
-`package-lock.json` in `toolchain/`). That is the whole point: the thing that decides version
-numbers must not be re-resolved from the network on every release.
+`package-lock.json`). That is the whole point: the thing that decides version numbers must not be
+re-resolved from the network on every release.
 
-Note the two `package.json` files per directory and don't confuse them:
+Each directory's `package.json` is **both** things at once, which is unusual enough to say plainly:
 
-- `package.json` — the **release manifest** for this image's own train (name → tag prefix, version
-  bumped by `@semantic-release/git`). Same as every other image dir here.
-- `toolchain/package.json` + `toolchain/package-lock.json` — the **toolchain** baked into the image.
+- the **release manifest** for this image's train — its `name` is the tag prefix, its `version` is
+  bumped by `@semantic-release/git` — same as every other image dir here, and
+- the **toolchain manifest**, whose `dependencies` + `package-lock.json` are what `npm ci` bakes in.
+
+npm does not mind either collision this creates. It tolerates a root `version` ahead of the
+lockfile's, which is the state every release leaves behind (verified: build with `package.json` at
+9.9.9 against a 0.0.0 lock succeeds). And it accepts a package that depends on its own name, which
+`semantic-release-monorepo` and `semantic-release-rust` both do, since each image's name is also a
+package name. Renovate owns the dependencies; semantic-release owns the version.
 
 ## Changing the toolchain
 
-Edit `toolchain/package.json`, regenerate the lockfile, commit both:
+Edit the `dependencies` in the image dir's `package.json`, regenerate the lockfile, commit both:
 
 ```bash
-cd ops/docker/semantic-release/toolchain
+cd ops/docker/semantic-release
 docker run --rm -v "$PWD:/w" -w /w docker.io/library/node:24-bookworm-slim \
-  bash -c 'NPM_CONFIG_USERCONFIG=/w/.npmrc npm install --package-lock-only --omit=dev --no-audit --no-fund'
+  bash -c 'npm install --package-lock-only --omit=dev --no-audit --no-fund'
 ```
 
 Renovate does this for you and groups all three directories into one PR. A **major** bump of
@@ -68,15 +74,6 @@ docker build -t sr ops/docker/semantic-release
 docker build -t sr-monorepo ops/docker/semantic-release-monorepo
 docker run --rm sr-monorepo -c 'cd /tmp && node -p "require(\"semantic-release/package.json\").version"'
 ```
-
-## A subdirectory here is only safe because of `max-level: 1`
-
-These are the only image dirs with a nested directory, and that nesting cut a bogus **root** release
-the first time it ran (`v2.2.0`, run 166). `on_source_change.yml` calls
-`determine-changed-directories` with `max-level: 1` so one image is one immediate child of
-`ops/docker`; the reusable's default of `2` turns a file in `ops/docker/<image>/<subdir>/` into a
-phantom image dir, which — having no `.releaserc.cjs` — falls through to semantic-release's default
-`v${version}` tagFormat. Do not remove that input.
 
 ## Releasing
 

@@ -1,5 +1,19 @@
 {
   "name": "semantic-release-rust",
   "version": "0.0.0",
-  "private": true
+  "private": true,
+  "description": "Standard toolchain + semantic-release-cargo",
+  "dependencies": {
+    "@saithodev/semantic-release-gitea": "2.1.0",
+    "@semantic-release/changelog": "7.0.0",
+    "@semantic-release/commit-analyzer": "13.0.1",
+    "@semantic-release/exec": "7.1.0",
+    "@semantic-release/git": "11.0.1",
+    "@semantic-release/release-notes-generator": "14.1.1",
+    "@webgrip/semantic-release-config": "1.1.0",
+    "conventional-changelog-conventionalcommits": "10.2.1",
+    "semantic-release": "25.0.8",
+    "semantic-release-cargo": "2.4.2",
+    "semantic-release-helm3": "2.10.0"
+  }
 }

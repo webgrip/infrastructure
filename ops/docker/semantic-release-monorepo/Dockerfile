@@ -23,8 +23,13 @@ ARG DEBIAN_CODENAME=bookworm
 FROM ${REGISTRY_DOCKERHUB}/library/node:${NODE_VERSION}-${DEBIAN_CODENAME}-slim AS deps
 WORKDIR /opt/semrel
 # @webgrip packages come from the Forgejo registry (anonymous read; no credential in .npmrc).
-COPY toolchain/.npmrc /tmp/npmrc
-COPY toolchain/package.json toolchain/package-lock.json ./
+# NB: this dir's package.json is BOTH the release manifest (its name is the tag prefix, its version
+# is bumped by @semantic-release/git) and the toolchain manifest. npm does not mind: it tolerates a
+# root version ahead of the lock's, which is the state every release leaves behind, and it accepts a
+# package that depends on its own name — which semantic-release-monorepo and semantic-release-rust
+# both do, since the image name is also a package name.
+COPY .npmrc /tmp/npmrc
+COPY package.json package-lock.json ./
 RUN NPM_CONFIG_USERCONFIG=/tmp/npmrc npm ci --omit=dev --no-audit --no-fund
 
 ###############################################################################
