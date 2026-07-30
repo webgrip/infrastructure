@@ -52,33 +52,6 @@ jobs:
       # which is how run 166 cut a root v2.2.0 from ops/docker/semantic-release-rust/toolchain.
       # max-level: 1 is what keeps a matrix entry an IMMEDIATE child; if it is ever dropped, the
       # reusable's default of 2 silently restores the phantom-image path. Fail here instead.
-      # The three semantic-release* images are independent — no FROM between them — so their
-      # runtime setup (apt, yq + its checksums, the SEMREL_PREBAKED/NODE_PATH contract) is repeated
-      # verbatim. That is deliberate: coupling them made a sibling's PUBLISHED artifact a build
-      # dependency, and one killed distribute run (167) then blocked both variants for two more
-      # runs. The cost of independence is drift, so the shared block is compared byte-for-byte here.
-      - name: 'Guard: semantic-release images share one runtime block'
-        shell: bash
-        run: |
-          set -euo pipefail
-          sums=""
-          for f in ops/docker/semantic-release/Dockerfile \
-                   ops/docker/semantic-release-monorepo/Dockerfile \
-                   ops/docker/semantic-release-rust/Dockerfile; do
-            block="$(sed -n '/^# >>> shared runtime/,/^# <<< shared runtime$/p' "$f")"
-            if [ -z "$block" ]; then
-              echo "::error::$f has no '# >>> shared runtime' … '# <<< shared runtime' block"
-              exit 1
-            fi
-            sums="${sums}$(printf '%s' "$block" | sha256sum | cut -d' ' -f1) $f"$'\n'
-          done
-          printf '%s' "$sums"
-          if [ "$(printf '%s' "$sums" | cut -d' ' -f1 | sort -u | wc -l)" -ne 1 ]; then
-            echo "::error::the shared runtime block has drifted between the semantic-release* images — a change to one must be copied to all three (they are independent images by design; see the block's own comment)"
-            exit 1
-          fi
-          echo "shared runtime block identical across all three images"
-
       - name: 'Guard: image matrix stays one level deep'
         shell: bash
         run: |

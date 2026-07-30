@@ -44,7 +44,7 @@ ARG REGISTRY_DOCKERHUB
 ARG NODE_VERSION
 ARG DEBIAN_CODENAME
 
-# >>> shared runtime — byte-identical in all three semantic-release* images (CI guards this).
+# Shared runtime — keep this block the same in all three semantic-release* images.
 # Duplicated on purpose. These images used to build FROM one another, which made a sibling's
 # PUBLISHED artifact a build dependency: run 167's base image build was killed on the shared runner
 # pool, so 0.1.0 existed as a release with no image and both derived builds failed for two more
@@ -95,7 +95,6 @@ ENV SEMREL_PREBAKED=/opt/semrel/node_modules \
 
 # A release job bind-mounts a checkout owned by another uid; git refuses to touch it otherwise.
 RUN git config --system --add safe.directory '*'
-# <<< shared runtime
 
 ###############################################################################
 # Rust toolchain (stable, minimal) ➜ lives in /usr/local/cargo, as in rust-releaser

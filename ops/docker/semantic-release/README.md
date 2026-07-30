@@ -13,8 +13,8 @@ They were briefly chained (`monorepo`/`rust` building `FROM` `semantic-release`)
 sibling's *published* artifact a build dependency: run 167's base image build was killed on the
 shared runner pool, so `0.1.0` existed as a release with no image and both variants failed for two
 more runs on a `FROM` that could never resolve. Independent images cannot fail that way. The price
-is a runtime block repeated verbatim in all three Dockerfiles, which `on_source_change.yml` compares
-byte-for-byte on every push — change it in one, change it in all three. It costs text, not bytes:
+is a runtime block repeated in all three Dockerfiles — change it in one, change it in all three. It
+costs text, not bytes:
 identical instructions on an identical base produce identical layer digests, so Harbor stores them
 once and a runner pulls them once.
 

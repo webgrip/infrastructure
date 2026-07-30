@@ -33,9 +33,9 @@ Full rationale, and why these are built here rather than in the repo whose workf
 **None of them builds `FROM` another.** They were chained once, and it made a sibling's *published*
 artifact a build dependency: a killed distribute run left `semantic-release:0.1.0` as a release with
 no image, and both variants then failed for two runs on a `FROM` that could never resolve. The
-runtime block is instead repeated verbatim in all three Dockerfiles and compared byte-for-byte by
-`on_source_change.yml`. Identical instructions on an identical base produce identical layer digests,
-so the duplication costs Dockerfile text, not registry or pull bytes.
+runtime block is instead repeated in all three Dockerfiles, and must be kept in step by hand.
+Identical instructions on an identical base produce identical layer digests, so the duplication
+costs Dockerfile text, not registry or pull bytes.
 
 ## Image details
 
