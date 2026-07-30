@@ -1,7 +1,7 @@
 # semantic-release Toolchain
 
-The release toolchain every webgrip release job runs in: a base image plus two derived variants,
-each with a **locked** semantic-release dependency set baked in.
+The release toolchain every webgrip release job runs in: three independent images, each with a
+**locked** semantic-release dependency set baked in.
 
 ## Purpose
 
@@ -24,21 +24,24 @@ Full rationale, and why these are built here rather than in the repo whose workf
 
 ## The family
 
-| Image | Adds | Consumed by |
-|-------|------|-------------|
+| Image | Contents | Consumed by |
+|-------|----------|-------------|
 | `webgrip/semantic-release` | semantic-release 25, `@webgrip/semantic-release-config`, plugin set, `semantic-release-helm3`, node, git, yq | `webgrip/workflows` → `semantic-release.yml` |
-| `webgrip/semantic-release-monorepo` | `semantic-release-monorepo` | `semantic-release-monorepo.yml` |
-| `webgrip/semantic-release-rust` | cargo (rustup), `semantic-release-cargo` | the `rust-semantic-release` composite |
+| `webgrip/semantic-release-monorepo` | the same, plus `semantic-release-monorepo` | `semantic-release-monorepo.yml` |
+| `webgrip/semantic-release-rust` | the same, plus cargo (rustup) and `semantic-release-cargo` | the `rust-semantic-release` composite |
 
-The derived images build `FROM` the base, pinning it via the Renovate-watched
-`SEMANTIC_RELEASE_VERSION` build arg, so a derived image never floats onto a base it was not built
-against.
+**None of them builds `FROM` another.** They were chained once, and it made a sibling's *published*
+artifact a build dependency: a killed distribute run left `semantic-release:0.1.0` as a release with
+no image, and both variants then failed for two runs on a `FROM` that could never resolve. The
+runtime block is instead repeated in all three Dockerfiles, and must be kept in step by hand.
+Identical instructions on an identical base produce identical layer digests, so the duplication
+costs Dockerfile text, not registry or pull bytes.
 
 ## Image details
 
 | Property | Value |
 |----------|-------|
-| **Base image** | `node:24-bookworm-slim` (derived: `webgrip/semantic-release:<version>`) |
+| **Base image** | `node:24-bookworm-slim` (all three) |
 | **Size** | ~600MB base; the rust variant adds a minimal cargo toolchain |
 | **Architecture** | AMD64 (the in-cluster build is amd64-only; see homelab-cluster ADR-0036) |
 | **Registry** | `harbor.webgrip.dev/webgrip/semantic-release*` |
@@ -51,8 +54,8 @@ against.
 | **semantic-release** | 25.0.8 | The major the composites target; asserted at build time |
 | **@webgrip/semantic-release-config** | 1.1.0 | The shared config, so no consumer resolves it at release time |
 | **semantic-release-helm3** | 2.10.0 | Inline configs still reference it; the shared config does not depend on it |
-| **semantic-release-monorepo** | 8.0.2 | *monorepo variant only* — un-bundled from the shared config on purpose |
-| **semantic-release-cargo** | 2.4.2 | *rust variant only* |
+| **semantic-release-monorepo** | 8.0.2 | *monorepo image only* — un-bundled from the shared config on purpose |
+| **semantic-release-cargo** | 2.4.2 | *rust image only* |
 | **yq** | v4.44.3 | Chart.yaml version/appVersion bumps; checksum-verified at build |
 | **node** | 24 | semantic-release 25 requires `^22.14 \|\| >=24.10` |
 
@@ -106,12 +109,14 @@ That keeps environment needs in an image instead of in ad-hoc job steps.
 
 ## Maintenance
 
-The npm dependency sets live in `ops/docker/semantic-release*/toolchain/` — **not** in each image
-dir's own `package.json`, which is the release manifest for that image's train. See
+Each image dir's `package.json` is both the release manifest for that image's train (its `name` is
+the tag prefix, its `version` is bumped by semantic-release) and the toolchain manifest whose
+`dependencies` are baked in. npm tolerates both collisions that creates — a root version ahead of
+the lockfile's, and a package depending on its own name. See
 [`ops/docker/semantic-release/README.md`](../../../../../ops/docker/semantic-release/README.md) for
 how to regenerate a lockfile.
 
 Renovate groups all three toolchains into one PR and they must stay on the same semantic-release
-version. A **major** bump is expected to fail the build: each Dockerfile asserts the major that
+version. The three images version and release independently — there is nothing to sequence. A **major** bump is expected to fail the build: each Dockerfile asserts the major that
 `webgrip/workflows`' composites target, so moving to 26 is a deliberate, coordinated change rather
 than something that arrives while nobody is looking.
