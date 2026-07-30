@@ -35,9 +35,21 @@
       ],
       "matchFileNames": [
         "ops/docker/rust-ci-runner/Dockerfile",
-        "ops/docker/rust-releaser/Dockerfile"
+        "ops/docker/rust-releaser/Dockerfile",
+        "ops/docker/semantic-release/Dockerfile",
+        "ops/docker/semantic-release-monorepo/Dockerfile",
+        "ops/docker/semantic-release-rust/Dockerfile"
       ],
       "enabled": false
+    },
+    {
+      "description": "The release toolchain (webgrip/workflows ADR-0005) is the one npm dependency set in this repo that is LOCKED, because it decides every repo's version numbers. It upgrades as ONE reviewed PR across all three images — they must stay on the same semantic-release version, since the derived images replace the base's tree wholesale. A MAJOR bump is expected to FAIL the image build: each Dockerfile asserts the major that webgrip/workflows' composites target.",
+      "matchFileNames": [
+        "ops/docker/semantic-release*/toolchain/package.json"
+      ],
+      "groupName": "semantic-release toolchain",
+      "semanticCommitType": "fix",
+      "semanticCommitScope": "toolchain"
     },
     {
       "description": "Annotated ARGs hold bare versions that are reused outside the FROM line (rustup default, tag suffix composition); appending @sha256 digests would corrupt them.",

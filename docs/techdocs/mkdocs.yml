@@ -16,6 +16,7 @@ nav:
       - Playwright Runner: general/docker-images/playwright-runner.md
       - ACT Runner: general/docker-images/act-runner.md
       - Rust Releaser: general/docker-images/rust-releaser.md
+      - semantic-release Toolchain: general/docker-images/semantic-release.md
   - CI/CD Pipeline:
       - Automated Building: general/cicd/automated-building.md
       - Docker Registry: general/cicd/docker-registry.md
