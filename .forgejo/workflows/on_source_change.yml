@@ -47,6 +47,21 @@ jobs:
           [ "$missing" -eq 0 ] && echo "all ops/docker/* dirs carry a .releaserc.cjs"
           exit "$missing"
 
+      # Second half of the same guarantee, and the one the loop above cannot see. It iterates
+      # ops/docker/*/ only, so a matrix entry for ops/docker/<image>/<subdir> is invisible to it —
+      # which is how run 166 cut a root v2.2.0 from ops/docker/semantic-release-rust/toolchain.
+      # max-level: 1 is what keeps a matrix entry an IMMEDIATE child; if it is ever dropped, the
+      # reusable's default of 2 silently restores the phantom-image path. Fail here instead.
+      - name: 'Guard: image matrix stays one level deep'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! grep -qE "^\s*max-level: '1'" .forgejo/workflows/on_source_change.yml; then
+            echo "::error::changed-images must pass max-level: '1' — without it a file inside an image dir's subdirectory becomes its own release train and cuts a ROOT tag (run 166: v2.2.0)"
+            exit 1
+          fi
+          echo "changed-images pins max-level: 1"
+
   # NB: the caller job id must NOT equal the reusable workflow's inner job id. Forgejo v15
   # flattens an expanded reusable workflow's inner jobs into the caller's graph; when the ids
   # collide the resulting plan has no dependency-free job and Forgejo rejects the workflow with
@@ -58,6 +73,16 @@ jobs:
     uses: webgrip/workflows/.forgejo/workflows/determine-changed-directories.yml@546c0e02f6ca473419b9a8aa48e430304efaeebf # main
     with:
       inside-dir: 'ops/docker'
+      # max-level MUST be 1: one image is one IMMEDIATE child of ops/docker. The reusable defaults
+      # to 2, which truncates changed paths at two segments instead of one — so a file inside a
+      # SUBDIRECTORY of an image dir yields `ops/docker/<image>/<subdir>` as its own matrix entry:
+      # a phantom image. Run 166:
+      # ops/docker/semantic-release-rust/toolchain/package-lock.json produced a release train named
+      # `toolchain`, which (having no .releaserc.cjs of its own) fell through to semantic-release's
+      # default tagFormat and cut a ROOT release, v2.2.0, on this repository. That is exactly what
+      # the guard-releaserc job above exists to prevent, arriving by a route the guard cannot see:
+      # it only iterates ops/docker/*/.
+      max-level: '1'
 
   release-per-image:
     name: 'Release'

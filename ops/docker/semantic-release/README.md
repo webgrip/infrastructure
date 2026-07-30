@@ -54,12 +54,21 @@ depends on which reusable workflow it calls.
 The derived images build `FROM` the published base, so build and tag the base first:
 
 ```bash
-docker build -t harbor.webgrip.dev/webgrip/semantic-release:1.0.0 ops/docker/semantic-release
+docker build -t harbor.webgrip.dev/webgrip/semantic-release:0.1.0 ops/docker/semantic-release
 docker build -t sr-monorepo ops/docker/semantic-release-monorepo
 docker run --rm sr-monorepo -c 'cd /tmp && node -p "require(\"semantic-release/package.json\").version"'
 ```
 
 Or point the derived build at a local tag: `--build-arg REGISTRY_WEBGRIP=<prefix>`.
+
+## A subdirectory here is only safe because of `max-level: 1`
+
+These are the only image dirs with a nested directory, and that nesting cut a bogus **root** release
+the first time it ran (`v2.2.0`, run 166). `on_source_change.yml` calls
+`determine-changed-directories` with `max-level: 1` so one image is one immediate child of
+`ops/docker`; the reusable's default of `2` turns a file in `ops/docker/<image>/<subdir>/` into a
+phantom image dir, which — having no `.releaserc.cjs` — falls through to semantic-release's default
+`v${version}` tagFormat. Do not remove that input.
 
 ## Releasing
 
