@@ -11,8 +11,9 @@
 # install nothing. See webgrip/workflows ADR-0005.
 #
 # The dependency set is LOCKED — npm ci against toolchain/package-lock.json. That is the whole
-# point of the image, so the lockfile is committed and Renovate owns it. Derived images
-# (semantic-release-monorepo, semantic-release-rust) build FROM this one.
+# point of the image, so the lockfile is committed and Renovate owns it. The two variants
+# (semantic-release-monorepo, semantic-release-rust) are INDEPENDENT images that repeat the runtime
+# block below verbatim rather than building FROM this one; see that block for why.
 ###############################################################################
 ARG REGISTRY_DOCKERHUB=docker.io
 # renovate: datasource=docker depName=docker.io/library/node versioning=docker
@@ -40,6 +41,14 @@ ARG IMAGE_REVISION=unknown
 ARG REGISTRY_DOCKERHUB
 ARG NODE_VERSION
 ARG DEBIAN_CODENAME
+
+# >>> shared runtime — byte-identical in all three semantic-release* images (CI guards this).
+# Duplicated on purpose. These images used to build FROM one another, which made a sibling's
+# PUBLISHED artifact a build dependency: run 167's base image build was killed on the shared runner
+# pool, so 0.1.0 existed as a release with no image and both derived builds failed for two more
+# runs on a FROM that could never resolve. Independent images cannot fail that way. The duplication
+# costs text, not bytes: identical instructions on an identical base produce identical layer
+# digests, so Harbor stores them once and a runner pulls them once.
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update -yq && \
@@ -49,11 +58,9 @@ RUN apt-get update -yq && \
         curl \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-###############################################################################
 # yq — required by @webgrip/semantic-release-config's Chart.yaml version/appVersion bump and by
 # repo prepareCmds. Downloading and checksum-verifying a binary is BUILD work; it used to happen
 # inside every release job in every repo.
-###############################################################################
 # renovate: datasource=github-releases depName=mikefarah/yq
 ARG YQ_VERSION=v4.44.3
 RUN set -eux; \
@@ -76,22 +83,24 @@ RUN set -eux; \
     chmod +x /usr/local/bin/yq; \
     yq --version
 
-COPY --from=deps /opt/semrel /opt/semrel
-
-# SEMREL_PREBAKED is the contract; PATH and NODE_PATH are what make it usable. NODE_PATH is not
-# optional: a consumer's .releaserc.cjs does a bare require('@webgrip/semantic-release-config')
-# from its own checkout, which resolves against that workspace only unless NODE_PATH says otherwise.
+# SEMREL_PREBAKED is the contract with webgrip/workflows' composites; PATH and NODE_PATH are what
+# make it usable. NODE_PATH is not optional: a consumer's .releaserc.cjs does a bare
+# require('@webgrip/semantic-release-config') from its own checkout, which resolves against that
+# workspace only unless NODE_PATH says otherwise.
 ENV SEMREL_PREBAKED=/opt/semrel/node_modules \
     NODE_PATH=/opt/semrel/node_modules \
     PATH=/opt/semrel/node_modules/.bin:$PATH
 
 # A release job bind-mounts a checkout owned by another uid; git refuses to touch it otherwise.
 RUN git config --system --add safe.directory '*'
+# <<< shared runtime
+
+COPY --from=deps /opt/semrel /opt/semrel
 
 # Build-time proof of the contract the composites rely on: the major they target is what is
-# installed, and a bare require() of the shared config resolves from an arbitrary cwd. A lockfile
+# installed, and a bare require() resolves from an arbitrary cwd (i.e. NODE_PATH works). A lockfile
 # bump that breaks either fails the build instead of a release — including a semantic-release MAJOR
-# bump, which must be a deliberate change to this image, its consumers' expectations and their tags.
+# bump, which must be a deliberate change to these images and their consumers together.
 RUN cd /tmp \
  && node -e "const v=require('semantic-release/package.json').version; if(v.split('.')[0]!=='25') throw new Error('expected semantic-release 25.x, got '+v); console.log('semantic-release '+v)" \
  && node -e "require.resolve('@webgrip/semantic-release-config')" \

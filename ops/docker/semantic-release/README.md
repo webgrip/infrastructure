@@ -1,12 +1,22 @@
 # semantic-release toolchain images
 
-The toolchain every webgrip release job runs in. One base image and two derived ones:
+The toolchain every webgrip release job runs in. Three INDEPENDENT images — none builds `FROM`
+another:
 
 | Image | Adds | Consumed by |
 | ----- | ---- | ----------- |
 | `harbor.webgrip.dev/webgrip/semantic-release` | semantic-release 25, `@webgrip/semantic-release-config`, the plugin set, `semantic-release-helm3`, node, git, yq | `webgrip/workflows` → `semantic-release.yml` |
 | `…/semantic-release-monorepo` | `semantic-release-monorepo` | `semantic-release-monorepo.yml` |
 | `…/semantic-release-rust` | cargo (rustup), `semantic-release-cargo` | the `rust-semantic-release` composite |
+
+They were briefly chained (`monorepo`/`rust` building `FROM` `semantic-release`), and that made a
+sibling's *published* artifact a build dependency: run 167's base image build was killed on the
+shared runner pool, so `0.1.0` existed as a release with no image and both variants failed for two
+more runs on a `FROM` that could never resolve. Independent images cannot fail that way. The price
+is a runtime block repeated verbatim in all three Dockerfiles, which `on_source_change.yml` compares
+byte-for-byte on every push — change it in one, change it in all three. It costs text, not bytes:
+identical instructions on an identical base produce identical layer digests, so Harbor stores them
+once and a runner pulls them once.
 
 Rationale, and the reason these are not built in `webgrip/workflows`:
 [webgrip/workflows ADR-0005](https://forgejo.webgrip.dev/webgrip/workflows/src/branch/main/docs/adrs/0005-semantic-release-toolchain-image.md).
@@ -44,22 +54,20 @@ semantic-release is *expected to fail the build*: each Dockerfile asserts the ma
 `webgrip/workflows`' composites target, so moving to 26 has to be a deliberate change to these
 images, their consumers and their tags — not something that arrives while nobody is looking.
 
-Keep the three lockfiles on the same semantic-release version. The derived images replace the
-base's tree wholesale (one resolution root — semantic-release resolves plugins relative to its own
-install and the cwd, not via `NODE_PATH`), so a mismatch would mean a repo's toolchain silently
-depends on which reusable workflow it calls.
+Keep the three lockfiles on the same semantic-release version: each image installs its tree whole
+(one resolution root — semantic-release resolves plugins relative to its own install and the cwd,
+not via `NODE_PATH`), so a mismatch would mean a repo's toolchain silently depends on which
+reusable workflow it calls. Renovate groups them into one PR for exactly this reason.
 
 ## Building locally
 
-The derived images build `FROM` the published base, so build and tag the base first:
+Each image builds on its own, in any order:
 
 ```bash
-docker build -t harbor.webgrip.dev/webgrip/semantic-release:0.1.0 ops/docker/semantic-release
+docker build -t sr ops/docker/semantic-release
 docker build -t sr-monorepo ops/docker/semantic-release-monorepo
 docker run --rm sr-monorepo -c 'cd /tmp && node -p "require(\"semantic-release/package.json\").version"'
 ```
-
-Or point the derived build at a local tag: `--build-arg REGISTRY_WEBGRIP=<prefix>`.
 
 ## A subdirectory here is only safe because of `max-level: 1`
 
@@ -73,7 +81,5 @@ phantom image dir, which — having no `.releaserc.cjs` — falls through to sem
 ## Releasing
 
 Standard for this repo: a conventional commit under `ops/docker/<image>/` cuts
-`<image>-v<version>`, and the release event builds and pushes to Harbor. The base's version is
-pinned in each derived Dockerfile as `SEMANTIC_RELEASE_VERSION` (Renovate-watched), so a derived
-image never floats onto a base it was not built against — bump it deliberately, after the base is
-published.
+`<image>-v<version>`, and the release event builds and pushes to Harbor. The three images version
+independently — nothing to sequence, and a killed distribute run affects only its own image.

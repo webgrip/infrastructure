@@ -1,49 +1,103 @@
 ###############################################################################
 # semantic-release toolchain + semantic-release-monorepo, for per-package release trains
-# (webgrip/workflows' semantic-release-monorepo.yml).
 #
-# FROM the base toolchain image, so node, git, yq, the SEMREL_PREBAKED contract and the OCI
-# metadata are inherited rather than restated. The only difference is the locked dependency set:
-# it adds semantic-release-monorepo, which @webgrip/semantic-release-config deliberately does NOT
-# depend on (2026-07-26 security cleanup — it drags a legacy dep with findings, and bundling it in
-# the config would push it into every consumer's tree). The image carries it instead, so only the
-# repos that need it get it.
+# (webgrip/workflows' semantic-release-monorepo.yml.)
 #
-# The whole tree is REPLACED rather than layered on: semantic-release resolves plugins relative to
-# its own install and the cwd, not via NODE_PATH, so a second node_modules would not be found. One
-# resolution root, locked, is the only shape that cannot half-work.
+# Same locked toolchain as the semantic-release image, plus semantic-release-monorepo — which
+# @webgrip/semantic-release-config deliberately does NOT depend on (2026-07-26 security cleanup: it
+# drags a legacy dep with findings, and bundling it in the config would push it into every
+# consumer's tree). The image carries it instead, so only the repos that need it get it.
+#
+# The dependency tree is installed whole rather than layered onto the base image's: semantic-release
+# resolves plugins relative to its own install and the cwd, not via NODE_PATH, so a second
+# node_modules would not be found. One resolution root is the only shape that cannot half-work.
 ###############################################################################
 ARG REGISTRY_DOCKERHUB=docker.io
-ARG REGISTRY_WEBGRIP=harbor.webgrip.dev/webgrip
-# The base image's own release train cut 0.1.0 first (a fresh dir starts from a seeded 0.0.0, so a
-# feat lands as 0.1.0 — not 1.0.0). Renovate watches this; bump it deliberately after a base release.
-# renovate: datasource=docker depName=harbor.webgrip.dev/webgrip/semantic-release
-ARG SEMANTIC_RELEASE_VERSION=0.1.0
 # renovate: datasource=docker depName=docker.io/library/node versioning=docker
 ARG NODE_VERSION=24
 ARG DEBIAN_CODENAME=bookworm
 
 ###############################################################################
-# Locked toolchain (same node as the base image builds its own with)
+# Locked toolchain, built in a separate stage so npm's cache and metadata never reach the image
 ###############################################################################
 FROM ${REGISTRY_DOCKERHUB}/library/node:${NODE_VERSION}-${DEBIAN_CODENAME}-slim AS deps
 WORKDIR /opt/semrel
+# @webgrip packages come from the Forgejo registry (anonymous read; no credential in .npmrc).
 COPY toolchain/.npmrc /tmp/npmrc
 COPY toolchain/package.json toolchain/package-lock.json ./
 RUN NPM_CONFIG_USERCONFIG=/tmp/npmrc npm ci --omit=dev --no-audit --no-fund
 
 ###############################################################################
-FROM ${REGISTRY_WEBGRIP}/semantic-release:${SEMANTIC_RELEASE_VERSION}
+# Runtime: node (which also runs the JS actions in a container job), git, yq
+###############################################################################
+FROM ${REGISTRY_DOCKERHUB}/library/node:${NODE_VERSION}-${DEBIAN_CODENAME}-slim
 
 ARG IMAGE_CREATED=1970-01-01T00:00:00Z
 ARG IMAGE_VERSION=dev
 ARG IMAGE_REVISION=unknown
-ARG REGISTRY_WEBGRIP
-ARG SEMANTIC_RELEASE_VERSION
+ARG REGISTRY_DOCKERHUB
+ARG NODE_VERSION
+ARG DEBIAN_CODENAME
 
-RUN rm -rf /opt/semrel/node_modules
-COPY --from=deps /opt/semrel/node_modules /opt/semrel/node_modules
+# >>> shared runtime — byte-identical in all three semantic-release* images (CI guards this).
+# Duplicated on purpose. These images used to build FROM one another, which made a sibling's
+# PUBLISHED artifact a build dependency: run 167's base image build was killed on the shared runner
+# pool, so 0.1.0 existed as a release with no image and both derived builds failed for two more
+# runs on a FROM that could never resolve. Independent images cannot fail that way. The duplication
+# costs text, not bytes: identical instructions on an identical base produce identical layer
+# digests, so Harbor stores them once and a runner pulls them once.
+ENV DEBIAN_FRONTEND=noninteractive
 
+RUN apt-get update -yq && \
+    apt-get install -y --no-install-recommends \
+        git \
+        ca-certificates \
+        curl \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# yq — required by @webgrip/semantic-release-config's Chart.yaml version/appVersion bump and by
+# repo prepareCmds. Downloading and checksum-verifying a binary is BUILD work; it used to happen
+# inside every release job in every repo.
+# renovate: datasource=github-releases depName=mikefarah/yq
+ARG YQ_VERSION=v4.44.3
+RUN set -eux; \
+    arch="$(dpkg --print-architecture)"; \
+    # Checksums as published with the version pinned above (the release's own `checksums` asset).
+    # A Renovate bump lands here with no recorded hash: that WARNS rather than failing, so an
+    # automated bump cannot break the image build — but the warning is the signal to record the
+    # new pair.
+    case "${YQ_VERSION}_${arch}" in \
+      v4.44.3_amd64) yq_sha="a2c097180dd884a8d50c956ee16a9cec070f30a7947cf4ebf87d5f36213e9ed7" ;; \
+      v4.44.3_arm64) yq_sha="0e7e1524f68d91b3ff9b089872d185940ab0fa020a5a9052046ef10547023156" ;; \
+      *) yq_sha="" ;; \
+    esac; \
+    curl -fsSL -o /usr/local/bin/yq "https://github.com/mikefarah/yq/releases/download/${YQ_VERSION}/yq_linux_${arch}"; \
+    if [ -n "$yq_sha" ]; then \
+      echo "${yq_sha}  /usr/local/bin/yq" | sha256sum -c -; \
+    else \
+      echo "WARNING: no recorded sha256 for yq ${YQ_VERSION}/${arch} — downloaded unverified; record it in this Dockerfile" >&2; \
+    fi; \
+    chmod +x /usr/local/bin/yq; \
+    yq --version
+
+# SEMREL_PREBAKED is the contract with webgrip/workflows' composites; PATH and NODE_PATH are what
+# make it usable. NODE_PATH is not optional: a consumer's .releaserc.cjs does a bare
+# require('@webgrip/semantic-release-config') from its own checkout, which resolves against that
+# workspace only unless NODE_PATH says otherwise.
+ENV SEMREL_PREBAKED=/opt/semrel/node_modules \
+    NODE_PATH=/opt/semrel/node_modules \
+    PATH=/opt/semrel/node_modules/.bin:$PATH
+
+# A release job bind-mounts a checkout owned by another uid; git refuses to touch it otherwise.
+RUN git config --system --add safe.directory '*'
+# <<< shared runtime
+
+COPY --from=deps /opt/semrel /opt/semrel
+
+# Build-time proof of the contract the composites rely on: the major they target is what is
+# installed, and a bare require() resolves from an arbitrary cwd (i.e. NODE_PATH works). A lockfile
+# bump that breaks either fails the build instead of a release — including a semantic-release MAJOR
+# bump, which must be a deliberate change to these images and their consumers together.
 RUN cd /tmp \
  && node -e "const v=require('semantic-release/package.json').version; if(v.split('.')[0]!=='25') throw new Error('expected semantic-release 25.x, got '+v); console.log('semantic-release '+v)" \
  && node -e "require.resolve('@webgrip/semantic-release-config')" \
@@ -57,7 +111,7 @@ LABEL org.opencontainers.image.title="WebGrip semantic-release Toolchain (monore
     org.opencontainers.image.vendor="WebGrip" \
     org.opencontainers.image.authors="Ryan Grippeling <ryan@webgrip.nl>" \
     org.opencontainers.image.licenses="MIT" \
-    org.opencontainers.image.base.name="${REGISTRY_WEBGRIP}/semantic-release:${SEMANTIC_RELEASE_VERSION}" \
+    org.opencontainers.image.base.name="${REGISTRY_DOCKERHUB}/library/node:${NODE_VERSION}-${DEBIAN_CODENAME}-slim" \
     org.opencontainers.image.created="${IMAGE_CREATED}" \
     org.opencontainers.image.version="${IMAGE_VERSION}" \
     org.opencontainers.image.revision="${IMAGE_REVISION}"

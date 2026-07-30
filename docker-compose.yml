@@ -31,9 +31,6 @@ services:
     build:
       context: ops/docker/semantic-release
       dockerfile: Dockerfile
-  # The two derived toolchains build FROM the published base, so building either one needs
-  # harbor.webgrip.dev/webgrip/semantic-release:<version> pullable, or built and tagged locally
-  # first — see ops/docker/semantic-release/README.md.
   semantic-release-monorepo:
     build:
       context: ops/docker/semantic-release-monorepo
