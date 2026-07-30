@@ -18,8 +18,10 @@
 ###############################################################################
 ARG REGISTRY_DOCKERHUB=docker.io
 ARG REGISTRY_WEBGRIP=harbor.webgrip.dev/webgrip
+# The base image's own release train cut 0.1.0 first (a fresh dir starts from a seeded 0.0.0, so a
+# feat lands as 0.1.0 — not 1.0.0). Renovate watches this; bump it deliberately after a base release.
 # renovate: datasource=docker depName=harbor.webgrip.dev/webgrip/semantic-release
-ARG SEMANTIC_RELEASE_VERSION=1.0.0
+ARG SEMANTIC_RELEASE_VERSION=0.1.0
 # renovate: datasource=docker depName=docker.io/library/node versioning=docker
 ARG NODE_VERSION=24
 ARG DEBIAN_CODENAME=bookworm
