@@ -119,6 +119,22 @@ runs:
         # the step log just stops after 15-25 min (runs 102/104/123). Single-threaded
         # cataloging bounds peak RSS; it's slower but survives.
         SYFT_PARALLELISM: "1"
+        # The 3Gi cap is on the RUNNER container (dind gets 6Gi), and the node it lands on is
+        # memory-bound at ~78% with CPU idle at ~17% — so the honest fix is raising that limit.
+        # Until there is memory to spare, cut the work instead of the parallelism.
+        #
+        # File cataloging is what actually consumes the memory: syft hashes every file in the image
+        # to populate SBOM file entries, which is why the step log stalls on things like
+        # `/usr/lib/x86_64-linux-gnu/perl/5.36.0/CORE/warnings.h`. Nothing downstream reads them —
+        # Dependency-Track ingests PACKAGES, Kyverno counts `.components`, and the CVE gate matches
+        # package coordinates. Setting selection=none drops the file section entirely and takes the
+        # peak RSS with it.
+        #
+        # This narrows the SBOM: it still lists every package (the NTIA minimum elements and every
+        # consumer we have), but no longer enumerates individual files. If a future consumer needs
+        # file-level provenance, set this back to `owned-by-package` and raise the runner limit in
+        # the same change — not one without the other.
+        SYFT_FILE_METADATA_SELECTION: "none"
       run: |
         set -euo pipefail
         # registry: source — pull layers straight from Harbor into syft's temp dir instead of
