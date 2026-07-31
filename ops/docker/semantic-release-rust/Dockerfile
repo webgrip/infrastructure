@@ -132,9 +132,9 @@ RUN cd /tmp \
 
 LABEL org.opencontainers.image.title="WebGrip semantic-release Toolchain (Rust)" \
     org.opencontainers.image.description="Locked semantic-release 25 toolchain + cargo and semantic-release-cargo" \
-    org.opencontainers.image.source="https://github.com/webgrip/infrastructure" \
-    org.opencontainers.image.url="https://github.com/webgrip/infrastructure" \
-    org.opencontainers.image.documentation="https://github.com/webgrip/infrastructure/tree/main/docs/techdocs" \
+    org.opencontainers.image.source="https://forgejo.webgrip.dev/webgrip/infrastructure" \
+    org.opencontainers.image.url="https://forgejo.webgrip.dev/webgrip/infrastructure" \
+    org.opencontainers.image.documentation="https://forgejo.webgrip.dev/webgrip/infrastructure/tree/main/docs/techdocs" \
     org.opencontainers.image.vendor="WebGrip" \
     org.opencontainers.image.authors="Ryan Grippeling <ryan@webgrip.nl>" \
     org.opencontainers.image.licenses="MIT" \

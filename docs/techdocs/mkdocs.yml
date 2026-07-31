@@ -23,6 +23,7 @@ nav:
       - Workflow Details: general/cicd/workflow-details.md
   - Security:
       - Overview: general/security/index.md
+      - Hardening Roadmap: general/security/hardening-roadmap.md
       - Supply Chain Security: general/security/supply-chain-security.md
       - Image Signing: general/security/image-signing.md
       - SBOM & Attestations: general/security/sbom-attestations.md

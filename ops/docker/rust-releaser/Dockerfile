@@ -97,9 +97,9 @@ RUN mkdir -p /root/.cargo/bin && \
 
 LABEL org.opencontainers.image.title="WebGrip Rust Releaser" \
     org.opencontainers.image.description="Rust + Node release automation toolchain" \
-    org.opencontainers.image.source="https://github.com/webgrip/infrastructure" \
-    org.opencontainers.image.url="https://github.com/webgrip/infrastructure" \
-    org.opencontainers.image.documentation="https://github.com/webgrip/infrastructure/tree/main/docs/techdocs" \
+    org.opencontainers.image.source="https://forgejo.webgrip.dev/webgrip/infrastructure" \
+    org.opencontainers.image.url="https://forgejo.webgrip.dev/webgrip/infrastructure" \
+    org.opencontainers.image.documentation="https://forgejo.webgrip.dev/webgrip/infrastructure/tree/main/docs/techdocs" \
     org.opencontainers.image.vendor="WebGrip" \
     org.opencontainers.image.authors="Ryan Grippeling <ryan@webgrip.nl>" \
     org.opencontainers.image.licenses="MIT" \

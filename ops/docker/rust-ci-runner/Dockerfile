@@ -102,9 +102,9 @@ ENV \
 
 LABEL org.opencontainers.image.title="WebGrip Rust CI Runner" \
     org.opencontainers.image.description="Rust CI job image: toolchains (stable channel + wasm32), audit/test tooling, git, and node for Forgejo Actions JS actions" \
-    org.opencontainers.image.source="https://github.com/webgrip/infrastructure" \
-    org.opencontainers.image.url="https://github.com/webgrip/infrastructure" \
-    org.opencontainers.image.documentation="https://github.com/webgrip/infrastructure/tree/main/docs/techdocs" \
+    org.opencontainers.image.source="https://forgejo.webgrip.dev/webgrip/infrastructure" \
+    org.opencontainers.image.url="https://forgejo.webgrip.dev/webgrip/infrastructure" \
+    org.opencontainers.image.documentation="https://forgejo.webgrip.dev/webgrip/infrastructure/tree/main/docs/techdocs" \
     org.opencontainers.image.vendor="WebGrip" \
     org.opencontainers.image.authors="Ryan Grippeling <ryan@webgrip.nl>" \
     org.opencontainers.image.licenses="MIT" \

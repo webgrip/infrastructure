@@ -1,10 +1,18 @@
 # Supply Chain Security: Keyless Image Signing, SBOM Attestation, and SLSA Provenance
 
-* Status: accepted
+* Status: superseded by [ADR-0004](0004-supply-chain-on-forgejo-harbor-openbao.md)
 * Deciders: WebGrip Ops Team, Infrastructure Contributors
-* Date: 2024-12-01
+* Date: 2026-07-31
 * Supersedes: N/A
+* Superseded by: [ADR-0004](0004-supply-chain-on-forgejo-harbor-openbao.md) — Signing, SBOM and attestation on self-hosted Forgejo, Harbor and OpenBao
 * Related to: [ADR-0001](0001-docker-image-architecture.md) — Docker Image Architecture
+
+> **Superseded.** The decision below was made for a GitHub Actions / GHCR pipeline and is retained
+> as the historical record of *why keyless signing was chosen*, which still reads true. It no
+> longer describes how images are signed: the platform moved to self-hosted Forgejo, Harbor and
+> OpenBao, where Fulcio and Rekor are neither available nor desirable. See
+> [ADR-0004](0004-supply-chain-on-forgejo-harbor-openbao.md) for the current mechanism and for an
+> explicit account of what the migration gave up (SLSA provenance, transparency-log auditability).
 
 ## Context and Problem Statement
 

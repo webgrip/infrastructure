@@ -155,9 +155,9 @@ WORKDIR /workspace
 
 LABEL org.opencontainers.image.title="WebGrip Agent Runner" \
     org.opencontainers.image.description="Dark-factory agent runner: headless OpenHands with a per-run LiteLLM key, a skills loadout, and a docker CLI for its DinD sandbox. Language gates run in CI's own images rather than being baked, so the image stays small and the gates match CI exactly." \
-    org.opencontainers.image.source="https://github.com/webgrip/infrastructure" \
-    org.opencontainers.image.url="https://github.com/webgrip/infrastructure" \
-    org.opencontainers.image.documentation="https://github.com/webgrip/infrastructure/tree/main/docs/techdocs" \
+    org.opencontainers.image.source="https://forgejo.webgrip.dev/webgrip/infrastructure" \
+    org.opencontainers.image.url="https://forgejo.webgrip.dev/webgrip/infrastructure" \
+    org.opencontainers.image.documentation="https://forgejo.webgrip.dev/webgrip/infrastructure/tree/main/docs/techdocs" \
     org.opencontainers.image.vendor="WebGrip" \
     org.opencontainers.image.authors="Ryan Grippeling <ryan@webgrip.nl>" \
     org.opencontainers.image.licenses="MIT" \

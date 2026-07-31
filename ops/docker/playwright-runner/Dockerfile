@@ -55,9 +55,9 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" &&
 
 LABEL org.opencontainers.image.title="WebGrip Playwright Runner" \
     org.opencontainers.image.description="Playwright test runner with PHP ${PHP_VERSION}" \
-    org.opencontainers.image.source="https://github.com/webgrip/infrastructure" \
-    org.opencontainers.image.url="https://github.com/webgrip/infrastructure" \
-    org.opencontainers.image.documentation="https://github.com/webgrip/infrastructure/tree/main/docs/techdocs" \
+    org.opencontainers.image.source="https://forgejo.webgrip.dev/webgrip/infrastructure" \
+    org.opencontainers.image.url="https://forgejo.webgrip.dev/webgrip/infrastructure" \
+    org.opencontainers.image.documentation="https://forgejo.webgrip.dev/webgrip/infrastructure/tree/main/docs/techdocs" \
     org.opencontainers.image.vendor="WebGrip" \
     org.opencontainers.image.authors="Ryan Grippeling <ryan@webgrip.nl>" \
     org.opencontainers.image.licenses="MIT" \
