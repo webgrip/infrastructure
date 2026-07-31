@@ -59,6 +59,12 @@ inputs:
     description: "OpenBao Transit key name used to sign"
     required: false
     default: "cosign-webgrip"
+  vex-author:
+    description: >-
+      Fallback author recorded on the OpenVEX document when a statement file does not name one.
+      A VEX statement is an attributable security assertion; it should never be anonymous.
+    required: false
+    default: "WebGrip Ops <ryan@webgrip.nl>"
 
 runs:
   using: composite
@@ -120,12 +126,105 @@ runs:
         # SPDX output dropped: nothing consumed sbom.spdx.json (cosign attests the CycloneDX,
         # Dependency-Track ingests CycloneDX) and serializing a second whole-image document
         # roughly doubles syft's memory footprint.
-        syft "registry:$IMAGE" -o "cyclonedx-json=sbom.cdx.json"
+        #
+        # The @1.6 spec pin is LOAD-BEARING, not cosmetic. Unpinned, syft emits the newest
+        # CycloneDX it supports — 1.7 since syft 1.4x. Dependency-Track validates uploads against
+        # its bundled schemas and tops out at 1.6, so it rejected every BOM this action produced
+        # with a bare `400 Bad Request`. The upload step is fail-soft (a DT outage must never fail
+        # a release), so the rejection surfaced only as a `::warning::` nobody read: DT ingested
+        # NOTHING from run 133 through run 180. The v1.21.0 -> v1.48.0 bump in 5da16be is what
+        # crossed the 1.6/1.7 line.
+        #
+        # The same document is what `cosign attest` signs below, so the pin also keeps the
+        # attestation predicate readable by 1.6-capable consumers — including the Kyverno
+        # `{{ components | length(@) }}` condition in homelab-cluster's image-verify-harbor-audit.
+        # Raise this only after confirming Dependency-Track advertises the newer spec.
+        syft "registry:$IMAGE" -o "cyclonedx-json@1.6=sbom.cdx.json"
         echo "components=$(jq '.components | length' sbom.cdx.json)" >> "$GITHUB_OUTPUT"
+
+    - name: "Compose OpenVEX document"
+      id: vex
+      shell: bash
+      env:
+        IMAGE: ${{ steps.digest.outputs.image-with-digest }}
+        IMAGE_NAME: ${{ inputs.image-name }}
+        IMAGE_VERSION: ${{ inputs.image-version }}
+        VEX_AUTHOR: ${{ inputs.vex-author }}
+      run: |
+        set -euo pipefail
+        # Statements are hand-authored and reviewed in ops/vex/statements/<image>.openvex.json
+        # (see ops/vex/README.md). This step does NOT invent suppressions — it only re-targets
+        # reviewed ones at the digest that was actually built.
+        basename="${IMAGE_NAME##*/}"
+        src="ops/vex/statements/${basename}.openvex.json"
+        digest="${IMAGE#*@}"
+        # Consumed by the CVE gate step below to look up this image's budget.
+        echo "basename=${basename}" >> "$GITHUB_OUTPUT"
+
+        if [ ! -f "$src" ]; then
+          echo "no VEX statements for ${basename}; nothing to attest"
+          echo "present=false" >> "$GITHUB_OUTPUT"
+          echo "statements=0" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        # Reject a malformed document loudly rather than attesting garbage: a VEX doc that fails to
+        # parse would otherwise silently suppress nothing while looking like it works.
+        jq -e 'type=="object" and (.statements|type=="array")' "$src" >/dev/null \
+          || { echo "::error::${src} is not a valid OpenVEX document (expected object with .statements[])"; exit 1; }
+
+        # Stamp the built digest onto every statement's product set. Authors write the unversioned
+        # purl (pkg:oci/<image>); we emit BOTH the digest-qualified purl and the literal image
+        # reference, because scanners match VEX products against whichever identifier they used for
+        # the scan target and the two differ between grype and trivy.
+        jq --arg purl "pkg:oci/${basename}@${digest}" \
+           --arg ref  "${IMAGE}" \
+           --arg id   "https://openvex.dev/docs/webgrip/${basename}-${IMAGE_VERSION}" \
+           --arg author "${VEX_AUTHOR}" \
+           '. as $doc
+            | .["@context"] = "https://openvex.dev/ns/v0.2.0"
+            | .["@id"] = $id
+            | .author = (.author // $author)
+            | .version = (.version // 1)
+            | .statements = [ .statements[] | .products = [ {"@id": $purl}, {"@id": $ref} ] ]' \
+           "$src" > vex.openvex.json
+
+        n="$(jq '.statements | length' vex.openvex.json)"
+        echo "present=true" >> "$GITHUB_OUTPUT"
+        echo "statements=${n}" >> "$GITHUB_OUTPUT"
+
+        # Surface what is being suppressed IN THE RUN LOG. A suppression that nobody sees is an
+        # allowlist; printing status+justification per CVE is what keeps it reviewable after merge.
+        echo "VEX statements applied to ${basename} (${n}):"
+        jq -r '.statements[] | "  \(.vulnerability.name // .vulnerability["@id"] // "?")  \(.status)  \(.justification // .action_statement // "-")"' vex.openvex.json
+
+    # ── The CVE budget gate is DELIBERATELY NOT WIRED IN YET ──────────────────────────────────
+    # It belongs here, immediately before signing: a signature should mean "built by CI AND within
+    # its CVE budget", not merely "built by CI", and an over-budget image left unsigned is exactly
+    # what Kyverno refuses once image-verify-harbor-audit goes to Enforce.
+    #
+    # But the gate runs INSIDE harbor.webgrip.dev/webgrip/cve-gate, which this PR is what first
+    # builds. Wiring it here in the same change would make cve-gate's own first release depend on
+    # an image that does not exist yet — a bootstrap failure on the very first run, papered over
+    # with the ALLOW_MISSING_GATE escape hatch. Shipping the image first and wiring second means
+    # the happy path never needs the escape hatch at all.
+    #
+    # Follow-up PR, once cve-gate 0.1.0 exists in Harbor, restores exactly this:
+    #
+    #   - name: CVE budget gate
+    #     id: cve
+    #     uses: ./.forgejo/actions/cve-gate
+    #     with:
+    #       image-ref: ${{ steps.digest.outputs.image-with-digest }}
+    #       image-name: ${{ steps.vex.outputs.basename }}
+    #
+    # The action itself (.forgejo/actions/cve-gate) ships in this PR and is complete; only the call
+    # site is deferred.
 
     - name: Sign & attest via Forgejo OIDC -> OpenBao Transit
       shell: bash
       env:
+        VEX_PRESENT: ${{ steps.vex.outputs.present }}
         VAULT_ADDR: ${{ inputs.openbao-addr }}
         OPENBAO_ROLE: ${{ inputs.openbao-role }}
         OIDC_AUDIENCE: ${{ inputs.oidc-audience }}
@@ -170,6 +269,14 @@ runs:
         cosign sign   --yes --tlog-upload=false --key "hashivault://${TRANSIT_KEY}" "$IMAGE"
         cosign attest --yes --tlog-upload=false --key "hashivault://${TRANSIT_KEY}" \
           --predicate sbom.cdx.json --type cyclonedx "$IMAGE"
+        # 4) OpenVEX rides the same key as the SBOM. Signing the suppressions matters more than
+        #    signing the inventory: an unsigned VEX document is an unauthenticated instruction to a
+        #    downstream scanner to ignore a CVE. Attested here, a consumer can verify WHO decided a
+        #    finding was not exploitable before honouring it.
+        if [ "${VEX_PRESENT:-false}" = "true" ]; then
+          cosign attest --yes --tlog-upload=false --key "hashivault://${TRANSIT_KEY}" \
+            --predicate vex.openvex.json --type openvex "$IMAGE"
+        fi
 
     - name: "Generate Harbor-native SBOM accessory (fail-soft)"
       # Harbor-only: this hits Harbor's v2 API (no analog on ghcr.io etc.), so skip it for other
@@ -236,9 +343,17 @@ runs:
           -F "projectName=${PROJECT}" \
           -F "projectVersion=${VERSION}" \
           -F "bom=@sbom.cdx.json;type=application/json" || echo 000)"
+        # Fail-soft, but NOT fail-silent — and the two are not the same failure.
+        # 5xx/000 is DT being down or unreachable: transient, self-healing, a warning is right.
+        # 4xx is DT rejecting what we SENT: a permanent bug in this action that will repeat on
+        # every release until a human changes something. Emitting both as `::warning::` is how a
+        # CycloneDX schema rejection went unnoticed for ~50 releases. 4xx now emits `::error::`
+        # (visible in the run's annotations) while still exiting 0, so a broken DT integration is
+        # loud without a DT outage ever blocking a release.
         case "$code" in
           200|201) echo "uploaded SBOM to Dependency-Track (${PROJECT}:${VERSION})" ;;
-          *) echo "::warning::Dependency-Track upload returned HTTP ${code} (non-fatal)" ;;
+          4*)      echo "::error::Dependency-Track REJECTED the SBOM: HTTP ${code}. This is a bug in this action (bad payload/credentials/schema version), not an outage — it will repeat every release until fixed. Release not blocked." ;;
+          *)       echo "::warning::Dependency-Track unreachable (HTTP ${code}); SBOM not uploaded. Non-fatal — retry is the next release." ;;
         esac
 
     - name: Summary
@@ -247,11 +362,18 @@ runs:
       env:
         IMAGE: ${{ steps.digest.outputs.image-with-digest }}
         COMPONENTS: ${{ steps.sbom.outputs.components }}
+        VEX_PRESENT: ${{ steps.vex.outputs.present }}
+        VEX_STATEMENTS: ${{ steps.vex.outputs.statements }}
       run: |
         {
           echo "## 🔐 Supply chain (Harbor)"
           echo ""
           echo "- Signed (cosign via OpenBao Transit): \`${IMAGE}\`"
-          echo "- CycloneDX SBOM attested in Harbor + uploaded to Dependency-Track (${COMPONENTS:-?} components)"
+          echo "- CycloneDX SBOM (spec 1.6) attested in Harbor + uploaded to Dependency-Track (${COMPONENTS:-?} components)"
+          if [ "${VEX_PRESENT:-false}" = "true" ]; then
+            echo "- OpenVEX attested: ${VEX_STATEMENTS:-0} reviewed statement(s) — see \`ops/vex/statements/\`"
+          else
+            echo "- OpenVEX: no statements for this image (nothing suppressed)"
+          fi
           echo "- Harbor-native SBOM accessory generation requested for the pushed digest (populates Harbor's SBOM column; fail-soft)"
         } >> "$GITHUB_STEP_SUMMARY"

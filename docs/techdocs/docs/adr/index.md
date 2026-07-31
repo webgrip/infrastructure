@@ -63,29 +63,17 @@ Chosen option: "[option 1]", because [justification. e.g., only option, which me
 
 ## Current ADRs
 
-### Infrastructure Architecture
+See the [Records](#records) table at the end of this page — it is the single authoritative list.
 
-| ADR | Title | Status | Date |
-|-----|-------|---------|------|
-| ADR-0001 | Docker Image Architecture and Organization | Accepted | 2024-01-15 |
-| ADR-0002 | CI/CD Workflow Strategy with Reusable Components | Accepted | 2024-01-20 |
-| ADR-0003 | Documentation Platform Selection (TechDocs) | Accepted | 2024-01-25 |
-
-### Image Design Decisions
-
-| ADR | Title | Status | Date |
-|-----|-------|---------|------|
-| ADR-0004 | Base Image Selection Strategy | Accepted | 2024-02-01 |
-| ADR-0005 | Multi-stage Build Pattern Adoption | Accepted | 2024-02-05 |
-| ADR-0006 | Container Security Hardening Standards | Accepted | 2024-02-10 |
-
-### Operational Decisions
-
-| ADR | Title | Status | Date |
-|-----|-------|---------|------|
-| ADR-0007 | Docker Registry Strategy and Management | Accepted | 2024-02-15 |
-| ADR-0008 | Testing Strategy for Infrastructure Images | Accepted | 2024-02-20 |
-| ADR-0009 | Maintenance and Update Automation | Proposed | 2024-02-25 |
+> **Removed 2026-07-31.** This section previously carried three tables listing nine ADRs, of which
+> **six did not exist** (`ADR-0004` "Base Image Selection Strategy" through `ADR-0009` "Maintenance
+> and Update Automation" were never written), and `ADR-0002` was listed under the wrong title
+> ("CI/CD Workflow Strategy" — the actual record is Supply Chain Security). It was scaffolding that
+> shipped as documentation and then went unread for long enough to become misleading: a reader
+> checking "do we have a base-image decision?" would have been told yes.
+>
+> The real ADR-0004/0005/0006 were written on 2026-07-31 and occupy those numbers now. Numbers are
+> never reused, so the phantoms could not be left in place alongside them.
 
 ## Creating New ADRs
 
@@ -128,8 +116,11 @@ ADRs are stored in the [`docs/adrs/`](../adrs) directory:
 ```
 docs/adrs/
 ├── 0001-docker-image-architecture.md
-├── 0002-ci-cd-workflow-strategy.md
+├── 0002-supply-chain-security.md            # superseded by 0004
 ├── 0003-documentation-platform.md
+├── 0004-supply-chain-on-forgejo-harbor-openbao.md
+├── 0005-openvex-and-cve-budgets.md
+├── 0006-hardened-base-images.md
 └── template.md
 ```
 
@@ -353,6 +344,21 @@ jobs:
 
 > **Note**: ADRs are living documents that should evolve with the project. Regular review and updates ensure they remain valuable for decision-making and knowledge sharing.
 
-**Maintainer**: [WebGrip Ops Team](https://github.com/orgs/webgrip/teams/ops)  
+**Maintainer**: WebGrip Ops Team  
 **Location**: [`docs/adrs/`](../adrs)  
 **Format**: [MADR (Markdown ADR)](https://adr.github.io/madr/)
+
+## Records
+
+The registry is authoritative for status. Static-site builds do not render frontmatter, so this
+table and each record's dated history are the reader-visible status — keep them in lock-step with
+the files.
+
+| # | Title | Status | Date |
+| --- | --- | --- | --- |
+| 0001 | Docker image architecture | accepted | 2024-11-15 |
+| 0002 | Supply chain security: keyless signing, SBOM, SLSA | superseded by 0004 | 2026-07-31 |
+| 0003 | Documentation platform | accepted | 2024-12-10 |
+| 0004 | Signing, SBOM and attestation on self-hosted Forgejo, Harbor and OpenBao | accepted | 2026-07-31 |
+| 0005 | OpenVEX statements and per-image CVE budgets instead of a zero-CVE target | accepted | 2026-07-31 |
+| 0006 | Docker Hardened Images as the default base, with named structural exceptions | proposed | 2026-07-31 |
