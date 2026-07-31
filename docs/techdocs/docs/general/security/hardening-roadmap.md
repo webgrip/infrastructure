@@ -114,10 +114,12 @@ the gate itself, held to the standard it enforces — the only image starting at
 
 Two things it surfaced that apply to every Wave 3 migration:
 
-1. **`dhi.io` is free but not anonymous** (`401` on `/v2/`). Needs either `docker login dhi.io` with
-   a free Docker account, or — preferred — a `dhi` pull-through proxy project in Harbor, matching how
-   `REGISTRY_DOCKERHUB`/`REGISTRY_GHCR`/`REGISTRY_MCR` are already routed. **This is a prerequisite
-   for the whole wave**, not a per-image detail.
+1. **`dhi.io` is free but not anonymous** (`401` on `/v2/`) — yet this never reaches CI. Builders
+   authenticate to nothing; bases resolve through a `dhi` Harbor proxy project, matching how
+   `REGISTRY_DOCKERHUB`/`REGISTRY_GHCR`/`REGISTRY_MCR` already work. And no new account: `dhi.io`
+   advertises `service="registry.docker.io"`, the same Docker identity service as Docker Hub, so the
+   existing Docker Hub credential authenticates it. **The proxy project is a prerequisite for the
+   whole wave**, not a per-image detail — provisioned in `webgrip/homelab-cluster`.
 2. **Digests cannot be pinned until that credential exists.** Every other base here is digest-pinned;
    these are not yet. Pin on first successful build.
 

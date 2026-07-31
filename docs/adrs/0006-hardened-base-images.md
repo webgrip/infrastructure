@@ -61,6 +61,18 @@ Chosen option: **Option 1 — Docker Hardened Images as the default base where a
 because it is the only option that is free, digest-pinnable, and built on the same Debian and Alpine
 lineages already in use, so the migration carries no libc or toolchain risk.
 
+**Access is via Harbor, not via CI credentials.** DHI is free but not anonymous
+(`GET https://dhi.io/v2/` → `401`), which would ordinarily mean putting a registry credential in the
+build path. It does not, because `dhi.io` advertises `service="registry.docker.io"` — the same Docker
+identity service as Docker Hub — so a `dhi` pull-through proxy project reuses the Docker Hub
+credential Harbor already holds, and builds reference
+`--build-arg REGISTRY_DHI=harbor.webgrip.dev/dhi` exactly as they already do for
+`REGISTRY_DOCKERHUB`/`REGISTRY_GHCR`/`REGISTRY_MCR`. No new account, no builder login, and the LAN
+gets a layer cache. Provisioned in `webgrip/homelab-cluster`
+(`kubernetes/apps/harbor/harbor/app/harbor-proxy-config.configmap.yaml`; ADR-0023 amended
+2026-07-31). **This proxy is a prerequisite for the whole migration** — no image can move to a DHI
+base before it exists.
+
 Adoption is **staged by risk, not applied wholesale**:
 
 **Stage 1 — near drop-in.** `semantic-release`, `semantic-release-monorepo`, `semantic-release-rust`,
@@ -105,6 +117,13 @@ budget ceiling in the same commit.
   published — but the *ongoing rebuild cadence* is a service, and services can change terms.
   Mitigation: images are pulled through Harbor's proxy cache, so a licence change strands us on the
   last good digest rather than breaking builds immediately.
+* **DHI cannot be pulled anonymously**, unlike every stock base we use today. `GET https://dhi.io/v2/`
+  returns `401`; the Community tier is free but still requires a Docker account. This does not reach
+  CI — builders authenticate to nothing, and the credential lives only in Harbor's `dhi` proxy
+  endpoint (`webgrip/homelab-cluster` ADR-0023, amended 2026-07-31) — but it does mean **a Docker
+  account becomes a hard dependency of building any migrated image**, where previously the base
+  registry was optional-credential at worst. If that account is ever suspended or the free tier is
+  withdrawn, every Stage 1/2 image stops building until it falls back to a stock base.
 * DHI covers Debian and Alpine only. An image needing a different lineage gets no help.
 * Runtime variants ship no shell and no package manager and run as non-root by default. For CI
   runner images that is often the *wrong* variant, so most of these will use `-dev` variants and
