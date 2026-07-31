@@ -97,6 +97,30 @@ base. The catalog went Apache 2.0 and free in December 2025, which is what makes
 Chainguard's free tier is five images restricted to `latest`, structurally incompatible with a repo
 that digest-pins everything and lets Renovate move it.
 
+### The reference implementation
+
+[`cve-gate`](../docker-images/cve-gate.md) is the worked example every other migration copies. It is
+the gate itself, held to the standard it enforces — the only image starting at `enforce` 0/0:
+
+- DHI `alpine-base`, `-dev` variant as a **build stage only**; the runtime stage has no package
+  manager, so nothing can be installed into a running container.
+- Tools **copied from hardened upstream images**, not fetched at release time. The first version of
+  this gate ran `curl -sSfL raw.githubusercontent.com/anchore/grype/main/install.sh | sh` — an
+  unpinned script from a mutable branch, executed in the job that decides whether an image is fit to
+  sign. A supply-chain hole inside a supply-chain control.
+- Non-root (65532), read-only rootfs, `--cap-drop ALL`, `no-new-privileges`, `/tmp` the only
+  writable path.
+- Build-time assertions that the toolchain runs **as the non-root user** before it is baked in.
+
+Two things it surfaced that apply to every Wave 3 migration:
+
+1. **`dhi.io` is free but not anonymous** (`401` on `/v2/`). Needs either `docker login dhi.io` with
+   a free Docker account, or — preferred — a `dhi` pull-through proxy project in Harbor, matching how
+   `REGISTRY_DOCKERHUB`/`REGISTRY_GHCR`/`REGISTRY_MCR` are already routed. **This is a prerequisite
+   for the whole wave**, not a per-image detail.
+2. **Digests cannot be pinned until that credential exists.** Every other base here is digest-pinned;
+   these are not yet. Pin on first successful build.
+
 - **Stage 1** (near drop-in): the `semantic-release` trio, `rust-releaser`, `node-ci-runner`.
 - **Stage 2** (verify first): `agent-runner`, `rust-ci-runner`, `act-runner`, `helm-deploy`,
   `php-ci-runner`, `techdocs-builder`.
