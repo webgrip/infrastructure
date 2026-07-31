@@ -84,6 +84,92 @@ jobs:
       # it only iterates ops/docker/*/.
       max-level: '1'
 
+  # Builds every changed image ON THE BRANCH, without releasing or pushing anything.
+  #
+  # Why this exists: release-per-image below is gated on main/development, so on a feature branch
+  # NOTHING was ever built. A green branch run meant "the guards passed", not "the image compiles" —
+  # and the runs were suspiciously fast (21-56s) for exactly that reason. The only way to discover a
+  # broken Dockerfile was to merge and watch main go red, which is how cve-gate burned four
+  # consecutive merges (runs 188, 192, 194, 196) to learn four separate one-line facts: the DHI
+  # registry needs a proxy default, jq is dynamically linked, musl's ldd writes to stderr, and this
+  # base has no ldd at all. Every one of those was discoverable on the branch.
+  #
+  # This runs the SAME `docker buildx build` the release path's verifyRelease gate runs — same
+  # build-args, same Harbor layer cache — but with --output=type=cacheonly, so it produces no image,
+  # pushes nothing, and cuts no tag. Main stops being the test environment.
+  build-check:
+    name: 'Build check'
+    needs: [changed-images]
+    # Only off main/development: there, release-per-image already builds the same thing via
+    # verifyRelease, and running both would double every release's build time.
+    if: >
+      always()
+      && github.ref != 'refs/heads/main'
+      && github.ref != 'refs/heads/development'
+      && needs.changed-images.result == 'success'
+      && needs.changed-images.outputs.matrix != '[]'
+    runs-on: docker
+    strategy:
+      # Report every broken image in one run rather than stopping at the first.
+      fail-fast: false
+      # Deliberately NOT max-parallel: 1. That setting exists on release-per-image to serialise the
+      # version-bump commits those jobs push, and Forgejo ignores it anyway. Nothing here writes, so
+      # concurrency is bounded only by the runner pool.
+      matrix:
+        include: ${{ fromJson(needs.changed-images.outputs.matrix) }}
+    # Hoisted to job env so the login step can be skipped when unset. The `secrets` context is not
+    # dependably available in a step-level `if:` — `env` is, so the secret is mapped once here and
+    # the condition reads that.
+    env:
+      HARBOR_ROBOT_USER: ${{ secrets.HARBOR_ROBOT_USER }}
+      HARBOR_ROBOT_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      # Login BEFORE buildx setup: the buildkit bootstrap image pulls through Harbor and must be
+      # authenticated in case that proxy project isn't anonymous-pull. Mirrors the release path.
+      # Skipped rather than failed when the secret is absent — the build then runs cache-cold, which
+      # is slow but still a valid check.
+      - name: Log in to Harbor
+        if: ${{ env.HARBOR_ROBOT_TOKEN != '' }}
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        with:
+          registry: harbor.webgrip.dev
+          username: ${{ env.HARBOR_ROBOT_USER }}
+          password: ${{ env.HARBOR_ROBOT_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+        with:
+          # Same reason as the release path: pulling buildkit straight from docker.io was the one
+          # external fetch left in the hot path and it flakes (run 125).
+          driver-opts: image=harbor.webgrip.dev/dockerhub/moby/buildkit:buildx-stable-1
+
+      - name: Build ${{ matrix.basename }} (no push)
+        shell: bash
+        working-directory: ${{ matrix.path }}
+        run: |
+          set -euo pipefail
+          # Build-args MUST stay in lockstep with on_release_published.yml and with
+          # dockerVerifyGate() in @webgrip/semantic-release-config. A check that builds differently
+          # from the release path is a check that passes while the release fails — which is the
+          # failure mode this job exists to remove, not reproduce.
+          #
+          # cache-from only, never cache-to: a branch build must not be able to poison the layer
+          # cache that main's releases read. A cache miss here costs time; a poisoned cache costs
+          # trust in every subsequent release.
+          docker buildx build \
+            --file Dockerfile \
+            --platform linux/amd64 \
+            --build-arg REGISTRY_DOCKERHUB=harbor.webgrip.dev/dockerhub \
+            --build-arg REGISTRY_GHCR=harbor.webgrip.dev/ghcr \
+            --build-arg REGISTRY_MCR=harbor.webgrip.dev/mcr \
+            --build-arg REGISTRY_DHI=harbor.webgrip.dev/dhi \
+            --cache-from "type=registry,ref=harbor.webgrip.dev/webgrip/${{ matrix.basename }}:cache" \
+            --output=type=cacheonly \
+            .
+          echo "::notice::${{ matrix.basename }} builds. This did NOT push, sign, or release anything."
+
   release-per-image:
     name: 'Release'
     needs: [changed-images]
