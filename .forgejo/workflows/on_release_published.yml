@@ -105,6 +105,12 @@ jobs:
         REGISTRY_DOCKERHUB=harbor.webgrip.dev/dockerhub
         REGISTRY_GHCR=harbor.webgrip.dev/ghcr
         REGISTRY_MCR=harbor.webgrip.dev/mcr
+        # REGISTRY_DHI is passed for symmetry and self-documentation, but unlike the three above it
+        # is NOT what makes the build work — cve-gate's Dockerfile already defaults it to the Harbor
+        # proxy. It has to, because dhi.io is the only upstream here that refuses anonymous pulls,
+        # and `dockerVerifyGate()` in @webgrip/semantic-release-config hardcodes its own --build-arg
+        # list that this workflow cannot reach. See ops/docker/cve-gate/Dockerfile.
+        REGISTRY_DHI=harbor.webgrip.dev/dhi
       # Owner is hardcoded `webgrip` (the Harbor project): Forgejo leaves github.repository_owner
       # EMPTY in this workflow_dispatch-triggered run, which produced `harbor.webgrip.dev//<image>`
       # (empty owner -> double slash -> invalid tag). Bare OWNER/IMAGE[:TAG]; the Harbor workflow
