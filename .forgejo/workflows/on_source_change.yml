@@ -19,7 +19,6 @@ on:
       - '**'
     paths:
       - 'ops/docker/**'
-      - '.forgejo/actions/semantic-release-monorepo/action.yml'
       - '.forgejo/workflows/on_source_change.yml'
       - '.forgejo/workflows/on_release_published.yml'
 
@@ -96,34 +95,77 @@ jobs:
       contents: write
     strategy:
       fail-fast: false
-      # Serialize: each release job pushes a chore(release) version-bump commit back to main,
-      # so two jobs releasing concurrently race — the loser's push is rejected non-fast-forward
-      # and its release silently never cuts (bit ci-runner in run 124/125). One at a time.
+      # Forgejo ignores this (run 177: all three Release jobs started 18:48:57). The version-bump
+      # push-back race is handled by the shared composite's retry instead.
       max-parallel: 1
       matrix:
         include: ${{ fromJson(needs.changed-images.outputs.matrix) }}
-    # In-cluster Forgejo has a single ephemeral DinD runner pool advertising `docker`.
-    # (semantic-release's verifyReleaseCmd runs `docker build`, so it needs the DinD backend.)
+    # Host-mode runner: steps run in the ci-runner image, which has both the docker CLI + buildx
+    # verifyReleaseCmd needs and the locked toolchain at $SEMREL_PREBAKED. Hence no `container:`.
     runs-on: docker
     steps:
-      # Local `uses: ./…` actions require the repo on disk first; without this the runner
-      # cannot read the action ("failed to read action … no files found … action.yml").
-      # Mirrors the .github job's checkout (adapted: checkout v5, since v6 is broken on
-      # non-GitHub runners, and the CI bot's WEBGRIP_CI_TOKEN instead of a GitHub App token).
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0 # semantic-release requires all commits/tags
           token: ${{ secrets.WEBGRIP_CI_TOKEN }}
+
+      # Before buildx setup: the buildkit bootstrap image pulls through Harbor's dockerhub proxy
+      # and must be authenticated (run 125: TLS handshake timeout pulling straight from docker.io).
+      - name: Log in to Harbor (verifyRelease build cache)
+        if: ${{ secrets.HARBOR_ROBOT_TOKEN != '' }}
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        with:
+          registry: harbor.webgrip.dev
+          username: ${{ secrets.HARBOR_ROBOT_USER }}
+          password: ${{ secrets.HARBOR_ROBOT_TOKEN }}
+
+      - name: Set up Docker Buildx
+        if: ${{ secrets.HARBOR_ROBOT_TOKEN != '' }}
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+        with:
+          # docker-container driver — required for `cache-from type=registry`.
+          driver-opts: image=harbor.webgrip.dev/dockerhub/moby/buildkit:buildx-stable-1
+
+      # dockerVerifyGate() keys on this for the cached buildx build; unset means a cold build.
+      # Owner hardcoded: github.repository_owner is empty on Forgejo, yielding an invalid ref.
+      - name: Export build cache ref
+        if: ${{ secrets.HARBOR_ROBOT_TOKEN != '' }}
+        run: echo "BUILD_CACHE_REF=harbor.webgrip.dev/webgrip/${{ matrix.basename }}:cache" >> "$GITHUB_ENV"
+
+      # Shared composite, not a repo-local copy. Installs nothing (webgrip/workflows ADR-0005).
       - name: Semantic Release (image)
-        uses: ./.forgejo/actions/semantic-release-monorepo
+        id: release
+        uses: https://forgejo.webgrip.dev/webgrip/workflows/.forgejo/composite-actions/semantic-release-monorepo@main
         with:
           package-path: ${{ matrix.path }}
           package-name: ${{ matrix.basename }}
+          monorepo: 'true'
           token: ${{ secrets.WEBGRIP_CI_TOKEN }}
-          # Lets the verifyRelease build reuse the Harbor buildx layer-cache that
-          # on_release_published writes, instead of a cold full rebuild every release.
-          harbor-robot-user: ${{ secrets.HARBOR_ROBOT_USER }}
-          harbor-robot-token: ${{ secrets.HARBOR_ROBOT_TOKEN }}
-          # GitHub PAT so Forgejo (the sole release authority) also mirrors the Release object onto
-          # the github.com mirror's Releases tab. Best-effort; unset -> mirror step skipped.
-          github-release-token: ${{ secrets.GH_RELEASE_TOKEN }}
+
+      # Reflect the release onto the github.com mirror's Releases tab; Forgejo stays the sole
+      # authority. Best-effort by design: a mirror hiccup must not fail an already-cut release.
+      - name: Mirror release to GitHub (best-effort)
+        if: ${{ steps.release.outputs.tag != '' && secrets.GH_RELEASE_TOKEN != '' }}
+        env:
+          GITEA_URL: ${{ github.server_url }}
+          GITEA_TOKEN: ${{ secrets.WEBGRIP_CI_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
+          TAG: ${{ steps.release.outputs.tag }}
+          REPO: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+          IS_PRERELEASE: ${{ github.ref != 'refs/heads/main' && 'true' || 'false' }}
+        run: |
+          set -uo pipefail   # deliberately NOT -e: best-effort
+          notes="$(curl -fsS -H "Authorization: token ${GITEA_TOKEN}" \
+            "${GITEA_URL%/}/api/v1/repos/${REPO}/releases/tags/${TAG}" 2>/dev/null | jq -r '.body // ""')"
+          # target_commitish so GitHub can create the tag if the push-mirror has not synced it.
+          body="$(jq -nc --arg t "$TAG" --arg b "$notes" --arg c "$BRANCH" --argjson pre "${IS_PRERELEASE}" \
+            '{tag_name:$t, name:$t, body:$b, target_commitish:$c, prerelease:$pre}')"
+          code="$(curl -sS -o /tmp/ghrel.json -w '%{http_code}' \
+            -X POST -H "Authorization: Bearer ${GH_TOKEN}" -H 'Accept: application/vnd.github+json' \
+            "https://api.github.com/repos/${REPO}/releases" -d "$body" || echo 000)"
+          case "$code" in
+            201) echo "mirrored release ${TAG} to GitHub" ;;
+            422) echo "::notice::GitHub release ${TAG} already exists — skipping" ;;
+            *)   echo "::warning::GitHub release mirror for ${TAG} -> HTTP ${code}: $(cat /tmp/ghrel.json 2>/dev/null) (non-fatal)" ;;
+          esac
