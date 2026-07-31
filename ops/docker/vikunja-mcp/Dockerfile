@@ -26,9 +26,9 @@ RUN npm install -g "@aimbitgmbh/vikunja-mcp@${VIKUNJA_MCP_VERSION}" \
 
 LABEL org.opencontainers.image.title="WebGrip Vikunja MCP" \
     org.opencontainers.image.description="supergateway with @aimbitgmbh/vikunja-mcp baked in — streamable-HTTP Vikunja MCP with no npx-at-startup npm fetch" \
-    org.opencontainers.image.source="https://github.com/webgrip/infrastructure" \
-    org.opencontainers.image.url="https://github.com/webgrip/infrastructure" \
-    org.opencontainers.image.documentation="https://github.com/webgrip/infrastructure/tree/main/docs/techdocs" \
+    org.opencontainers.image.source="https://forgejo.webgrip.dev/webgrip/infrastructure" \
+    org.opencontainers.image.url="https://forgejo.webgrip.dev/webgrip/infrastructure" \
+    org.opencontainers.image.documentation="https://forgejo.webgrip.dev/webgrip/infrastructure/tree/main/docs/techdocs" \
     org.opencontainers.image.vendor="WebGrip" \
     org.opencontainers.image.authors="Ryan Grippeling <ryan@webgrip.nl>" \
     org.opencontainers.image.licenses="MIT" \
