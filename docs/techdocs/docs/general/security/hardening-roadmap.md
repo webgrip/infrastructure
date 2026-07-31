@@ -120,8 +120,11 @@ Two things it surfaced that apply to every Wave 3 migration:
    advertises `service="registry.docker.io"`, the same Docker identity service as Docker Hub, so the
    existing Docker Hub credential authenticates it. **The proxy project is a prerequisite for the
    whole wave**, not a per-image detail — provisioned in `webgrip/homelab-cluster`.
-2. **Digests cannot be pinned until that credential exists.** Every other base here is digest-pinned;
-   these are not yet. Pin on first successful build.
+2. **Digests resolve once the proxy exists** — and they are now pinned (2026-07-31), via
+   `harbor.webgrip.dev/dhi`. Verified live: the `dhi` endpoint is healthy on the reused Docker Hub
+   credential, and an anonymous pull of `dhi/alpine-base:3.23` through Harbor returns a genuine DHI
+   manifest. Each base is one ARG carrying tag *and* digest, so Renovate cannot bump one without the
+   other.
 
 - **Stage 1** (near drop-in): the `semantic-release` trio, `rust-releaser`, `node-ci-runner`.
 - **Stage 2** (verify first): `agent-runner`, `rust-ci-runner`, `act-runner`, `helm-deploy`,
