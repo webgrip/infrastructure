@@ -34,6 +34,7 @@
         "dockerfile"
       ],
       "matchFileNames": [
+        "ops/docker/cve-gate/Dockerfile",
         "ops/docker/rust-ci-runner/Dockerfile",
         "ops/docker/rust-releaser/Dockerfile",
         "ops/docker/semantic-release/Dockerfile",

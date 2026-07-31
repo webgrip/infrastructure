@@ -9,6 +9,7 @@ nav:
       - Architecture: general/overview/architecture.md
       - Quick Start: general/overview/quick-start.md
   - Docker Images:
+      - CVE Gate (hardened reference): general/docker-images/cve-gate.md
       - Rust CI Runner: general/docker-images/rust-ci-runner.md
       - PHP CI Runner: general/docker-images/php-ci-runner.md
       - CI Runner: general/docker-images/ci-runner.md
@@ -23,6 +24,7 @@ nav:
       - Workflow Details: general/cicd/workflow-details.md
   - Security:
       - Overview: general/security/index.md
+      - Hardening Roadmap: general/security/hardening-roadmap.md
       - Supply Chain Security: general/security/supply-chain-security.md
       - Image Signing: general/security/image-signing.md
       - SBOM & Attestations: general/security/sbom-attestations.md
