@@ -158,15 +158,25 @@ jobs:
           # cache-from only, never cache-to: a branch build must not be able to poison the layer
           # cache that main's releases read. A cache miss here costs time; a poisoned cache costs
           # trust in every subsequent release.
+          # SOURCE_DATE_EPOCH pinned to the commit's own timestamp, plus buildkit's
+          # rewrite-timestamp, makes the build reproducible: the same source produces the same
+          # digest regardless of when or where it is built. That is what turns "the digest changed"
+          # into a signal — without it, every rebuild differs and tampering is indistinguishable
+          # from a Tuesday.
+          SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)"
+          export SOURCE_DATE_EPOCH
+          echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH ($(date -u -d "@$SOURCE_DATE_EPOCH" 2>/dev/null || date -u -r "$SOURCE_DATE_EPOCH"))"
+
           docker buildx build \
             --file Dockerfile \
             --platform linux/amd64 \
+            --build-arg SOURCE_DATE_EPOCH \
             --build-arg REGISTRY_DOCKERHUB=harbor.webgrip.dev/dockerhub \
             --build-arg REGISTRY_GHCR=harbor.webgrip.dev/ghcr \
             --build-arg REGISTRY_MCR=harbor.webgrip.dev/mcr \
             --build-arg REGISTRY_DHI=harbor.webgrip.dev/dhi \
             --cache-from "type=registry,ref=harbor.webgrip.dev/webgrip/${{ matrix.basename }}:cache" \
-            --output=type=cacheonly \
+            --output=type=cacheonly,rewrite-timestamp=true \
             .
           echo "::notice::${{ matrix.basename }} builds. This did NOT push, sign, or release anything."
 
