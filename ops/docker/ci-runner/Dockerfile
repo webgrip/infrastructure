@@ -2,6 +2,12 @@
 
 ARG RUNNER_VERSION=2.335.1@sha256:08c30b0a7105f64bddfc485d2487a22aa03932a791402393352fdf674bda2c29
 ARG REGISTRY_GHCR=ghcr.io
+
+# Must already exist in Harbor when this builds; not a cycle (ci-runner is not on that train).
+# renovate: datasource=docker depName=harbor.webgrip.dev/webgrip/semantic-release-monorepo
+ARG SEMREL_TOOLCHAIN_IMAGE=harbor.webgrip.dev/webgrip/semantic-release-monorepo:0.1.0
+FROM ${SEMREL_TOOLCHAIN_IMAGE} AS semrel
+
 FROM ${REGISTRY_GHCR}/actions/actions-runner:${RUNNER_VERSION} AS runner
 
 ARG IMAGE_CREATED=1970-01-01T00:00:00Z
@@ -172,26 +178,15 @@ ARG CLAUDE_CODE_VERSION=2.1.214
 RUN npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" && \
     npm cache clean --force
 
-# Prebaked semantic-release toolchain. The webgrip/workflows semantic-release composites
-# npm-install exactly this set on every release job (~4 min measured per run); when
-# SEMREL_PREBAKED is set and the directory exists they skip the install and put
-# $SEMREL_PREBAKED/.bin on PATH instead. Versions pinned exactly (--save-exact) so the
-# baked tree mirrors what the composites would have installed.
-RUN mkdir -p /opt/semrel && \
-    cd /opt/semrel && \
-    npm init -y > /dev/null && \
-    npm install --save-exact --no-audit --no-fund \
-      semantic-release@24.2.7 \
-      semantic-release-monorepo@8.0.2 \
-      @semantic-release/commit-analyzer@13.0.0 \
-      @semantic-release/exec@7.0.3 \
-      @semantic-release/git@10.0.1 \
-      @semantic-release/changelog@6.0.3 \
-      @saithodev/semantic-release-gitea@2.1.0 \
-      @semantic-release/release-notes-generator@14.0.0 \
-      conventional-changelog-conventionalcommits@7.0.2 \
-      semantic-release-helm3@2.10.0 && \
-    npm cache clean --force
-ENV SEMREL_PREBAKED=/opt/semrel/node_modules
+# Prebaked semantic-release toolchain (webgrip/workflows ADR-0005), copied from the image that
+# owns it so host-mode jobs and container jobs run the same locked tree. This was a hand-pinned
+# npm install that drifted to semantic-release 24 with no @webgrip/semantic-release-config and no
+# NODE_PATH — which is why the composites stopped trusting SEMREL_PREBAKED. The monorepo variant
+# is a superset of the base one, so one copy serves both. NODE_PATH is what lets a consumer's
+# .releaserc.cjs require the shared config from its own checkout.
+COPY --from=semrel /opt/semrel /opt/semrel
+ENV SEMREL_PREBAKED=/opt/semrel/node_modules \
+    NODE_PATH=/opt/semrel/node_modules \
+    PATH=/opt/semrel/node_modules/.bin:$PATH
 
 USER runner
