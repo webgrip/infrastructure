@@ -177,29 +177,62 @@ runner executes.
 Recorded here rather than fixed immediately, because each one is a separate change with its own
 blast radius.
 
-### Harbor `prevent_vul` — block vulnerable images at pull time
+### Harbor `prevent_vul` — what it actually does
 
-Harbor can refuse to serve an image whose scan exceeds a severity threshold. It is **off**, and the
-per-project `cve_allowlist` is empty (deliberately — suppressions live in OpenVEX, not in registry
-state). Turning it on is a project-metadata change:
+Badly named. It is **not** "prevent vulnerable images from running" in any runtime sense — Harbor
+has no view of your cluster. It refuses to **serve the manifest on pull**. The block happens at
+`docker pull` / kubelet image-pull time, and the symptom is an `ImagePullBackOff`, not a rejected
+Pod.
+
+**It is a severity threshold, not a count.** There is no "N vulnerabilities allowed" setting
+anywhere. You pick one severity, and *any single finding at or above it* blocks the pull. The knob
+is two fields on project metadata:
+
+| Field | Values |
+| --- | --- |
+| `prevent_vul` | `"true"` / `"false"` |
+| `severity` | `none` · `low` · `medium` · `high` · `critical` |
 
 ```bash
-# preview current state
+# read current state
 curl -sS -u "$ROBOT" https://harbor.webgrip.dev/api/v2.0/projects/webgrip/metadatas
 
-# enable: refuse to serve anything with a High or worse
-curl -sS -u "$ROBOT" -X PUT \
-  -H 'Content-Type: application/json' \
-  -d '{"prevent_vul":"true","severity":"high"}' \
+# set it (UI equivalent: Project -> Configuration -> Deployment security)
+curl -sS -u "$ROBOT" -X PUT -H 'Content-Type: application/json' \
+  -d '{"severity":"critical"}' \
+  https://harbor.webgrip.dev/api/v2.0/projects/webgrip/metadatas/severity
+curl -sS -u "$ROBOT" -X PUT -H 'Content-Type: application/json' \
+  -d '{"prevent_vul":"true"}' \
   https://harbor.webgrip.dev/api/v2.0/projects/webgrip/metadatas/prevent_vul
 ```
 
-**Do not turn this on yet.** `ci-runner` currently measures 8 critical / 136 high, so a `high`
-threshold would immediately make the CI runner image unpullable and stop all CI. The safe sequence
-is: bring the runner images down first (ADR-0006 migration), then enable at `critical`, then tighten
-to `high` once the numbers support it. Set it declaratively in the `harbor-proxy-config` provisioner
-alongside `ensure_project_scanning`, not by hand — a curl'd change is invisible to GitOps and will be
-reverted by the next reconcile.
+Docs: [Harbor — Deployment security](https://goharbor.io/docs/2.1.0/administration/vulnerability-scanning/deployment-security/)
+and [Project configuration](https://goharbor.io/docs/2.5.0/working-with-projects/project-configuration/).
+
+**Two properties that matter more than the setting itself:**
+
+1. **It fails OPEN on unscanned images.** An image Harbor has never scanned is served normally —
+   the threshold only applies to artifacts with a scan result
+   ([goharbor/harbor#16218](https://github.com/goharbor/harbor/issues/16218),
+   [#16732](https://github.com/goharbor/harbor/issues/16732)). So it is not a control you can rely
+   on alone: anything that lands without a scan bypasses it silently. Our CVE gate has the opposite
+   failure mode — it exits non-zero when it cannot run, which blocks signing, which blocks
+   admission. **Fail-closed beats fail-open, so the gate remains the primary control and this is
+   defence in depth.**
+2. **The project `cve_allowlist` is what it honours — not our OpenVEX.** Harbor has no idea our VEX
+   statements exist. So an OpenVEX-suppressed finding still counts toward this threshold. That is a
+   real divergence: the gate and Harbor will disagree about the same image, deliberately, because
+   only the gate applies VEX.
+
+**Do not enable it yet.** `ci-runner` measures 8 critical / 136 high, so `high` — or even
+`critical` — makes the runner image unpullable and stops all CI immediately. Sequence:
+
+1. Bring the runner images down (ADR-0006 migration).
+2. Enable at `critical` once no image carries one.
+3. Tighten to `high` only when the numbers support it.
+
+Set it in the `harbor-proxy-config` provisioner next to `ensure_project_scanning`, not by hand — a
+curl'd change is invisible to GitOps and survives only until the next reconcile.
 
 ### `ci-runner` carries the GitHub CLI
 
