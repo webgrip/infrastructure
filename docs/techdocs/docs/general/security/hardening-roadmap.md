@@ -102,15 +102,29 @@ that digest-pins everything and lets Renovate move it.
 [`cve-gate`](../docker-images/cve-gate.md) is the worked example every other migration copies. It is
 the gate itself, held to the standard it enforces — the only image starting at `enforce` 0/0:
 
-- DHI `alpine-base`, `-dev` variant as a **build stage only**; the runtime stage has no package
-  manager, so nothing can be installed into a running container.
-- Tools **copied from hardened upstream images**, not fetched at release time. The first version of
-  this gate ran `curl -sSfL raw.githubusercontent.com/anchore/grype/main/install.sh | sh` — an
-  unpinned script from a mutable branch, executed in the job that decides whether an image is fit to
-  sign. A supply-chain hole inside a supply-chain control.
-- Non-root (65532), read-only rootfs, `--cap-drop ALL`, `no-new-privileges`, `/tmp` the only
-  writable path.
-- Build-time assertions that the toolchain runs **as the non-root user** before it is baked in.
+- **`dhi/static` runtime**: two static Go binaries, no shell, no libc, no package manager, no
+  package database. Nothing left to be missing.
+- **grype built from source**, not fetched at release time. The first version ran
+  `curl -sSfL raw.githubusercontent.com/anchore/grype/main/install.sh | sh` — an unpinned script from
+  a mutable branch, executed in the job that decides whether an image is fit to sign. A supply-chain
+  hole inside a supply-chain control.
+- Non-root (65532), read-only rootfs, `--cap-drop ALL`, `no-new-privileges`, a `noexec` tmpfs, and a
+  seccomp profile that also blocks `io_uring`.
+- Reproducible: `SOURCE_DATE_EPOCH` + `rewrite-timestamp` + `-trimpath -buildvcs=false`.
+
+**Measured result — this is the argument for ADR-0006 in one line:**
+
+| Image | Crit | High | Medium | Total |
+| --- | --- | --- | --- | --- |
+| `helm-deploy` (stock alpine) | 5 | 106 | 117 | **252** |
+| `cve-gate` 0.1.0 (DHI alpine + jq/yq) | 0 | 4 | 2 | 8 |
+| `cve-gate` 0.2.0 (static) | 0 | 3 | 2 | **6** |
+
+Both are Alpine-lineage CI tools of comparable scope. **252 against 6.**
+
+The path from 0.1.0 to 0.2.0 is also instructive: the shell was the root cause of every build
+failure, not `jq`. A shell script forces a shell in the runtime, which forces `jq` and `yq`, and
+`jq` is dynamically linked. Rewriting ~250 lines of shell as Go removed the entire class.
 
 Two things it surfaced that apply to every Wave 3 migration:
 
