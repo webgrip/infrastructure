@@ -158,11 +158,74 @@ This wave complements rather than replaces
 removes *privilege* from the build engine, this one hardens the *boundary* around everything the
 runner executes.
 
+## Findings backlog (2026-08-01)
+
+Recorded here rather than fixed immediately, because each one is a separate change with its own
+blast radius.
+
+### Harbor `prevent_vul` — block vulnerable images at pull time
+
+Harbor can refuse to serve an image whose scan exceeds a severity threshold. It is **off**, and the
+per-project `cve_allowlist` is empty (deliberately — suppressions live in OpenVEX, not in registry
+state). Turning it on is a project-metadata change:
+
+```bash
+# preview current state
+curl -sS -u "$ROBOT" https://harbor.webgrip.dev/api/v2.0/projects/webgrip/metadatas
+
+# enable: refuse to serve anything with a High or worse
+curl -sS -u "$ROBOT" -X PUT \
+  -H 'Content-Type: application/json' \
+  -d '{"prevent_vul":"true","severity":"high"}' \
+  https://harbor.webgrip.dev/api/v2.0/projects/webgrip/metadatas/prevent_vul
+```
+
+**Do not turn this on yet.** `ci-runner` currently measures 8 critical / 136 high, so a `high`
+threshold would immediately make the CI runner image unpullable and stop all CI. The safe sequence
+is: bring the runner images down first (ADR-0006 migration), then enable at `critical`, then tighten
+to `high` once the numbers support it. Set it declaratively in the `harbor-proxy-config` provisioner
+alongside `ensure_project_scanning`, not by hand — a curl'd change is invisible to GitOps and will be
+reverted by the next reconcile.
+
+### `ci-runner` carries the GitHub CLI
+
+`ops/docker/ci-runner/Dockerfile` adds `cli.github.com` as a third-party apt source and installs
+`gh` — in an organisation that no longer uses GitHub. That is a package set *and* an external
+repository key, in the worst-scoring and most privileged image in the estate. Removing it retires
+findings permanently and needs no VEX justification from anyone. Deferred to the image consolidation
+pass rather than done piecemeal.
+
+### Not every "fixed in X" is reachable
+
+Trivy reported the Moby findings as *fixed in 29.3.1 / 29.5.1*, which reads like a version bump.
+`github.com/docker/docker` has **no v29** — it tops out at `v28.5.2+incompatible`. Docker Engine 29.x
+lives at a different module path (`github.com/moby/moby/v2`), so consuming the fix requires the
+*dependent* to migrate modules. A "fix version" in a scanner is a fact about the upstream project,
+not a promise that the module you depend on has one.
+
+### A dependency floor can introduce a vulnerability
+
+`go get mod@version` sets an **exact** requirement, not a minimum. Applied unconditionally it moves
+modules *down* and drags their dependents with them. In `cve-gate` 0.2.0 it downgraded grype
+`0.116.1 → 0.116.0`, syft `1.50.0 → 1.48.0`, and `x/crypto 0.54.0 → 0.53.0` — the last of which is
+where that build's `GO-2026-5932` finding came from. Floors must read the resolved version first and
+raise only when strictly below. The build now asserts grype resolves to exactly the requested
+version, which is the check that would have caught it.
+
+### Two SBOMs per image, one consumer
+
+With BuildKit provenance enabled (`webgrip/workflows` #41) every image carries a BuildKit-generated
+SBOM *and* the syft SBOM that `cosign-sign-attest` attests. Different origins — one from inside the
+build, one from the pushed image — but only the cosign one is consumed by Dependency-Track and
+Kyverno. Keeping both costs build time on a memory-constrained runner. Decide once there is data on
+the delta.
+
 ## Known gaps, stated rather than hidden
 
-- **No SLSA build provenance.** `actions/attest-build-provenance` has no Forgejo analog, so the SLSA
-  Build Level 2 claim in the superseded ADR-0002 is not currently met. The signature proves *who*
-  built an image; nothing proves *how*. Largest single regression from the GitHub migration.
+- ~~**No SLSA build provenance.**~~ **Closed 2026-08-01** — BuildKit emits the same in-toto SLSA
+  predicate natively (`--provenance=mode=max`), attached as an OCI referrer, with no GitHub
+  involvement. `webgrip/workflows` #41. This was the largest single regression from the GitHub
+  migration and it turned out to be a two-line fix; the gap was one of attention, not capability.
 - **No public transparency log.** Deliberate — Rekor would publish our image inventory and add an
   internet dependency to admission — but it means an OpenBao compromise plus registry write access
   would be externally undetectable.
