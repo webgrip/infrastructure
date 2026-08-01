@@ -130,11 +130,16 @@ runs:
         # package coordinates. Setting selection=none drops the file section entirely and takes the
         # peak RSS with it.
         #
-        # This narrows the SBOM: it still lists every package (the NTIA minimum elements and every
-        # consumer we have), but no longer enumerates individual files. If a future consumer needs
-        # file-level provenance, set this back to `owned-by-package` and raise the runner limit in
-        # the same change — not one without the other.
-        SYFT_FILE_METADATA_SELECTION: "none"
+        # `owned-by-package` is the middle setting, chosen over `none` deliberately: it keeps file
+        # entries for files that BELONG to a package — which is what file-level forensics actually
+        # needs ("was this exact file, with this hash, in that image?") — and drops the unowned
+        # remainder that dominates the cost. `none` would have been cheaper and would have removed
+        # that capability outright.
+        #
+        # Packages are unaffected either way, so Dependency-Track, Kyverno's `.components` count and
+        # the gate's package matching are untouched. Revert to the syft default when the runner limit
+        # is raised; this is a workaround for a memory cap on the wrong resource, not an improvement.
+        SYFT_FILE_METADATA_SELECTION: "owned-by-package"
       run: |
         set -euo pipefail
         # registry: source — pull layers straight from Harbor into syft's temp dir instead of
@@ -214,28 +219,20 @@ runs:
         echo "VEX statements applied to ${basename} (${n}):"
         jq -r '.statements[] | "  \(.vulnerability.name // .vulnerability["@id"] // "?")  \(.status)  \(.justification // .action_statement // "-")"' vex.openvex.json
 
-    # ── The CVE budget gate is DELIBERATELY NOT WIRED IN YET ──────────────────────────────────
-    # It belongs here, immediately before signing: a signature should mean "built by CI AND within
-    # its CVE budget", not merely "built by CI", and an over-budget image left unsigned is exactly
-    # what Kyverno refuses once image-verify-harbor-audit goes to Enforce.
+    # Gate BEFORE sign. A signature is supposed to mean something: with this in front of it, it
+    # means "built by CI AND within its CVE budget", not merely "built by CI". An over-budget image
+    # stays in Harbor but unsigned — and unsigned is what admission refuses.
     #
-    # But the gate runs INSIDE harbor.webgrip.dev/webgrip/cve-gate, which this PR is what first
-    # builds. Wiring it here in the same change would make cve-gate's own first release depend on
-    # an image that does not exist yet — a bootstrap failure on the very first run, papered over
-    # with the ALLOW_MISSING_GATE escape hatch. Shipping the image first and wiring second means
-    # the happy path never needs the escape hatch at all.
-    #
-    # Follow-up PR, once cve-gate 0.1.0 exists in Harbor, restores exactly this:
-    #
-    #   - name: CVE budget gate
-    #     id: cve
-    #     uses: ./.forgejo/actions/cve-gate
-    #     with:
-    #       image-ref: ${{ steps.digest.outputs.image-with-digest }}
-    #       image-name: ${{ steps.vex.outputs.basename }}
-    #
-    # The action itself (.forgejo/actions/cve-gate) ships in this PR and is complete; only the call
-    # site is deferred.
+    # Deferred until cve-gate 0.2.0 existed in Harbor, because wiring it in the same change that
+    # first built that image would have made cve-gate's own release depend on an image that did not
+    # exist yet. It exists now, so the bootstrap reason is gone and ALLOW_MISSING_GATE should never
+    # be needed again.
+    - name: CVE budget gate
+      id: cve
+      uses: ./.forgejo/actions/cve-gate
+      with:
+        image-ref: ${{ steps.digest.outputs.image-with-digest }}
+        image-name: ${{ steps.vex.outputs.basename }}
 
     - name: Sign & attest via Forgejo OIDC -> OpenBao Transit
       shell: bash
@@ -292,6 +289,18 @@ runs:
         if [ "${VEX_PRESENT:-false}" = "true" ]; then
           cosign attest --yes --tlog-upload=false --key "hashivault://${TRANSIT_KEY}" \
             --predicate vex.openvex.json --type openvex "$IMAGE"
+        fi
+        # 5) The CVE-budget verdict. This is the attestation that closes the loop with admission.
+        #    Harbor cannot: it has no VEX support (goharbor/harbor#22720) and its cve_allowlist is
+        #    project-wide with no product scope, so its prevent_vul would block on findings we have
+        #    already reviewed. The gate's verdict is VEX-aware by construction — it counts what is
+        #    left AFTER suppression — so signing that verdict and verifying it at admission enforces
+        #    the same answer the gate reached, without Harbor needing to understand any of it.
+        if [ -f cve-budget.json ]; then
+          cosign attest --yes --tlog-upload=false --key "hashivault://${TRANSIT_KEY}" \
+            --predicate cve-budget.json --type https://webgrip.dev/attestations/cve-budget/v1 "$IMAGE"
+        else
+          echo "::error::no cve-budget.json to attest — this image will be signed WITHOUT a budget verdict, and admission will refuse it once the Kyverno policy is enforcing."
         fi
 
     - name: "Generate Harbor-native SBOM accessory (fail-soft)"

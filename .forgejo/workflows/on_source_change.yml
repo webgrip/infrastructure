@@ -176,6 +176,7 @@ jobs:
             --build-arg REGISTRY_MCR=harbor.webgrip.dev/mcr \
             --build-arg REGISTRY_DHI=harbor.webgrip.dev/dhi \
             --cache-from "type=registry,ref=harbor.webgrip.dev/webgrip/${{ matrix.basename }}:cache" \
+            --provenance=mode=max \
             --output=type=cacheonly,rewrite-timestamp=true \
             .
           echo "::notice::${{ matrix.basename }} builds. This did NOT push, sign, or release anything."
