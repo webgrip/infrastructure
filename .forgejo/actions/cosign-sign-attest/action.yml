@@ -130,11 +130,16 @@ runs:
         # package coordinates. Setting selection=none drops the file section entirely and takes the
         # peak RSS with it.
         #
-        # This narrows the SBOM: it still lists every package (the NTIA minimum elements and every
-        # consumer we have), but no longer enumerates individual files. If a future consumer needs
-        # file-level provenance, set this back to `owned-by-package` and raise the runner limit in
-        # the same change — not one without the other.
-        SYFT_FILE_METADATA_SELECTION: "none"
+        # `owned-by-package` is the middle setting, chosen over `none` deliberately: it keeps file
+        # entries for files that BELONG to a package — which is what file-level forensics actually
+        # needs ("was this exact file, with this hash, in that image?") — and drops the unowned
+        # remainder that dominates the cost. `none` would have been cheaper and would have removed
+        # that capability outright.
+        #
+        # Packages are unaffected either way, so Dependency-Track, Kyverno's `.components` count and
+        # the gate's package matching are untouched. Revert to the syft default when the runner limit
+        # is raised; this is a workaround for a memory cap on the wrong resource, not an improvement.
+        SYFT_FILE_METADATA_SELECTION: "owned-by-package"
       run: |
         set -euo pipefail
         # registry: source — pull layers straight from Harbor into syft's temp dir instead of
