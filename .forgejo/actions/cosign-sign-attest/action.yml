@@ -235,6 +235,7 @@ runs:
         image-name: ${{ steps.vex.outputs.basename }}
 
     - name: Sign & attest via Forgejo OIDC -> OpenBao Transit
+      id: sign
       shell: bash
       env:
         VEX_PRESENT: ${{ steps.vex.outputs.present }}
@@ -382,6 +383,12 @@ runs:
         esac
 
     - name: Summary
+      # `if: always()` so a failed release still explains itself — which means this step MUST branch
+      # on what actually happened. It used to print "Signed (cosign via OpenBao Transit)"
+      # unconditionally, so when the gate failed in run 221 and signing never ran, the job summary
+      # asserted a signature on an image that has none. A supply-chain summary that reports the
+      # happy path regardless of outcome is worse than no summary: it is the artifact a human reads
+      # to decide whether to trust the release.
       if: always()
       shell: bash
       env:
@@ -389,16 +396,34 @@ runs:
         COMPONENTS: ${{ steps.sbom.outputs.components }}
         VEX_PRESENT: ${{ steps.vex.outputs.present }}
         VEX_STATEMENTS: ${{ steps.vex.outputs.statements }}
+        GATE_OUTCOME: ${{ steps.cve.outcome }}
+        SIGN_OUTCOME: ${{ steps.sign.outcome }}
       run: |
         {
-          echo "## 🔐 Supply chain (Harbor)"
-          echo ""
-          echo "- Signed (cosign via OpenBao Transit): \`${IMAGE}\`"
-          echo "- CycloneDX SBOM (spec 1.6) attested in Harbor + uploaded to Dependency-Track (${COMPONENTS:-?} components)"
-          if [ "${VEX_PRESENT:-false}" = "true" ]; then
-            echo "- OpenVEX attested: ${VEX_STATEMENTS:-0} reviewed statement(s) — see \`ops/vex/statements/\`"
+          if [ "${SIGN_OUTCOME}" = "success" ]; then
+            echo "## 🔐 Supply chain (Harbor)"
+            echo ""
+            echo "- Signed (cosign via OpenBao Transit): \`${IMAGE}\`"
+            echo "- CycloneDX SBOM (spec 1.6) attested in Harbor + uploaded to Dependency-Track (${COMPONENTS:-?} components)"
+            if [ "${VEX_PRESENT:-false}" = "true" ]; then
+              echo "- OpenVEX attested: ${VEX_STATEMENTS:-0} reviewed statement(s) — see \`ops/vex/statements/\`"
+            else
+              echo "- OpenVEX: no statements for this image (nothing suppressed)"
+            fi
+            echo "- Harbor-native SBOM accessory generation requested for the pushed digest (populates Harbor's SBOM column; fail-soft)"
           else
-            echo "- OpenVEX: no statements for this image (nothing suppressed)"
+            echo "## ❌ Supply chain (Harbor) — NOT SIGNED"
+            echo ""
+            echo "\`${IMAGE:-<digest unresolved>}\` is **in Harbor and unsigned**. It was pushed by the build job;"
+            echo "this job is what would have vouched for it, and it did not get that far."
+            echo ""
+            echo "| stage | outcome |"
+            echo "| --- | --- |"
+            echo "| CVE budget gate | \`${GATE_OUTCOME:-did not run}\` |"
+            echo "| cosign sign + attest | \`${SIGN_OUTCOME:-did not run}\` |"
+            echo ""
+            echo "Kyverno's image-verify policy will refuse this digest once promoted to Enforce."
+            echo "Fix the failure above and cut a new patch release — do not re-tag, and consider"
+            echo "deleting this tag so an unsigned artifact is not left pullable."
           fi
-          echo "- Harbor-native SBOM accessory generation requested for the pushed digest (populates Harbor's SBOM column; fail-soft)"
         } >> "$GITHUB_STEP_SUMMARY"
