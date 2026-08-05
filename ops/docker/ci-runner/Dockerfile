@@ -63,23 +63,35 @@ RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
 # Helm, baked in: CI jobs currently run azure/setup-helm per job — a WAN download plus an
 # action clone on every run. With helm on PATH the shared reusables' setup-helm fallback
 # becomes a no-op.
+# Checksum-verified, like cosign and syft below. It was a bare `curl | tar -xz` — an unverified
+# binary, piped straight into tar, landing on PATH in the image that runs every CI job in the org.
+# Whatever integrity TLS gives you ends at the CDN; this pins the artifact itself.
 # renovate: datasource=github-releases depName=helm/helm
 ARG HELM_VERSION=3.21.3
-RUN curl -fsSL "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz" \
-      | tar -xz -C /tmp linux-amd64/helm && \
-    install -m 0755 /tmp/linux-amd64/helm /usr/local/bin/helm && \
-    rm -rf /tmp/linux-amd64 && \
+ARG HELM_SHA256=15e041a93a590dce8100f39385cd98c84a765c9e36aeeb9e2dc6ff9e4769e2e0
+RUN set -eux; \
+    curl -fsSL "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz" -o /tmp/helm.tgz; \
+    echo "${HELM_SHA256}  /tmp/helm.tgz" | sha256sum -c -; \
+    tar -xzf /tmp/helm.tgz -C /tmp linux-amd64/helm; \
+    install -m 0755 /tmp/linux-amd64/helm /usr/local/bin/helm; \
+    rm -rf /tmp/helm.tgz /tmp/linux-amd64; \
     helm version --short
 
 # yq: the shared semantic-release config (manifest:'helm') bumps Chart.yaml version/appVersion
 # with it — without yq on the runner, helm-repo releases die in prepare with "yq: not found"
 # (common-charts run 3, exit 127). The composites carry a download fallback; baking it here
 # makes that a no-op.
+# 4.44.3 -> 4.53.3: nine minor versions stale despite the Renovate annotation. Checksum-verified
+# for the same reason as helm above — this was a bare curl of a binary straight onto PATH.
 # renovate: datasource=github-releases depName=mikefarah/yq
-ARG YQ_VERSION=4.44.3
-RUN curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64" \
-      -o /usr/local/bin/yq && \
-    chmod 0755 /usr/local/bin/yq && \
+ARG YQ_VERSION=4.53.3
+ARG YQ_SHA256=fa52a4e758c63d38299163fbdd1edfb4c4963247918bf9c1c5d31d84789eded4
+RUN set -eux; \
+    curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64" \
+      -o /tmp/yq; \
+    echo "${YQ_SHA256}  /tmp/yq" | sha256sum -c -; \
+    install -m 0755 /tmp/yq /usr/local/bin/yq; \
+    rm -f /tmp/yq; \
     yq --version
 
 # cosign + syft, baked for the same reason Helm above is: every signing job currently installs both
