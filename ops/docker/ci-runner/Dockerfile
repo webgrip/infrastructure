@@ -2,6 +2,26 @@
 
 ARG RUNNER_VERSION=2.335.1@sha256:08c30b0a7105f64bddfc485d2487a22aa03932a791402393352fdf674bda2c29
 ARG REGISTRY_GHCR=ghcr.io
+
+# The CVE gate's two binaries, taken from the hardened image that already ships them.
+#
+# They used to run INSIDE that image, one `docker run` per release. Everything that made that hard
+# came from the container, not from the scan: `docker cp` refused by a read-only rootfs, a 2g tmpfs
+# too small for grype's DB plus an extracted multi-GB image, volumes created root-owned and
+# unwritable by uid 65532, a seccomp rule that denied what its own comment said it allowed. Five
+# releases, five failures, none of them about finding CVEs.
+#
+# Copying the binaries out turns the gate into an ordinary step. cve-gate stays the ADR-0006 worked
+# example of a hardened image — it is simply no longer in the hot path of every release.
+#
+# Pinned by tag AND digest, same as every other base here. NOTE: cve-gate releases are currently
+# UNSIGNED (the gate could not sign itself while it was broken), so this pins an unsigned artifact
+# we built. That resolves the first time cve-gate releases through a working gate.
+ARG REGISTRY_WEBGRIP=harbor.webgrip.dev/webgrip
+# renovate: datasource=docker depName=harbor.webgrip.dev/webgrip/cve-gate versioning=docker
+ARG CVE_GATE_VERSION=0.3.2@sha256:5c70b055ce8dcbcf02b04d66b1d78aeb8386b00efcc5fd98ba8107100e418883
+FROM ${REGISTRY_WEBGRIP}/cve-gate:${CVE_GATE_VERSION} AS cve-gate-src
+
 FROM ${REGISTRY_GHCR}/actions/actions-runner:${RUNNER_VERSION} AS runner
 
 ARG IMAGE_CREATED=1970-01-01T00:00:00Z
@@ -137,9 +157,23 @@ RUN set -eux; \
     rm -f /tmp/syft.tgz /tmp/syft; \
     syft version
 
+# grype + cve-gate, lifted from the hardened image (see the stage at the top of this file). Both are
+# static Go binaries, so they run here unchanged. This is what lets .forgejo/actions/cve-gate stop
+# being a `docker run` against a remote daemon and become a step that calls a binary on PATH.
+COPY --from=cve-gate-src /usr/local/bin/grype    /usr/local/bin/grype
+COPY --from=cve-gate-src /usr/local/bin/cve-gate /usr/local/bin/cve-gate
+
 # Regression guard, same shape as the envsubst one above: if a refactor or base-image change drops
-# either tool, fail HERE rather than in some future release's Sign & Attest job.
-RUN command -v cosign && command -v syft
+# any of these, fail HERE rather than in some future release's Sign & Attest job. `cve-gate` with no
+# IMAGE_REF must reach its own argument validation — that proves the binary actually executes on
+# this base, which a `command -v` alone would not.
+RUN set -eux; \
+    command -v cosign; \
+    command -v syft; \
+    command -v grype; \
+    grype version; \
+    IMAGE_REF= cve-gate 2>&1 | grep -q 'IMAGE_REF is required' \
+      || { echo "FATAL: cve-gate did not reach its own argument validation" >&2; exit 1; }
 
 # https://github.com/orgs/community/discussions/177903
 # This "fixes" a "bug" that causes errors on self-hosted runners when runner ghcp agents workloads
