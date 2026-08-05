@@ -84,6 +84,188 @@ jobs:
       # it only iterates ops/docker/*/.
       max-level: '1'
 
+  # Builds every changed image ON THE BRANCH, without releasing or pushing anything.
+  #
+  # Why this exists: release-per-image below is gated on main/development, so on a feature branch
+  # NOTHING was ever built. A green branch run meant "the guards passed", not "the image compiles" —
+  # and the runs were suspiciously fast (21-56s) for exactly that reason. The only way to discover a
+  # broken Dockerfile was to merge and watch main go red, which is how cve-gate burned four
+  # consecutive merges (runs 188, 192, 194, 196) to learn four separate one-line facts: the DHI
+  # registry needs a proxy default, jq is dynamically linked, musl's ldd writes to stderr, and this
+  # base has no ldd at all. Every one of those was discoverable on the branch.
+  #
+  # This runs the SAME `docker buildx build` the release path's verifyRelease gate runs — same
+  # build-args, same Harbor layer cache — but with --output=type=cacheonly, so it produces no image,
+  # pushes nothing, and cuts no tag. Main stops being the test environment.
+  build-check:
+    name: 'Build check'
+    needs: [changed-images]
+    # Only off main/development: there, release-per-image already builds the same thing via
+    # verifyRelease, and running both would double every release's build time.
+    if: >
+      always()
+      && github.ref != 'refs/heads/main'
+      && github.ref != 'refs/heads/development'
+      && needs.changed-images.result == 'success'
+      && needs.changed-images.outputs.matrix != '[]'
+    runs-on: docker
+    strategy:
+      # Report every broken image in one run rather than stopping at the first.
+      fail-fast: false
+      # Deliberately NOT max-parallel: 1. That setting exists on release-per-image to serialise the
+      # version-bump commits those jobs push, and Forgejo ignores it anyway. Nothing here writes, so
+      # concurrency is bounded only by the runner pool.
+      matrix:
+        include: ${{ fromJson(needs.changed-images.outputs.matrix) }}
+    # Hoisted to job env so the login step can be skipped when unset. The `secrets` context is not
+    # dependably available in a step-level `if:` — `env` is, so the secret is mapped once here and
+    # the condition reads that.
+    env:
+      HARBOR_ROBOT_USER: ${{ secrets.HARBOR_ROBOT_USER }}
+      HARBOR_ROBOT_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      # Login BEFORE buildx setup: the buildkit bootstrap image pulls through Harbor and must be
+      # authenticated in case that proxy project isn't anonymous-pull. Mirrors the release path.
+      # Skipped rather than failed when the secret is absent — the build then runs cache-cold, which
+      # is slow but still a valid check.
+      #
+      # docker/login-action (134 MB) and docker/setup-buildx-action (66 MB) used to do these two
+      # things. act `git clone`s an action's full history on every job — measured 27.7s and 15.9s
+      # respectively on run 224 — to run one `docker login` and one `docker buildx create`. The
+      # build step below already drives the CLI directly; these now match it.
+      - name: Log in to Harbor
+        if: ${{ env.HARBOR_ROBOT_TOKEN != '' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf '%s' "$HARBOR_ROBOT_TOKEN" \
+            | docker login harbor.webgrip.dev --username "$HARBOR_ROBOT_USER" --password-stdin
+
+      - name: Set up Docker Buildx
+        id: buildx
+        shell: bash
+        env:
+          # forgejo-buildkitd's Service is internalTrafficPolicy: Local, so this name resolves to
+          # the daemon on THIS node — which is why a fixed DNS name works instead of a per-pod IP.
+          BUILDKITD_ENDPOINT: tcp://forgejo-buildkitd.forgejo.svc.cluster.local:1234
+        run: |
+          set -euo pipefail
+          # Prefer the long-lived per-node daemon; fall back to a throwaway builder.
+          #
+          # A throwaway builder's LOCAL cache dies with it, so a build-check is always locally
+          # cache-cold and leans entirely on `cache-from type=registry` — a network round-trip per
+          # layer for what should be a disk read. That matters most HERE: build-check exists to give
+          # fast feedback on a branch, and it is the job that runs most often.
+          #
+          # The fallback is load-bearing. forgejo-buildkitd is deliberately not a dependency of the
+          # runner pool, so it can be absent or draining; when it is, this behaves exactly as before.
+          #
+          # A unique name either way: buildx keeps its builder registry in the CLIENT's
+          # ~/.docker/buildx (empty in a fresh pod) while a docker-container builder lives on the
+          # shared per-node dind daemon and outlives it, so a fixed name collides with a container
+          # the client cannot see.
+          name="build-check-${GITHUB_RUN_ID:-0}-${{ matrix.basename }}-$RANDOM"
+          driver=docker-container
+
+          host="${BUILDKITD_ENDPOINT#tcp://}"; host="${host%%:*}"
+          port="${BUILDKITD_ENDPOINT##*:}"
+          # bash /dev/tcp probes resolution and reachability at once, no extra tooling — the same
+          # technique the runner entrypoint uses to choose its dind endpoint.
+          if (exec 3<>"/dev/tcp/${host}/${port}") 2>/dev/null; then
+            exec 3>&- || true
+            if docker buildx create --name "$name" --driver remote --use "${BUILDKITD_ENDPOINT}" >/dev/null 2>&1 \
+               && docker buildx inspect --bootstrap --builder "$name" >/dev/null 2>&1; then
+              driver=remote
+            else
+              # Reachable but unusable: drop the half-made client entry so the name is free below.
+              docker buildx rm --force "$name" >/dev/null 2>&1 || true
+              echo "::warning::${BUILDKITD_ENDPOINT} answered but the remote builder did not come up; using docker-container."
+            fi
+          else
+            echo "::warning::${BUILDKITD_ENDPOINT} unreachable; using docker-container (cold local cache)."
+          fi
+
+          if [ "$driver" = "docker-container" ]; then
+            # Buildkit image pinned to the Harbor proxy for the same reason as the release path:
+            # pulling it straight from docker.io was the one external fetch left in the hot path and
+            # it flakes (run 125). Tag AND digest so Renovate can move the tag without the build
+            # silently following a repointed `buildx-stable-1`.
+            docker buildx create \
+              --name "$name" \
+              --driver docker-container \
+              --driver-opt image=harbor.webgrip.dev/dockerhub/moby/buildkit:buildx-stable-1@sha256:2f5adac4ecd194d9f8c10b7b5d7bceb5186853db1b26e5abd3a657af0b7e26ec \
+              --use >/dev/null
+            docker buildx inspect --bootstrap --builder "$name" >/dev/null
+          fi
+
+          echo "using $driver builder $name"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+          echo "driver=$driver" >> "$GITHUB_OUTPUT"
+
+      - name: Build ${{ matrix.basename }} (no push)
+        shell: bash
+        working-directory: ${{ matrix.path }}
+        run: |
+          set -euo pipefail
+          # Build-args MUST stay in lockstep with on_release_published.yml and with
+          # dockerVerifyGate() in @webgrip/semantic-release-config. A check that builds differently
+          # from the release path is a check that passes while the release fails — which is the
+          # failure mode this job exists to remove, not reproduce.
+          #
+          # cache-from only, never cache-to: a branch build must not be able to poison the layer
+          # cache that main's releases read. A cache miss here costs time; a poisoned cache costs
+          # trust in every subsequent release.
+          # SOURCE_DATE_EPOCH pinned to the commit's own timestamp, plus buildkit's
+          # rewrite-timestamp, makes the build reproducible: the same source produces the same
+          # digest regardless of when or where it is built. That is what turns "the digest changed"
+          # into a signal — without it, every rebuild differs and tampering is indistinguishable
+          # from a Tuesday.
+          SOURCE_DATE_EPOCH="$(git log -1 --format=%ct)"
+          export SOURCE_DATE_EPOCH
+          echo "SOURCE_DATE_EPOCH=$SOURCE_DATE_EPOCH ($(date -u -d "@$SOURCE_DATE_EPOCH" 2>/dev/null || date -u -r "$SOURCE_DATE_EPOCH"))"
+
+          docker buildx build \
+            --builder "${{ steps.buildx.outputs.name }}" \
+            --file Dockerfile \
+            --platform linux/amd64 \
+            --build-arg SOURCE_DATE_EPOCH \
+            --build-arg REGISTRY_DOCKERHUB=harbor.webgrip.dev/dockerhub \
+            --build-arg REGISTRY_GHCR=harbor.webgrip.dev/ghcr \
+            --build-arg REGISTRY_MCR=harbor.webgrip.dev/mcr \
+            --build-arg REGISTRY_DHI=harbor.webgrip.dev/dhi \
+            --cache-from "type=registry,ref=harbor.webgrip.dev/webgrip/${{ matrix.basename }}:cache" \
+            --provenance=mode=max \
+            --output=type=cacheonly,rewrite-timestamp=true \
+            .
+          echo "::notice::${{ matrix.basename }} builds. This did NOT push, sign, or release anything."
+
+      # Replaces the post-steps the two actions registered. act DOES run them; they are folded into
+      # "Complete job" rather than shown as their own step, which is why they are easy to miss —
+      # run 226 ends with `Post Set up Docker Buildx` calling `docker buildx rm`, and
+      # `Post Log in to Harbor` calling `docker logout`. So this is the cleanup that already
+      # existed, made visible, not new work.
+      #
+      # It is worth keeping: the buildkit container runs on the shared per-node dind daemon rather
+      # than in this pod, so it would outlive the job.
+      #
+      # The real fix is to stop creating a builder per job at all — a long-lived buildkitd reached
+      # via the `remote` driver removes the create, the bootstrap and this step together, and keeps
+      # a warm local cache instead of starting cold on every build.
+      - name: Clean up builder and credentials
+        if: always()
+        shell: bash
+        run: |
+          # Only docker-container leaves anything behind: it creates a buildkit container on the
+          # shared per-node dind daemon, which outlives this pod. The remote driver creates nothing
+          # remotely — its builder is a line in the ephemeral client's ~/.docker/buildx.
+          if [ "${{ steps.buildx.outputs.driver }}" = "docker-container" ]; then
+            docker buildx rm --force "${{ steps.buildx.outputs.name }}" >/dev/null 2>&1
+          fi
+          docker logout harbor.webgrip.dev >/dev/null 2>&1
+          exit 0
+
   release-per-image:
     name: 'Release'
     needs: [changed-images]

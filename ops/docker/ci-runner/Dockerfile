@@ -82,6 +82,53 @@ RUN curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}
     chmod 0755 /usr/local/bin/yq && \
     yq --version
 
+# cosign + syft, baked for the same reason Helm above is: every signing job currently installs both
+# at runtime. sigstore/cosign-installer and anchore/sbom-action/download-syft are `uses:` on
+# ABSOLUTE github.com URLs, so act git-clones each action repo, and the actions then download the
+# binaries from GitHub releases — cosign-installer additionally downloads a *bootstrap* cosign to
+# verify the real one. Four WAN round-trips on the critical path of every release, in the job that
+# decides whether an image is fit to sign.
+#
+# Baking them also makes the release path independent of github.com being reachable at release time.
+#
+# Checksums are pinned alongside the versions, so the SHA256 is what is actually being trusted and a
+# Renovate version bump that forgets the checksum fails THIS build loudly rather than silently
+# installing something else. This trusts the GitHub release artifact — the same trust root
+# cosign-installer's bootstrap binary ultimately rests on — but pins it to an exact byte sequence
+# and resolves it once at image build instead of on every release.
+#
+# COSIGN IS DELIBERATELY HELD ON THE 2.x LINE — but on the CURRENT 2.x, not a stale one. 3.x
+# changes the default bundle/attestation format and the verification surface, so the major has to
+# roll out together with the Kyverno image-verify policy and everything already consuming these
+# attestations; it is its own change, not a side effect of this one. 2.6.4 is the latest 2.x
+# (the action's input default was still on 2.4.3, which is where this pin came from).
+# renovate: datasource=github-releases depName=sigstore/cosign
+ARG COSIGN_VERSION=2.6.4
+ARG COSIGN_SHA256=309779b0c4e409186b0a80daba99041fe2cf65a920ce645013901df6211895a9
+RUN set -eux; \
+    curl -fsSL "https://github.com/sigstore/cosign/releases/download/v${COSIGN_VERSION}/cosign-linux-amd64" \
+      -o /tmp/cosign; \
+    echo "${COSIGN_SHA256}  /tmp/cosign" | sha256sum -c -; \
+    install -m 0755 /tmp/cosign /usr/local/bin/cosign; \
+    rm -f /tmp/cosign; \
+    cosign version
+
+# renovate: datasource=github-releases depName=anchore/syft
+ARG SYFT_VERSION=1.50.0
+ARG SYFT_SHA256=bf7b29ff57f06da30918266a0e1c2885a8f99784798d1bdb1628886aa015d788
+RUN set -eux; \
+    curl -fsSL "https://github.com/anchore/syft/releases/download/v${SYFT_VERSION}/syft_${SYFT_VERSION}_linux_amd64.tar.gz" \
+      -o /tmp/syft.tgz; \
+    echo "${SYFT_SHA256}  /tmp/syft.tgz" | sha256sum -c -; \
+    tar -xzf /tmp/syft.tgz -C /tmp syft; \
+    install -m 0755 /tmp/syft /usr/local/bin/syft; \
+    rm -f /tmp/syft.tgz /tmp/syft; \
+    syft version
+
+# Regression guard, same shape as the envsubst one above: if a refactor or base-image change drops
+# either tool, fail HERE rather than in some future release's Sign & Attest job.
+RUN command -v cosign && command -v syft
+
 # https://github.com/orgs/community/discussions/177903
 # This "fixes" a "bug" that causes errors on self-hosted runners when runner ghcp agents workloads
 # The problem is that the workload expects codeql to be installed, but it's not present by default

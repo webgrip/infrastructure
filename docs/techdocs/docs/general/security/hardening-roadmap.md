@@ -102,15 +102,29 @@ that digest-pins everything and lets Renovate move it.
 [`cve-gate`](../docker-images/cve-gate.md) is the worked example every other migration copies. It is
 the gate itself, held to the standard it enforces — the only image starting at `enforce` 0/0:
 
-- DHI `alpine-base`, `-dev` variant as a **build stage only**; the runtime stage has no package
-  manager, so nothing can be installed into a running container.
-- Tools **copied from hardened upstream images**, not fetched at release time. The first version of
-  this gate ran `curl -sSfL raw.githubusercontent.com/anchore/grype/main/install.sh | sh` — an
-  unpinned script from a mutable branch, executed in the job that decides whether an image is fit to
-  sign. A supply-chain hole inside a supply-chain control.
-- Non-root (65532), read-only rootfs, `--cap-drop ALL`, `no-new-privileges`, `/tmp` the only
-  writable path.
-- Build-time assertions that the toolchain runs **as the non-root user** before it is baked in.
+- **`dhi/static` runtime**: two static Go binaries, no shell, no libc, no package manager, no
+  package database. Nothing left to be missing.
+- **grype built from source**, not fetched at release time. The first version ran
+  `curl -sSfL raw.githubusercontent.com/anchore/grype/main/install.sh | sh` — an unpinned script from
+  a mutable branch, executed in the job that decides whether an image is fit to sign. A supply-chain
+  hole inside a supply-chain control.
+- Non-root (65532), read-only rootfs, `--cap-drop ALL`, `no-new-privileges`, a `noexec` tmpfs, and a
+  seccomp profile that also blocks `io_uring`.
+- Reproducible: `SOURCE_DATE_EPOCH` + `rewrite-timestamp` + `-trimpath -buildvcs=false`.
+
+**Measured result — this is the argument for ADR-0006 in one line:**
+
+| Image | Crit | High | Medium | Total |
+| --- | --- | --- | --- | --- |
+| `helm-deploy` (stock alpine) | 5 | 106 | 117 | **252** |
+| `cve-gate` 0.1.0 (DHI alpine + jq/yq) | 0 | 4 | 2 | 8 |
+| `cve-gate` 0.2.0 (static) | 0 | 3 | 2 | **6** |
+
+Both are Alpine-lineage CI tools of comparable scope. **252 against 6.**
+
+The path from 0.1.0 to 0.2.0 is also instructive: the shell was the root cause of every build
+failure, not `jq`. A shell script forces a shell in the runtime, which forces `jq` and `yq`, and
+`jq` is dynamically linked. Rewriting ~250 lines of shell as Go removed the entire class.
 
 Two things it surfaced that apply to every Wave 3 migration:
 
@@ -158,11 +172,107 @@ This wave complements rather than replaces
 removes *privilege* from the build engine, this one hardens the *boundary* around everything the
 runner executes.
 
+## Findings backlog (2026-08-01)
+
+Recorded here rather than fixed immediately, because each one is a separate change with its own
+blast radius.
+
+### Harbor `prevent_vul` — what it actually does
+
+Badly named. It is **not** "prevent vulnerable images from running" in any runtime sense — Harbor
+has no view of your cluster. It refuses to **serve the manifest on pull**. The block happens at
+`docker pull` / kubelet image-pull time, and the symptom is an `ImagePullBackOff`, not a rejected
+Pod.
+
+**It is a severity threshold, not a count.** There is no "N vulnerabilities allowed" setting
+anywhere. You pick one severity, and *any single finding at or above it* blocks the pull. The knob
+is two fields on project metadata:
+
+| Field | Values |
+| --- | --- |
+| `prevent_vul` | `"true"` / `"false"` |
+| `severity` | `none` · `low` · `medium` · `high` · `critical` |
+
+```bash
+# read current state
+curl -sS -u "$ROBOT" https://harbor.webgrip.dev/api/v2.0/projects/webgrip/metadatas
+
+# set it (UI equivalent: Project -> Configuration -> Deployment security)
+curl -sS -u "$ROBOT" -X PUT -H 'Content-Type: application/json' \
+  -d '{"severity":"critical"}' \
+  https://harbor.webgrip.dev/api/v2.0/projects/webgrip/metadatas/severity
+curl -sS -u "$ROBOT" -X PUT -H 'Content-Type: application/json' \
+  -d '{"prevent_vul":"true"}' \
+  https://harbor.webgrip.dev/api/v2.0/projects/webgrip/metadatas/prevent_vul
+```
+
+Docs: [Harbor — Deployment security](https://goharbor.io/docs/2.1.0/administration/vulnerability-scanning/deployment-security/)
+and [Project configuration](https://goharbor.io/docs/2.5.0/working-with-projects/project-configuration/).
+
+**Two properties that matter more than the setting itself:**
+
+1. **It fails OPEN on unscanned images.** An image Harbor has never scanned is served normally —
+   the threshold only applies to artifacts with a scan result
+   ([goharbor/harbor#16218](https://github.com/goharbor/harbor/issues/16218),
+   [#16732](https://github.com/goharbor/harbor/issues/16732)). So it is not a control you can rely
+   on alone: anything that lands without a scan bypasses it silently. Our CVE gate has the opposite
+   failure mode — it exits non-zero when it cannot run, which blocks signing, which blocks
+   admission. **Fail-closed beats fail-open, so the gate remains the primary control and this is
+   defence in depth.**
+2. **The project `cve_allowlist` is what it honours — not our OpenVEX.** Harbor has no idea our VEX
+   statements exist. So an OpenVEX-suppressed finding still counts toward this threshold. That is a
+   real divergence: the gate and Harbor will disagree about the same image, deliberately, because
+   only the gate applies VEX.
+
+**Do not enable it yet.** `ci-runner` measures 8 critical / 136 high, so `high` — or even
+`critical` — makes the runner image unpullable and stops all CI immediately. Sequence:
+
+1. Bring the runner images down (ADR-0006 migration).
+2. Enable at `critical` once no image carries one.
+3. Tighten to `high` only when the numbers support it.
+
+Set it in the `harbor-proxy-config` provisioner next to `ensure_project_scanning`, not by hand — a
+curl'd change is invisible to GitOps and survives only until the next reconcile.
+
+### `ci-runner` carries the GitHub CLI
+
+`ops/docker/ci-runner/Dockerfile` adds `cli.github.com` as a third-party apt source and installs
+`gh` — in an organisation that no longer uses GitHub. That is a package set *and* an external
+repository key, in the worst-scoring and most privileged image in the estate. Removing it retires
+findings permanently and needs no VEX justification from anyone. Deferred to the image consolidation
+pass rather than done piecemeal.
+
+### Not every "fixed in X" is reachable
+
+Trivy reported the Moby findings as *fixed in 29.3.1 / 29.5.1*, which reads like a version bump.
+`github.com/docker/docker` has **no v29** — it tops out at `v28.5.2+incompatible`. Docker Engine 29.x
+lives at a different module path (`github.com/moby/moby/v2`), so consuming the fix requires the
+*dependent* to migrate modules. A "fix version" in a scanner is a fact about the upstream project,
+not a promise that the module you depend on has one.
+
+### A dependency floor can introduce a vulnerability
+
+`go get mod@version` sets an **exact** requirement, not a minimum. Applied unconditionally it moves
+modules *down* and drags their dependents with them. In `cve-gate` 0.2.0 it downgraded grype
+`0.116.1 → 0.116.0`, syft `1.50.0 → 1.48.0`, and `x/crypto 0.54.0 → 0.53.0` — the last of which is
+where that build's `GO-2026-5932` finding came from. Floors must read the resolved version first and
+raise only when strictly below. The build now asserts grype resolves to exactly the requested
+version, which is the check that would have caught it.
+
+### Two SBOMs per image, one consumer
+
+With BuildKit provenance enabled (`webgrip/workflows` #41) every image carries a BuildKit-generated
+SBOM *and* the syft SBOM that `cosign-sign-attest` attests. Different origins — one from inside the
+build, one from the pushed image — but only the cosign one is consumed by Dependency-Track and
+Kyverno. Keeping both costs build time on a memory-constrained runner. Decide once there is data on
+the delta.
+
 ## Known gaps, stated rather than hidden
 
-- **No SLSA build provenance.** `actions/attest-build-provenance` has no Forgejo analog, so the SLSA
-  Build Level 2 claim in the superseded ADR-0002 is not currently met. The signature proves *who*
-  built an image; nothing proves *how*. Largest single regression from the GitHub migration.
+- ~~**No SLSA build provenance.**~~ **Closed 2026-08-01** — BuildKit emits the same in-toto SLSA
+  predicate natively (`--provenance=mode=max`), attached as an OCI referrer, with no GitHub
+  involvement. `webgrip/workflows` #41. This was the largest single regression from the GitHub
+  migration and it turned out to be a two-line fix; the gap was one of attention, not capability.
 - **No public transparency log.** Deliberate — Rekor would publish our image inventory and add an
   internet dependency to admission — but it means an OpenBao compromise plus registry write access
   would be externally undetectable.

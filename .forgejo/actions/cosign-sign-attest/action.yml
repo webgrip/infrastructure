@@ -36,13 +36,16 @@ inputs:
     # verification surface, so it must be rolled out together with the Kyverno image-verify policy
     # and anything already consuming these attestations. Renovate will raise the major as a PR —
     # treat it as a coordinated migration, not a version bump.
+    # Kept in lockstep with COSIGN_VERSION in ops/docker/ci-runner/Dockerfile — the runner image now
+    # bakes cosign, and a mismatch here would silently install a different one over the top.
     # renovate: datasource=github-releases depName=sigstore/cosign
-    default: "v2.4.3"
+    default: "v2.6.4"
   syft-version:
     description: "Syft release to install"
     required: false
+    # Kept in lockstep with SYFT_VERSION in ops/docker/ci-runner/Dockerfile.
     # renovate: datasource=github-releases depName=anchore/syft
-    default: "v1.48.0"
+    default: "v1.50.0"
   openbao-addr:
     description: "In-cluster OpenBao address (Vault-compatible API)"
     required: false
@@ -119,6 +122,27 @@ runs:
         # the step log just stops after 15-25 min (runs 102/104/123). Single-threaded
         # cataloging bounds peak RSS; it's slower but survives.
         SYFT_PARALLELISM: "1"
+        # The 3Gi cap is on the RUNNER container (dind gets 6Gi), and the node it lands on is
+        # memory-bound at ~78% with CPU idle at ~17% — so the honest fix is raising that limit.
+        # Until there is memory to spare, cut the work instead of the parallelism.
+        #
+        # File cataloging is what actually consumes the memory: syft hashes every file in the image
+        # to populate SBOM file entries, which is why the step log stalls on things like
+        # `/usr/lib/x86_64-linux-gnu/perl/5.36.0/CORE/warnings.h`. Nothing downstream reads them —
+        # Dependency-Track ingests PACKAGES, Kyverno counts `.components`, and the CVE gate matches
+        # package coordinates. Setting selection=none drops the file section entirely and takes the
+        # peak RSS with it.
+        #
+        # `owned-by-package` is the middle setting, chosen over `none` deliberately: it keeps file
+        # entries for files that BELONG to a package — which is what file-level forensics actually
+        # needs ("was this exact file, with this hash, in that image?") — and drops the unowned
+        # remainder that dominates the cost. `none` would have been cheaper and would have removed
+        # that capability outright.
+        #
+        # Packages are unaffected either way, so Dependency-Track, Kyverno's `.components` count and
+        # the gate's package matching are untouched. Revert to the syft default when the runner limit
+        # is raised; this is a workaround for a memory cap on the wrong resource, not an improvement.
+        SYFT_FILE_METADATA_SELECTION: "owned-by-package"
       run: |
         set -euo pipefail
         # registry: source — pull layers straight from Harbor into syft's temp dir instead of
@@ -198,30 +222,23 @@ runs:
         echo "VEX statements applied to ${basename} (${n}):"
         jq -r '.statements[] | "  \(.vulnerability.name // .vulnerability["@id"] // "?")  \(.status)  \(.justification // .action_statement // "-")"' vex.openvex.json
 
-    # ── The CVE budget gate is DELIBERATELY NOT WIRED IN YET ──────────────────────────────────
-    # It belongs here, immediately before signing: a signature should mean "built by CI AND within
-    # its CVE budget", not merely "built by CI", and an over-budget image left unsigned is exactly
-    # what Kyverno refuses once image-verify-harbor-audit goes to Enforce.
+    # Gate BEFORE sign. A signature is supposed to mean something: with this in front of it, it
+    # means "built by CI AND within its CVE budget", not merely "built by CI". An over-budget image
+    # stays in Harbor but unsigned — and unsigned is what admission refuses.
     #
-    # But the gate runs INSIDE harbor.webgrip.dev/webgrip/cve-gate, which this PR is what first
-    # builds. Wiring it here in the same change would make cve-gate's own first release depend on
-    # an image that does not exist yet — a bootstrap failure on the very first run, papered over
-    # with the ALLOW_MISSING_GATE escape hatch. Shipping the image first and wiring second means
-    # the happy path never needs the escape hatch at all.
-    #
-    # Follow-up PR, once cve-gate 0.1.0 exists in Harbor, restores exactly this:
-    #
-    #   - name: CVE budget gate
-    #     id: cve
-    #     uses: ./.forgejo/actions/cve-gate
-    #     with:
-    #       image-ref: ${{ steps.digest.outputs.image-with-digest }}
-    #       image-name: ${{ steps.vex.outputs.basename }}
-    #
-    # The action itself (.forgejo/actions/cve-gate) ships in this PR and is complete; only the call
-    # site is deferred.
+    # Deferred until cve-gate 0.2.0 existed in Harbor, because wiring it in the same change that
+    # first built that image would have made cve-gate's own release depend on an image that did not
+    # exist yet. It exists now, so the bootstrap reason is gone and ALLOW_MISSING_GATE should never
+    # be needed again.
+    - name: CVE budget gate
+      id: cve
+      uses: ./.forgejo/actions/cve-gate
+      with:
+        image-ref: ${{ steps.digest.outputs.image-with-digest }}
+        image-name: ${{ steps.vex.outputs.basename }}
 
     - name: Sign & attest via Forgejo OIDC -> OpenBao Transit
+      id: sign
       shell: bash
       env:
         VEX_PRESENT: ${{ steps.vex.outputs.present }}
@@ -276,6 +293,18 @@ runs:
         if [ "${VEX_PRESENT:-false}" = "true" ]; then
           cosign attest --yes --tlog-upload=false --key "hashivault://${TRANSIT_KEY}" \
             --predicate vex.openvex.json --type openvex "$IMAGE"
+        fi
+        # 5) The CVE-budget verdict. This is the attestation that closes the loop with admission.
+        #    Harbor cannot: it has no VEX support (goharbor/harbor#22720) and its cve_allowlist is
+        #    project-wide with no product scope, so its prevent_vul would block on findings we have
+        #    already reviewed. The gate's verdict is VEX-aware by construction — it counts what is
+        #    left AFTER suppression — so signing that verdict and verifying it at admission enforces
+        #    the same answer the gate reached, without Harbor needing to understand any of it.
+        if [ -f cve-budget.json ]; then
+          cosign attest --yes --tlog-upload=false --key "hashivault://${TRANSIT_KEY}" \
+            --predicate cve-budget.json --type https://webgrip.dev/attestations/cve-budget/v1 "$IMAGE"
+        else
+          echo "::error::no cve-budget.json to attest — this image will be signed WITHOUT a budget verdict, and admission will refuse it once the Kyverno policy is enforcing."
         fi
 
     - name: "Generate Harbor-native SBOM accessory (fail-soft)"
@@ -357,6 +386,12 @@ runs:
         esac
 
     - name: Summary
+      # `if: always()` so a failed release still explains itself — which means this step MUST branch
+      # on what actually happened. It used to print "Signed (cosign via OpenBao Transit)"
+      # unconditionally, so when the gate failed in run 221 and signing never ran, the job summary
+      # asserted a signature on an image that has none. A supply-chain summary that reports the
+      # happy path regardless of outcome is worse than no summary: it is the artifact a human reads
+      # to decide whether to trust the release.
       if: always()
       shell: bash
       env:
@@ -364,16 +399,34 @@ runs:
         COMPONENTS: ${{ steps.sbom.outputs.components }}
         VEX_PRESENT: ${{ steps.vex.outputs.present }}
         VEX_STATEMENTS: ${{ steps.vex.outputs.statements }}
+        GATE_OUTCOME: ${{ steps.cve.outcome }}
+        SIGN_OUTCOME: ${{ steps.sign.outcome }}
       run: |
         {
-          echo "## 🔐 Supply chain (Harbor)"
-          echo ""
-          echo "- Signed (cosign via OpenBao Transit): \`${IMAGE}\`"
-          echo "- CycloneDX SBOM (spec 1.6) attested in Harbor + uploaded to Dependency-Track (${COMPONENTS:-?} components)"
-          if [ "${VEX_PRESENT:-false}" = "true" ]; then
-            echo "- OpenVEX attested: ${VEX_STATEMENTS:-0} reviewed statement(s) — see \`ops/vex/statements/\`"
+          if [ "${SIGN_OUTCOME}" = "success" ]; then
+            echo "## 🔐 Supply chain (Harbor)"
+            echo ""
+            echo "- Signed (cosign via OpenBao Transit): \`${IMAGE}\`"
+            echo "- CycloneDX SBOM (spec 1.6) attested in Harbor + uploaded to Dependency-Track (${COMPONENTS:-?} components)"
+            if [ "${VEX_PRESENT:-false}" = "true" ]; then
+              echo "- OpenVEX attested: ${VEX_STATEMENTS:-0} reviewed statement(s) — see \`ops/vex/statements/\`"
+            else
+              echo "- OpenVEX: no statements for this image (nothing suppressed)"
+            fi
+            echo "- Harbor-native SBOM accessory generation requested for the pushed digest (populates Harbor's SBOM column; fail-soft)"
           else
-            echo "- OpenVEX: no statements for this image (nothing suppressed)"
+            echo "## ❌ Supply chain (Harbor) — NOT SIGNED"
+            echo ""
+            echo "\`${IMAGE:-<digest unresolved>}\` is **in Harbor and unsigned**. It was pushed by the build job;"
+            echo "this job is what would have vouched for it, and it did not get that far."
+            echo ""
+            echo "| stage | outcome |"
+            echo "| --- | --- |"
+            echo "| CVE budget gate | \`${GATE_OUTCOME:-did not run}\` |"
+            echo "| cosign sign + attest | \`${SIGN_OUTCOME:-did not run}\` |"
+            echo ""
+            echo "Kyverno's image-verify policy will refuse this digest once promoted to Enforce."
+            echo "Fix the failure above and cut a new patch release — do not re-tag, and consider"
+            echo "deleting this tag so an unsigned artifact is not left pullable."
           fi
-          echo "- Harbor-native SBOM accessory generation requested for the pushed digest (populates Harbor's SBOM column; fail-soft)"
         } >> "$GITHUB_STEP_SUMMARY"
