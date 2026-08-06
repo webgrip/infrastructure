@@ -203,5 +203,10 @@ yq -r '.images | to_entries[] | select(.value.note) | .key' ops/security/cve-bud
 * 2026-07-31 — recorded as **proposed**; no migration has landed yet. Promote to `accepted` when
   Stage 1 completes and the measured budgets in
   [`ops/security/cve-budgets.yaml`](../../ops/security/cve-budgets.yaml) drop.
+* 2026-08-05 — `cve-gate` remains the worked example, but is no longer on the release hot path;
+  the gate's binaries are baked into `ci-runner` instead. The standard this ADR sets is unaffected
+  — what changed is that demonstrating it and enforcing it are no longer the same artifact. See
+  [ADR-0008](0008-cve-gate-runs-as-a-step.md).
 * Refines: [ADR-0005](0005-openvex-and-cve-budgets.md) — this is how the budgets come down
+* Refined by: [ADR-0008](0008-cve-gate-runs-as-a-step.md) — the example leaves the hot path
 * External: [Docker Hardened Images catalog](https://github.com/docker-hardened-images/catalog)
