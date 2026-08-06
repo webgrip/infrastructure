@@ -79,29 +79,69 @@ runs:
       shell: bash
       run: npm install -g npm@11.4.2
 
-    # When Harbor creds are provided, set up buildx (docker-container driver — supports
-    # `cache-from type=registry`) + log in (the Harbor :cache repo needs auth to pull), then
-    # export BUILD_CACHE_REF. .releaserc.js keys on BUILD_CACHE_REF to run the cached buildx
-    # verifyRelease build; without these the build falls back to a plain (cold) `docker build`.
-    # Login BEFORE buildx setup: the buildkit bootstrap image below pulls through Harbor and
-    # must be authenticated in case the proxy project isn't anonymous-pull.
+    # When Harbor creds are provided, log in and put a builder in front of semantic-release, then
+    # export BUILD_CACHE_REF. .releaserc.cjs keys on BUILD_CACHE_REF to run the cached buildx
+    # verifyRelease build; without these it falls back to a plain (cold) `docker build`.
+    #
+    # THE VERIFY BUILD WAS THE LAST COLD BUILD IN THE PIPELINE. Everything else moved to the
+    # shared per-node buildkitd; this job did not, so `dockerVerifyGate()` kept creating a
+    # throwaway docker-container builder with an empty local cache — a full rebuild of the image
+    # on every release, seconds before on_release_published builds the very same thing again.
+    # Run 240 shows what that costs: 7m8s, and enough Harbor traffic to take 502s on the base
+    # image manifest and fail the release outright.
+    #
+    # BUILDX_BUILDER is how it reaches semantic-release: buildx honours that env var, and
+    # dockerVerifyGate() lives in @webgrip/semantic-release-config where no `--builder` flag can
+    # be passed from here.
     - name: Log in to Harbor (verifyRelease build cache)
       if: ${{ inputs.harbor-robot-token != '' }}
-      uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
-      with:
-        registry: ${{ inputs.registry }}
-        username: ${{ inputs.harbor-robot-user }}
-        password: ${{ inputs.harbor-robot-token }}
+      shell: bash
+      env:
+        REGISTRY: ${{ inputs.registry }}
+        ROBOT_USER: ${{ inputs.harbor-robot-user }}
+        ROBOT_TOKEN: ${{ inputs.harbor-robot-token }}
+      run: |
+        set -euo pipefail
+        # --password-stdin: an argv password is visible in the daemon's process table.
+        printf '%s' "$ROBOT_TOKEN" | docker login "$REGISTRY" --username "$ROBOT_USER" --password-stdin
 
-    - name: Set up Docker Buildx
+    - name: Select a builder for the verifyRelease build
       if: ${{ inputs.harbor-robot-token != '' }}
-      uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
-      with:
-        # Pull the buildkit bootstrap image through the Harbor dockerhub proxy instead of
-        # straight from docker.io — that direct pull was the one external fetch left in the
-        # release hot path and it flakes (run 125: TLS handshake timeout to registry-1.docker.io
-        # killed both release jobs) besides burning Docker Hub's anonymous rate limit.
-        driver-opts: image=${{ inputs.registry }}/dockerhub/moby/buildkit:buildx-stable-1
+      shell: bash
+      env:
+        REGISTRY: ${{ inputs.registry }}
+        BUILDKITD_ENDPOINT: tcp://forgejo-buildkitd.forgejo.svc.cluster.local:1234
+      run: |
+        set -euo pipefail
+        name="semrel-${GITHUB_RUN_ID:-0}-$RANDOM"
+
+        host="${BUILDKITD_ENDPOINT#tcp://}"; host="${host%%:*}"
+        port="${BUILDKITD_ENDPOINT##*:}"
+        # bash /dev/tcp probes name resolution and reachability in one go, matching how the build
+        # composite and the runner entrypoint pick their endpoints.
+        if (exec 3<>"/dev/tcp/${host}/${port}") 2>/dev/null; then
+          exec 3>&- || true
+          if docker buildx create --name "$name" --driver remote --use "${BUILDKITD_ENDPOINT}" >/dev/null 2>&1 \
+             && docker buildx inspect --bootstrap --builder "$name" >/dev/null 2>&1; then
+            echo "BUILDX_BUILDER=$name" >> "$GITHUB_ENV"
+            echo "verifyRelease will build on the shared node buildkitd (warm cache)"
+            exit 0
+          fi
+          docker buildx rm --force "$name" >/dev/null 2>&1 || true
+        fi
+
+        # Fallback: the throwaway builder this used to always create. Buildkit image pinned to the
+        # Harbor proxy rather than docker.io — that direct pull was the one external fetch left in
+        # the release hot path and it flaked (run 125: TLS handshake timeout killed both release
+        # jobs) besides burning Docker Hub's anonymous rate limit.
+        echo "::warning::${BUILDKITD_ENDPOINT} unreachable; verifyRelease builds on a throwaway builder with a cold local cache."
+        docker buildx create \
+          --name "$name" \
+          --driver docker-container \
+          --driver-opt "image=${REGISTRY}/dockerhub/moby/buildkit:buildx-stable-1@sha256:2f5adac4ecd194d9f8c10b7b5d7bceb5186853db1b26e5abd3a657af0b7e26ec" \
+          --use >/dev/null
+        docker buildx inspect --bootstrap --builder "$name" >/dev/null
+        echo "BUILDX_BUILDER=$name" >> "$GITHUB_ENV"
 
     - name: Export build cache ref
       if: ${{ inputs.harbor-robot-token != '' }}
