@@ -259,9 +259,15 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Anthropic's Claude Code CLI — `claude plugin validate` is the official manifest/frontmatter
-# validator used by the skills/plugin repos. Pinned so validation is reproducible and moves
-# only on a deliberate image rebuild (Renovate bumps this ARG).
-ARG CLAUDE_CODE_VERSION=2.1.214
+# validator used by the skills/plugin repos. Pinned so validation is reproducible and moves only on
+# a deliberate image rebuild.
+#
+# The old comment here claimed "Renovate bumps this ARG". It did not, and could not: renovate.json's
+# custom manager matches a `# renovate:` annotation immediately followed by the ARG line, and this
+# ARG had no annotation. So it sat on 2.1.214 while upstream reached 2.1.223 — nine patch releases,
+# silently, on a pin everyone assumed was automated. Annotated now, so the claim is true.
+# renovate: datasource=npm depName=@anthropic-ai/claude-code
+ARG CLAUDE_CODE_VERSION=2.1.223
 RUN npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" && \
     npm cache clean --force
 
