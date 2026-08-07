@@ -316,11 +316,26 @@ jobs:
               echo "::error::ops/docker/${DISPATCH_IMAGE} does not exist. Pass the directory name, e.g. ci-runner."
               exit 1
             fi
-            printf 'matrix=[{"basename":"%s","path":"ops/docker/%s"}]\n' "$DISPATCH_IMAGE" "$DISPATCH_IMAGE" >> "$GITHUB_OUTPUT"
+            matrix="$(printf '[{"basename":"%s","path":"ops/docker/%s"}]' "$DISPATCH_IMAGE" "$DISPATCH_IMAGE")"
             echo "manual release requested for ${DISPATCH_IMAGE}"
           else
-            echo "matrix=${PUSH_MATRIX:-[]}" >> "$GITHUB_OUTPUT"
+            matrix="${PUSH_MATRIX:-[]}"
           fi
+
+          # HEREDOC, NOT `key=value`. $GITHUB_OUTPUT is line-oriented, and
+          # determine-changed-directories returns PRETTY-PRINTED JSON — so a bare
+          # `echo "matrix=$PUSH_MATRIX"` writes the first line as `matrix=[` and the runner then
+          # reads `  {` as a malformed entry:
+          #   invalid format '  {', expected a line with '=' or '<<'
+          # which is exactly what took down run 253 and, with it, every push-triggered release.
+          # The previous code never hit this because it fed the reusable's output straight into
+          # fromJson() in the matrix expression and never round-tripped it through a file.
+          {
+            echo 'matrix<<__MATRIX_EOF__'
+            printf '%s\n' "$matrix"
+            echo '__MATRIX_EOF__'
+          } >> "$GITHUB_OUTPUT"
+          echo "resolved matrix:"; printf '%s\n' "$matrix"
 
   release-per-image:
     name: 'Release'
