@@ -226,10 +226,11 @@ runs:
     # means "built by CI AND within its CVE budget", not merely "built by CI". An over-budget image
     # stays in Harbor but unsigned — and unsigned is what admission refuses.
     #
-    # Deferred until cve-gate 0.2.0 existed in Harbor, because wiring it in the same change that
-    # first built that image would have made cve-gate's own release depend on an image that did not
-    # exist yet. It exists now, so the bootstrap reason is gone and ALLOW_MISSING_GATE should never
-    # be needed again.
+    # This no longer pulls or runs a container. grype and cve-gate are baked into ci-runner, so the
+    # gate is a binary on PATH scanning a workspace already on disk. The bootstrap hatch that used
+    # to cover "the gate image does not exist yet" is gone with it — there is no image to be
+    # missing. What replaces it is a plain PATH check that names the fix: the runner pool is pinned
+    # to a ci-runner digest older than the one that bakes them.
     - name: CVE budget gate
       id: cve
       uses: ./.forgejo/actions/cve-gate
