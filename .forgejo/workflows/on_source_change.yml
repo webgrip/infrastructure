@@ -22,6 +22,27 @@ on:
       - '.forgejo/actions/semantic-release-monorepo/action.yml'
       - '.forgejo/workflows/on_source_change.yml'
       - '.forgejo/workflows/on_release_published.yml'
+  # Manual recovery for a release that failed AFTER its commit landed.
+  #
+  # changed-images is push-diff: it derives the matrix from the files this push touched. When a
+  # release job fails, no tag is cut and the commit is already on main, so the next push does not
+  # touch that image and it is never retried. The image sits unreleased until somebody either
+  # re-runs the job by hand or lands an unrelated commit under its directory.
+  #
+  # That is exactly what happened to ci-runner: run 240's release died on Harbor 502s while
+  # resolving base image manifests, and recovering it needed a fabricated commit because the
+  # re-run button is the only other route and it is not reachable from a script.
+  #
+  # `image` forces one matrix entry regardless of the diff. It does NOT skip anything: the same
+  # verifyRelease build gate runs, and semantic-release still decides from commit history whether
+  # a release is warranted — so dispatching against an image with nothing to release is a no-op,
+  # not a forced version bump.
+  workflow_dispatch:
+    inputs:
+      image:
+        description: 'Image directory name under ops/docker to release, e.g. ci-runner'
+        required: true
+        type: string
 
 jobs:
   # Guard: every ops/docker/<image> dir MUST carry a .releaserc.cjs hardcoding
@@ -266,14 +287,49 @@ jobs:
           docker logout harbor.webgrip.dev >/dev/null 2>&1
           exit 0
 
+  # Resolves the matrix from EITHER source: the push diff, or the dispatch input. Kept as its own
+  # job so release-per-image has a single `include:` expression rather than a conditional buried in
+  # a matrix, which Forgejo evaluates before `if:` and therefore cannot be made to short-circuit.
+  release-matrix:
+    name: 'Resolve release matrix'
+    needs: [changed-images]
+    if: always()
+    runs-on: docker
+    outputs:
+      matrix: ${{ steps.pick.outputs.matrix }}
+    steps:
+      # Needed for the directory guard below — without a checkout the `-d` test always fails and a
+      # legitimate dispatch would be rejected as a typo.
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - id: pick
+        shell: bash
+        env:
+          DISPATCH_IMAGE: ${{ inputs.image }}
+          PUSH_MATRIX: ${{ needs.changed-images.outputs.matrix }}
+        run: |
+          set -euo pipefail
+          if [ -n "${DISPATCH_IMAGE:-}" ]; then
+            # Guard the input: a typo would otherwise produce a matrix entry pointing at a
+            # directory that does not exist, and semantic-release would fail deep in the job with
+            # a confusing error instead of here with an obvious one.
+            if [ ! -d "ops/docker/${DISPATCH_IMAGE}" ]; then
+              echo "::error::ops/docker/${DISPATCH_IMAGE} does not exist. Pass the directory name, e.g. ci-runner."
+              exit 1
+            fi
+            printf 'matrix=[{"basename":"%s","path":"ops/docker/%s"}]\n' "$DISPATCH_IMAGE" "$DISPATCH_IMAGE" >> "$GITHUB_OUTPUT"
+            echo "manual release requested for ${DISPATCH_IMAGE}"
+          else
+            echo "matrix=${PUSH_MATRIX:-[]}" >> "$GITHUB_OUTPUT"
+          fi
+
   release-per-image:
     name: 'Release'
-    needs: [changed-images]
+    needs: [changed-images, release-matrix]
     if: >
       always()
       && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development')
-      && needs.changed-images.result == 'success'
-      && needs.changed-images.outputs.matrix != '[]'
+      && needs.release-matrix.result == 'success'
+      && needs.release-matrix.outputs.matrix != '[]'
     permissions:
       contents: write
     strategy:
@@ -283,7 +339,7 @@ jobs:
       # and its release silently never cuts (bit ci-runner in run 124/125). One at a time.
       max-parallel: 1
       matrix:
-        include: ${{ fromJson(needs.changed-images.outputs.matrix) }}
+        include: ${{ fromJson(needs.release-matrix.outputs.matrix) }}
     # In-cluster Forgejo has a single ephemeral DinD runner pool advertising `docker`.
     # (semantic-release's verifyReleaseCmd runs `docker build`, so it needs the DinD backend.)
     runs-on: docker
