@@ -72,17 +72,42 @@ inputs:
 runs:
   using: composite
   steps:
-    # Absolute github.com URLs: Forgejo's default action host (data.forgejo.org) is an incomplete
-    # mirror and 404s on these (as it does on actions/github-script). Pin to the canonical source.
-    - name: Install cosign
-      uses: https://github.com/sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
-      with:
-        cosign-release: ${{ inputs.cosign-version }}
+    # cosign and syft are BAKED INTO ci-runner (1.2.2+), checksum-verified at image build time.
+    #
+    # This used to install both at release time from two `uses:` on absolute github.com URLs. act
+    # git-clones an action repository in full to run it, and those actions then downloaded the
+    # binaries from GitHub releases — cosign-installer additionally fetching a *bootstrap* cosign to
+    # verify the real one. Four WAN round-trips on the critical path of the job that decides whether
+    # an image is fit to sign, and a hard dependency on github.com being reachable at release time.
+    #
+    # Checking rather than assuming: a miss means the runner pool is pinned to a ci-runner digest
+    # older than the one that bakes them, so the message names that fix instead of leaving a bare
+    # "cosign: command not found".
+    - name: Verify signing toolchain
+      shell: bash
+      env:
+        WANT_COSIGN: ${{ inputs.cosign-version }}
+        WANT_SYFT: ${{ inputs.syft-version }}
+      run: |
+        set -euo pipefail
+        for bin in cosign syft; do
+          command -v "$bin" >/dev/null || {
+            echo "::error::${bin} is not on PATH. It is baked into the ci-runner image; the runner pool is probably pinned to a ci-runner digest older than the one that added it. Bump the image in homelab-cluster's forgejo-runner ScaledJob."
+            exit 1
+          }
+        done
 
-    - name: Install Syft (SBOM generator)
-      uses: https://github.com/anchore/sbom-action/download-syft@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
-      with:
-        syft-version: ${{ inputs.syft-version }}
+        # Version drift is a warning, not a failure. The inputs exist so the intended versions are
+        # reviewable in one place and stay in lockstep with ops/docker/ci-runner/Dockerfile; the
+        # image is the source of truth for what actually runs. A mismatch means someone bumped one
+        # side only — worth saying out loud, not worth blocking a release over.
+        have_cosign="v$(cosign version 2>/dev/null | awk -F: '/GitVersion/{gsub(/ /,"",$2); print $2}')"
+        have_syft="v$(syft version 2>/dev/null | awk '/^Version:/{print $2}')"
+        [ "$have_cosign" = "${WANT_COSIGN}" ] \
+          || echo "::warning::cosign in the runner image is ${have_cosign}, this action expects ${WANT_COSIGN}. Keep ops/docker/ci-runner/Dockerfile and this input in lockstep."
+        [ "$have_syft" = "${WANT_SYFT}" ] \
+          || echo "::warning::syft in the runner image is ${have_syft}, this action expects ${WANT_SYFT}. Keep ops/docker/ci-runner/Dockerfile and this input in lockstep."
+        echo "signing toolchain: cosign ${have_cosign}, syft ${have_syft}"
 
     - name: Log in to the target registry
       shell: bash
