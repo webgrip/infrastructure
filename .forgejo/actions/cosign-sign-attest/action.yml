@@ -101,8 +101,12 @@ runs:
         # reviewable in one place and stay in lockstep with ops/docker/ci-runner/Dockerfile; the
         # image is the source of truth for what actually runs. A mismatch means someone bumped one
         # side only — worth saying out loud, not worth blocking a release over.
-        have_cosign="v$(cosign version 2>/dev/null | awk -F: '/GitVersion/{gsub(/ /,"",$2); print $2}')"
-        have_syft="v$(syft version 2>/dev/null | awk '/^Version:/{print $2}')"
+        # Normalise to a leading `v` rather than prepending one: cosign prints "GitVersion: v2.6.4"
+        # (already prefixed) and syft prints "Version: 1.50.0" (not). Blindly adding one produced
+        # "vv2.6.4" and a warning that fired on every release while the versions actually matched.
+        norm() { printf 'v%s\n' "${1#v}"; }
+        have_cosign="$(norm "$(cosign version 2>/dev/null | awk -F: '/GitVersion/{gsub(/ /,"",$2); print $2}')")"
+        have_syft="$(norm "$(syft version 2>/dev/null | awk '/^Version:/{print $2}')")"
         [ "$have_cosign" = "${WANT_COSIGN}" ] \
           || echo "::warning::cosign in the runner image is ${have_cosign}, this action expects ${WANT_COSIGN}. Keep ops/docker/ci-runner/Dockerfile and this input in lockstep."
         [ "$have_syft" = "${WANT_SYFT}" ] \
