@@ -18,8 +18,13 @@ ARG REGISTRY_GHCR=ghcr.io
 # UNSIGNED (the gate could not sign itself while it was broken), so this pins an unsigned artifact
 # we built. That resolves the first time cve-gate releases through a working gate.
 ARG REGISTRY_WEBGRIP=harbor.webgrip.dev/webgrip
+# 0.3.4 is the first cve-gate that signed: gate verdict pass at 0/0 enforce, cosign signature plus
+# SBOM, OpenVEX and cve-budget attestations on the digest. The previous pin, 0.3.2, shipped
+# unsigned (its release died in the container-era gate) — meaning the binaries that decide whether
+# every other image is fit to sign were themselves taken from an artifact that never passed. This
+# pin closes that loop: gate binaries now come only from a release the gate itself admitted.
 # renovate: datasource=docker depName=harbor.webgrip.dev/webgrip/cve-gate versioning=docker
-ARG CVE_GATE_VERSION=0.3.2@sha256:5c70b055ce8dcbcf02b04d66b1d78aeb8386b00efcc5fd98ba8107100e418883
+ARG CVE_GATE_VERSION=0.3.4@sha256:6afd2c3aea931364810835b4c2f0121ad57f0b5c20f0b2ce44c336124e683bf2
 FROM ${REGISTRY_WEBGRIP}/cve-gate:${CVE_GATE_VERSION} AS cve-gate-src
 
 FROM ${REGISTRY_GHCR}/actions/actions-runner:${RUNNER_VERSION} AS runner
