@@ -10,13 +10,22 @@ ARG IMAGE_REVISION=unknown
 
 RUN apk add --no-cache docker git bash curl
 
-ARG ACT_VERSION=latest
+# Version-pinned, checksum-verified release download — not `curl | bash` of an installer that
+# resolves 'latest' at build time. 'latest' meant the image contents were decided by whenever the
+# build happened to run, not by this file; and piping an unverified script into bash trusts both
+# the CDN and the repo's master branch at whatever commit is HEAD that day. Same house pattern as
+# ci-runner's helm/yq (#88): fetch the release artifact, verify the published checksum, install.
+# renovate: datasource=github-releases depName=nektos/act
+ARG ACT_VERSION=0.2.89
+ARG ACT_SHA256=0191d6f1f3b716b5c55820032605d05fc3c1cdbf581ebeff655019e5dd1524c0
 
-RUN if [ "$ACT_VERSION" = "latest" ]; then \
-        curl -s https://raw.githubusercontent.com/nektos/act/master/install.sh | bash -s -- -b /usr/local/bin; \
-    else \
-        curl -s https://raw.githubusercontent.com/nektos/act/master/install.sh | bash -s -- -b /usr/local/bin -- -d v${ACT_VERSION}; \
-    fi
+RUN set -eux; \
+    curl -fsSL -o /tmp/act.tar.gz \
+      "https://github.com/nektos/act/releases/download/v${ACT_VERSION}/act_Linux_x86_64.tar.gz"; \
+    echo "${ACT_SHA256}  /tmp/act.tar.gz" | sha256sum -c -; \
+    tar -C /usr/local/bin -xzf /tmp/act.tar.gz act; \
+    rm /tmp/act.tar.gz; \
+    act --version
 
 WORKDIR /workspace
 
