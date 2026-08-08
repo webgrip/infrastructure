@@ -90,7 +90,7 @@ See [ADR-0005](../../../adrs/0005-openvex-and-cve-budgets.md).
 **Closed 2026-08-08 by `cve-gate` 0.3.4** — the first image out of this pipeline carrying a
 signature:
 
-```
+```text
 cve-gate: critical=0/0 OK  high=0/0 OK  vex-suppressed=1
 verdict: pass
 ```
@@ -126,13 +126,65 @@ So fourteen images are ungated: no budget, therefore nothing to exceed, therefor
 strength of nothing. That is the gap Wave 3 closes, and it is a bigger one than "the numbers are
 high".
 
+### What the first estate-wide measurement actually found (2026-08-08, runs 272/287)
+
+A read-only diagnostic (`.forgejo/workflows/measure_cve_budgets.yml`) ran the release gate's own
+binary against the highest Harbor tag of every image — no builds, no releases. The numbers, after
+VEX subtraction:
+
+| image | tag | critical | high |
+| --- | --- | ---: | ---: |
+| **mkdocs-runner** | 1.0.2 | **125** | **474** |
+| rust-releaser | 1.2.0 | 67 | 258 |
+| playwright-runner | 1.1.1 | 56 | 117 |
+| rust-ci-runner | 1.4.0 | 50 | 114 |
+| agent-runner | 1.0.3 | 43 | 105 |
+| act-runner | 1.2.2 | 40 | 123 |
+| semantic-release-rust | 0.1.0 | 38 | 77 |
+| semantic-release-monorepo | 0.1.0 | 36 | 73 |
+| semantic-release | 0.1.2 | 36 | 74 |
+| helm-deploy | 1.2.2 | 21 | 105 |
+| ci-runner | 1.2.3 | 15 | 106 |
+| php-ci-runner | 1.3.0 | 1 | 12 |
+| node-ci-runner | 1.0.0 | 1 | 12 |
+| **cve-gate** | 0.3.4 | **0** | **0** |
+
+Three conclusions that reorder the plan:
+
+1. **The techdocs chain, not ci-runner, is the worst surface in the estate.** ci-runner's
+   8/136 reputation dated from July; the estate's real outlier is `mkdocs-runner` at 125/474,
+   inherited from `techdocs-builder`'s unwatched alpine3.20 node/python stages and Java 11 on
+   Jammy.
+2. **These are stale-artifact numbers.** Ten images resolved their base at build time, so the
+   running tags describe bases that upstream has long rebuilt. That is exactly why the pin train
+   below comes first — and why budgets get set from the *fresh* numbers the pinned releases
+   report, not from this table.
+3. **The one image held to `enforce` holds.** cve-gate 0.3.4 measures 0/0 in the wild with its
+   single VEX suppression matching. The standard is real when it is enforced; fourteen images
+   simply aren't yet.
+
+(Known instrument bug, non-blocking: on Debian-based images the `vexSuppressed` figure in the
+predicate also counts grype's *default* ignores — binary packages deduplicated against their
+owning OS package, ~1200 per node-slim image — not just reviewed OpenVEX suppressions. Critical
+and high counts are unaffected. The gate should count only ignores whose applied rule is the VEX
+rule; tracked for the next cve-gate release.)
+
 ### Order of operations, and why
 
-**Measure before hardening.** Every ungated image gets a budget in `warn` first, set at the number a
-real scan reports — not at a number someone hoped for. A budget invented without a scan is a guess,
-and a guess that fails closed blocks releases for no security reason. Only once an image has a
-measured ceiling does changing its base mean anything, because only then can the change be shown to
-have moved the number.
+**Pin before measuring, measure before hardening.** The first measurement found ten images whose
+base reference floated (tag without digest) and six tool installs pinned to `latest` — a budget
+measured against a floating tag is a number about the past, and the first `enforce` failure it
+causes will be an upstream rebuild nobody made. So the actual sequence is: pin everything so the
+artifact is deterministic (PRs #106–#117, #119), release, and set budgets from what those
+releases' gates report. A budget invented without a scan is a guess, and a guess that fails
+closed blocks releases for no security reason.
+
+**No blanket non-root for CI job images.** Sixteen of eighteen images run as root, and for the
+job-container images that stays deliberate for now: Forgejo Actions job containers receive
+root-owned workspace volumes, so a non-root `USER` breaks checkout the same way the hardened
+cve-gate container broke six releases — data plumbing, not security. Non-root is for images that
+run as *services* (vikunja-mcp already runs as uid 1000 via its Deployment's securityContext) and
+for the DHI runtime bases where ADR-0006 migration brings it naturally.
 
 **One image per PR.** Not preference — mechanism. `release-per-image` sets `max-parallel: 1` and
 **Forgejo ignores it**, so a PR touching N image directories fans out to N simultaneous builds
