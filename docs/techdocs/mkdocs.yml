@@ -29,6 +29,7 @@ nav:
       - Image Signing: general/security/image-signing.md
       - SBOM & Attestations: general/security/sbom-attestations.md
       - Vulnerability Scanning: general/security/vulnerability-scanning.md
+      - "Handoff: VEX in Harbor": general/security/upstream-vex-in-harbor.md
       - Kyverno Enforcement: general/security/kyverno-enforcement.md
   - Testing:
       - Playwright Setup: general/testing/playwright-setup.md
