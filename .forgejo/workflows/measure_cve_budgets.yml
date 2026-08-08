@@ -48,9 +48,8 @@ jobs:
         env:
           REGISTRY: harbor.webgrip.dev
           PROJECT: webgrip
-          # Diag-branch pushes read the filter from here; dispatch reads it from the input.
-          # Currently the four images run 272's deadline cut off.
-          ONLY: ${{ inputs.only || 'tauri-ci-runner techdocs-builder techdocs-runner vikunja-mcp' }}
+          # Empty = measure everything. Dispatch can pass a space-separated subset.
+          ONLY: ${{ inputs.only || '' }}
           HARBOR_USER: ${{ secrets.HARBOR_ROBOT_USER }}
           HARBOR_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
           # grype pulls the image it scans; Harbor is private.
