@@ -134,8 +134,11 @@ VEX subtraction:
 
 | image | tag | critical | high |
 | --- | --- | ---: | ---: |
+| **techdocs-builder** | 1.2.21 | **131** | **501** |
+| **techdocs-runner** | 1.0.2 | **131** | **503** |
 | **mkdocs-runner** | 1.0.2 | **125** | **474** |
 | rust-releaser | 1.2.0 | 67 | 258 |
+| tauri-ci-runner | 1.1.0 | 59 | 401 |
 | playwright-runner | 1.1.1 | 56 | 117 |
 | rust-ci-runner | 1.4.0 | 50 | 114 |
 | agent-runner | 1.0.3 | 43 | 105 |
@@ -145,6 +148,7 @@ VEX subtraction:
 | semantic-release | 0.1.2 | 36 | 74 |
 | helm-deploy | 1.2.2 | 21 | 105 |
 | ci-runner | 1.2.3 | 15 | 106 |
+| vikunja-mcp | 0.1.0 | 8 | 66 |
 | php-ci-runner | 1.3.0 | 1 | 12 |
 | node-ci-runner | 1.0.0 | 1 | 12 |
 | **cve-gate** | 0.3.4 | **0** | **0** |
@@ -152,9 +156,10 @@ VEX subtraction:
 Three conclusions that reorder the plan:
 
 1. **The techdocs chain, not ci-runner, is the worst surface in the estate.** ci-runner's
-   8/136 reputation dated from July; the estate's real outlier is `mkdocs-runner` at 125/474,
-   inherited from `techdocs-builder`'s unwatched alpine3.20 node/python stages and Java 11 on
-   Jammy.
+   8/136 reputation dated from July; the real outlier is `techdocs-builder` at 131/501, with
+   both children inheriting nearly all of it — three of the estate's top four are one chain,
+   fed by unwatched alpine3.20 node/python stages and Java 11 on Jammy. `tauri-ci-runner`'s
+   59/401 is the same shape: its GUI-toolkit apt layer alone adds ~290 highs over its parent.
 2. **These are stale-artifact numbers.** Ten images resolved their base at build time, so the
    running tags describe bases that upstream has long rebuilt. That is exactly why the pin train
    below comes first — and why budgets get set from the *fresh* numbers the pinned releases
