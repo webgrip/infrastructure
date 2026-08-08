@@ -1,5 +1,10 @@
 # syntax=docker/dockerfile:1
 #
+# Release re-entry: v1.0.1 shipped UNSIGNED — its Sign & Attest died on the security
+# namespace's ingress default-deny dropping runner->openbao:8200 (run 294; fixed in
+# homelab-cluster#550). Harbor's immutable tags make re-signing-by-rebuild impossible,
+# so this cuts a signed successor; delete the unsigned 1.0.1 tag after it lands.
+#
 # Node CI job image for Forgejo Actions.
 #
 # node:24-alpine ships without git, and the moon task graph needs a vcs client to detect
