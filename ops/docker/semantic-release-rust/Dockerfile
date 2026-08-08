@@ -1,4 +1,10 @@
 ###############################################################################
+# Release re-entry: v0.1.1 shipped UNSIGNED — its Sign & Attest died on the security
+# namespace's ingress default-deny dropping runner->openbao:8200 (run 301; fixed in
+# homelab-cluster#550). Harbor's immutable tags make re-signing-by-rebuild impossible
+# (proven on run 301 attempt 2), so this cuts a signed successor; delete the unsigned
+# 0.1.1 tag after it lands.
+###############################################################################
 # semantic-release toolchain + cargo, for Rust crate release trains
 #
 # (webgrip/workflows' rust-semantic-release composite.)
