@@ -22,7 +22,12 @@ name: 'Measure CVE budgets (diagnostic, read-only)'
 # workflow_dispatch once this lands on main so anyone can re-measure without a branch.
 
 on:
-  workflow_dispatch: {}
+  workflow_dispatch:
+    inputs:
+      only:
+        description: 'Space-separated image names to measure (empty = all). Run 272 hit the ~25-minute job deadline at image 15 of 18; this lets a follow-up run scan just the remainder.'
+        required: false
+        default: ''
   push:
     branches:
       - 'diag/measure-cve-budgets*'
@@ -31,6 +36,10 @@ jobs:
   measure:
     name: 'Scan every Harbor image against its budget'
     runs-on: docker
+    # Run 272 was killed by the runner's default job deadline ("context deadline exceeded")
+    # 25 minutes in, four images short. 18 registry scans, several multi-GB, is legitimately a
+    # long job.
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
@@ -39,6 +48,9 @@ jobs:
         env:
           REGISTRY: harbor.webgrip.dev
           PROJECT: webgrip
+          # Diag-branch pushes read the filter from here; dispatch reads it from the input.
+          # Currently the four images run 272's deadline cut off.
+          ONLY: ${{ inputs.only || 'tauri-ci-runner techdocs-builder techdocs-runner vikunja-mcp' }}
           HARBOR_USER: ${{ secrets.HARBOR_ROBOT_USER }}
           HARBOR_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
           # grype pulls the image it scans; Harbor is private.
@@ -59,6 +71,12 @@ jobs:
 
           for d in ops/docker/*/; do
             name="$(basename "$d")"
+            if [ -n "${ONLY:-}" ]; then
+              case " ${ONLY} " in
+                *" ${name} "*) ;;
+                *) continue ;;
+              esac
+            fi
             echo "::group::${name}"
 
             # Tag discovery via the registry v2 API, not the Harbor REST API: a pull-only robot is
