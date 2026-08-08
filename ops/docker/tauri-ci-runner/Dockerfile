@@ -9,8 +9,11 @@
 # containers), git, the stable channel + wasm32 target, pkg-config and libssl-dev — so
 # this layer is exactly the GUI toolkit delta.
 ARG REGISTRY_WEBGRIP=harbor.webgrip.dev/webgrip
-# renovate: datasource=docker depName=harbor.webgrip.dev/webgrip/rust-ci-runner
-ARG RUST_CI_RUNNER_VERSION=1.4.0
+# Tag AND digest (house pattern, cf. ci-runner's CVE_GATE_VERSION): a tag alone is mutable in
+# principle even against our own Harbor, and the whole point of budgeting this image is that its
+# baseline names an exact artifact. Renovate moves both together (digest-aware manager, #106).
+# renovate: datasource=docker depName=harbor.webgrip.dev/webgrip/rust-ci-runner versioning=docker
+ARG RUST_CI_RUNNER_VERSION=1.4.0@sha256:2ef5fcb9b81ff145ae3a0f0263bdaf5098874fb40145a1e97c65e6e9023a6638
 
 FROM ${REGISTRY_WEBGRIP}/rust-ci-runner:${RUST_CI_RUNNER_VERSION}
 
