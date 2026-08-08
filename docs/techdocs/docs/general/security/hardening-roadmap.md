@@ -70,7 +70,7 @@ deleting that retires findings permanently and needs no justification from anyon
 | Repoint OCI `source`/`url`/`documentation` labels at Forgejo | Image provenance points at the actual source of truth |
 | [ADR-0004](../../../adrs/0004-supply-chain-on-forgejo-harbor-openbao.md) supersedes ADR-0002 | The decision record matches the running system, including what the migration cost |
 
-## Wave 2 — make the evidence mean something (built, awaiting first release)
+## Wave 2 — make the evidence mean something (complete, 2026-08-08)
 
 **OpenVEX** ([`ops/vex/`](../../../../ops/vex/README.md)). Hand-authored, PR-reviewed statements
 with a justification from OpenVEX's closed vocabulary. Stamped with the built digest and attested
@@ -87,10 +87,132 @@ Harbor but unsigned — and unsigned is what admission refuses. This makes a web
 
 See [ADR-0005](../../../adrs/0005-openvex-and-cve-budgets.md).
 
-**Next action:** cut one release, read the budget table in the step summary, fill in the fourteen
-unmeasured images, flip them to `enforce`.
+**Closed 2026-08-08 by `cve-gate` 0.3.4** — the first image out of this pipeline carrying a
+signature:
+
+```text
+cve-gate: critical=0/0 OK  high=0/0 OK  vex-suppressed=1
+verdict: pass
+```
+
+signature + three attestations (CycloneDX SBOM, OpenVEX, `cve-budget/v1`), signed by OpenBao
+Transit against `repo:webgrip/infrastructure:ref:refs/tags/cve-gate-v0.3.4`.
+
+It took eight releases to get there, and the honest summary is that **not one of the eight failures
+was about finding a CVE**. Every one was plumbing between the gate and the thing it was scanning:
+`docker cp` into a read-only rootfs, a version pin naming a tag nothing had built, a seccomp rule
+that denied exactly what its own comment said it allowed, a 2 GB tmpfs, cache volumes created
+root-owned, root without `CAP_CHOWN` to fix them, grype returning zero bytes because its stderr was
+a TTY, and finally VEX statements naming CVEs while grype matches on GHSA.
+
+The last one is the one worth remembering: **five reviewed statements suppressed nothing for eight
+releases, and every number the gate printed looked identical to having no statements at all.** The
+fix was one `aliases` field. The lasting change is the guard that now warns when statements are
+applied and nothing is suppressed — see [ADR-0008](../../../adrs/0008-cve-gate-runs-as-a-step.md)
+for why the gate stopped running in a container at all.
 
 ## Wave 3 — bring the numbers down
+
+**Where this actually stands (2026-08-08):**
+
+| | count |
+| --- | --- |
+| images in `ops/docker/` | 18 |
+| with a CVE budget | 4 |
+| with reviewed OpenVEX | 1 |
+| on a hardened base | 1 |
+
+So fourteen images are ungated: no budget, therefore nothing to exceed, therefore signed on the
+strength of nothing. That is the gap Wave 3 closes, and it is a bigger one than "the numbers are
+high".
+
+### What the first estate-wide measurement actually found (2026-08-08, runs 272/287)
+
+A read-only diagnostic (`.forgejo/workflows/measure_cve_budgets.yml`) ran the release gate's own
+binary against the highest Harbor tag of every image — no builds, no releases. The numbers, after
+VEX subtraction:
+
+| image | tag | critical | high |
+| --- | --- | ---: | ---: |
+| **techdocs-builder** | 1.2.21 | **131** | **501** |
+| **techdocs-runner** | 1.0.2 | **131** | **503** |
+| **mkdocs-runner** | 1.0.2 | **125** | **474** |
+| rust-releaser | 1.2.0 | 67 | 258 |
+| tauri-ci-runner | 1.1.0 | 59 | 401 |
+| playwright-runner | 1.1.1 | 56 | 117 |
+| rust-ci-runner | 1.4.0 | 50 | 114 |
+| agent-runner | 1.0.3 | 43 | 105 |
+| act-runner | 1.2.2 | 40 | 123 |
+| semantic-release-rust | 0.1.0 | 38 | 77 |
+| semantic-release-monorepo | 0.1.0 | 36 | 73 |
+| semantic-release | 0.1.2 | 36 | 74 |
+| helm-deploy | 1.2.2 | 21 | 105 |
+| ci-runner | 1.2.3 | 15 | 106 |
+| vikunja-mcp | 0.1.0 | 8 | 66 |
+| php-ci-runner | 1.3.0 | 1 | 12 |
+| node-ci-runner | 1.0.0 | 1 | 12 |
+| **cve-gate** | 0.3.4 | **0** | **0** |
+
+Three conclusions that reorder the plan:
+
+1. **The techdocs chain, not ci-runner, is the worst surface in the estate.** ci-runner's
+   8/136 reputation dated from July; the real outlier is `techdocs-builder` at 131/501, with
+   both children inheriting nearly all of it — three of the estate's top four are one chain,
+   fed by unwatched alpine3.20 node/python stages and Java 11 on Jammy. `tauri-ci-runner`'s
+   59/401 is the same shape: its GUI-toolkit apt layer alone adds ~290 highs over its parent.
+2. **These are stale-artifact numbers.** Ten images resolved their base at build time, so the
+   running tags describe bases that upstream has long rebuilt. That is exactly why the pin train
+   below comes first — and why budgets get set from the *fresh* numbers the pinned releases
+   report, not from this table.
+3. **The one image held to `enforce` holds.** cve-gate 0.3.4 measures 0/0 in the wild with its
+   single VEX suppression matching. The standard is real when it is enforced; fourteen images
+   simply aren't yet.
+
+(Known instrument bug, non-blocking: on Debian-based images the `vexSuppressed` figure in the
+predicate also counts grype's *default* ignores — binary packages deduplicated against their
+owning OS package, ~1200 per node-slim image — not just reviewed OpenVEX suppressions. Critical
+and high counts are unaffected. The gate should count only ignores whose applied rule is the VEX
+rule; tracked for the next cve-gate release.)
+
+### Order of operations, and why
+
+**Pin before measuring, measure before hardening.** The first measurement found ten images whose
+base reference floated (tag without digest) and six tool installs pinned to `latest` — a budget
+measured against a floating tag is a number about the past, and the first `enforce` failure it
+causes will be an upstream rebuild nobody made. So the actual sequence is: pin everything so the
+artifact is deterministic (PRs #106–#117, #119), release, and set budgets from what those
+releases' gates report. A budget invented without a scan is a guess, and a guess that fails
+closed blocks releases for no security reason.
+
+**No blanket non-root for CI job images.** Sixteen of eighteen images run as root, and for the
+job-container images that stays deliberate for now: Forgejo Actions job containers receive
+root-owned workspace volumes, so a non-root `USER` breaks checkout the same way the hardened
+cve-gate container broke six releases — data plumbing, not security. Non-root is for images that
+run as *services* (vikunja-mcp already runs as uid 1000 via its Deployment's securityContext) and
+for the DHI runtime bases where ADR-0006 migration brings it naturally.
+
+**One image per PR.** Not preference — mechanism. `release-per-image` sets `max-parallel: 1` and
+**Forgejo ignores it**, so a PR touching N image directories fans out to N simultaneous builds
+against one runner pool and one Harbor. That is how a routine change becomes an outage.
+
+**Group by base, not by image.** Four of the fourteen share one base, so one decision moves four
+images. Two more are chains where fixing the parent fixes the child for free.
+
+| Group | Images | Shared base | Leverage |
+| --- | --- | --- | --- |
+| semantic-release family | `semantic-release`, `-monorepo`, `-rust`, `rust-releaser` | `node:24-bookworm-slim` | 4 images, 1 base decision |
+| techdocs chain | `techdocs-builder` → `techdocs-runner`, `mkdocs-runner` | node alpine | fix the parent, children inherit |
+| rust chain | `rust-ci-runner` → `tauri-ci-runner` | rust slim-bookworm | fix the parent, child inherits |
+| small leaves | `act-runner`, `helm-deploy`, `vikunja-mcp` | alpine | smallest blast radius — start here |
+| standalone | `node-ci-runner`, `php-ci-runner` | node alpine, composer | independent |
+| constrained | `playwright-runner` | `mcr.microsoft.com/playwright` | browser deps pin the base; budget it, do not move it |
+| the big one | `ci-runner` | actions-runner | 8 critical / 136 high, used by every job — **last**, once the pattern is proven |
+
+Start with the small leaves. They are the cheapest place to be wrong, and the point of going first
+is to find out what breaks before it breaks something that matters.
+
+**Then, and only then, `warn` → `enforce`.** An image is promoted when its measured budget has been
+stable across two releases. Flipping earlier converts a monitoring signal into an outage.
 
 [ADR-0006](../../../adrs/0006-hardened-base-images.md) — **Docker Hardened Images** as the default
 base. The catalog went Apache 2.0 and free in December 2025, which is what makes this viable:
@@ -267,6 +389,47 @@ build, one from the pushed image — but only the cosign one is consumed by Depe
 Kyverno. Keeping both costs build time on a memory-constrained runner. Decide once there is data on
 the delta.
 
+### The VEX-to-registry gap, and what everyone else does about it
+
+Harbor's UI shows six vulnerabilities on a signed `cve-gate` 0.3.4 with **"Listed In CVE Allowlist:
+No"** against every one, while the gate that signed it reports `high=0/0 OK`. Both are correct.
+They are measuring different things with different tools, and only one of them is load-bearing.
+
+**The mechanism is already there — Harbor just does not use it.** Trivy has supported VEX natively
+for some time, with [four input methods](https://trivy.dev/docs/latest/guide/supply-chain/vex/): a
+local file, an **OCI attestation**, a VEX repository, and an SBOM reference. `--vex oci`
+[auto-discovers a VEX attestation attached as an OCI 1.1 referrer](https://trivy.dev/docs/latest/guide/supply-chain/vex/oci/)
+— which is *exactly* what this pipeline already publishes. Harbor scans with Trivy and never passes
+the flag, so the document is present, discoverable, and ignored
+([goharbor/harbor#22720](https://github.com/goharbor/harbor/issues/22720)). The gap is one flag in
+an adapter, not a missing capability.
+
+That framing matters, because it means the workaround the ecosystem has settled on is a workaround
+for a config gap rather than for a design problem.
+
+| Option | What it costs |
+| --- | --- |
+| **Do nothing; enforce at admission** *(current)* | Harbor's numbers stay noisy. Nothing depends on them — Kyverno verifies the signed, VEX-aware budget verdict. |
+| Ask upstream for `--vex oci` in Harbor's adapter | Free, slow, correct. The right long-term fix. |
+| Publish a Trivy **VEX repository** | Real work; helps every Trivy consumer, but Harbor's adapter still has to be told to use it. |
+| Sync VEX → **Harbor CVE allowlist** | What most teams do today — and the one to be careful with. |
+
+**Why the allowlist sync is not recommended here.** Harbor's allowlist is **per-project**; our VEX
+statements are **per-image**. Allowlisting `CVE-2026-34040` for the `webgrip` project exempts it for
+*every image in that project*, including ones where the vulnerable code genuinely is reachable. That
+converts a narrow, justified, authored, expiring assertion into a blanket exemption with no product
+scope — which is the objection Wave 2 already records against `cve_allowlist`. It would make the UI
+green by making the claim weaker.
+
+It is worth doing only if Harbor's `prevent_vul` is ever used to block pulls. It is not today, and
+admission is the boundary that matters.
+
+**A second thing this surfaced:** Trivy reports `CVE-2026-41567` and `CVE-2026-42306` as High, and
+grype does not report them at all. grype reports `CVE-2026-41568`, which has no statement. The two
+scanners genuinely disagree about the same image, so a VEX set authored against one is incomplete
+against the other. Statements should be written against the union, and the gate's new
+unmatched-statement warning is what makes a statement that covers neither visible.
+
 ## Known gaps, stated rather than hidden
 
 - ~~**No SLSA build provenance.**~~ **Closed 2026-08-01** — BuildKit emits the same in-toto SLSA
@@ -291,8 +454,9 @@ the delta.
 
 ```mermaid
 graph LR
-  W1["Wave 1<br/>stop the bleeding<br/><i>done</i>"] --> W2["Wave 2<br/>VEX + budgets<br/><i>built</i>"]
-  W2 --> W3["Wave 3<br/>hardened bases<br/><i>12 PRs</i>"]
+  W1["Wave 1<br/>stop the bleeding<br/><i>done</i>"] --> W2["Wave 2<br/>VEX + budgets<br/><i>done 2026-08-08</i>"]
+  W2 --> M["Measure<br/>14 budgets in warn<br/><i>1 PR per image</i>"]
+  M --> W3["Wave 3<br/>hardened bases<br/><i>grouped by base</i>"]
   W2 --> W4["Wave 4<br/>runtime isolation<br/><i>3 waves</i>"]
   W3 --> E["Promote admission<br/>to Enforce"]
   W4 --> E
