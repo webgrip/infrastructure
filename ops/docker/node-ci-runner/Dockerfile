@@ -8,7 +8,11 @@
 # So git — and the handful of tools the web/preview jobs shell out to — are baked here, at
 # BUILD time (which has egress), not fetched per run.
 ARG REGISTRY_DOCKERHUB=docker.io
-ARG NODE_IMAGE=${REGISTRY_DOCKERHUB}/library/node:24-alpine
+# Pinned by digest: a floating tag means the image contents — and therefore its CVE count — change
+# with every upstream rebuild, and a budget measured against Monday's base is not the budget the
+# gate sees on Tuesday. Renovate moves tag and digest together via the annotated-ARG manager.
+# renovate: datasource=docker depName=docker.io/library/node versioning=docker
+ARG NODE_IMAGE=${REGISTRY_DOCKERHUB}/library/node:24-alpine@sha256:d32cdf619f63fe0471182d08996dd516c6275bb5fd31ae06e55a570bd9e1ad43
 
 FROM ${NODE_IMAGE}
 
