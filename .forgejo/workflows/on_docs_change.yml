@@ -1,6 +1,7 @@
 name: '[Workflow] On Documentation Change'
 
 # Forgejo mirror of .github/workflows/on_docs_change.yml. GitHub deploys to GitHub Pages; the
+# (Pin bumped past 990a6fa: the deploy container now apk-adds bash, which its publish step needs.)
 # Forgejo path has no native Pages, so it publishes the built site to Codeberg Pages — the interim,
 # off-site host (ADR-0038; ADR-0039 = the later in-cluster Backstage target). The deploy reusable force-pushes the site to a Codeberg repo's `pages`
 # branch using a scoped CODEBERG_TOKEN (provisioned as an org Actions secret from OpenBao). The
