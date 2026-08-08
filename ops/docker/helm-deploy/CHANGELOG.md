@@ -1,3 +1,5 @@
+## [helm-deploy-v1.2.3](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/helm-deploy-v1.2.2...helm-deploy-v1.2.3) (2026-08-08)
+
 ## [helm-deploy-v1.2.2](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/helm-deploy-v1.2.1...helm-deploy-v1.2.2) (2026-07-25)
 
 ### Changed
