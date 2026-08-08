@@ -1,0 +1,140 @@
+name: 'Measure CVE budgets (diagnostic, read-only)'
+
+# Scans the CURRENT Harbor tag of every image under ops/docker/ with the same binary the release
+# gate uses, and prints one consolidated table. It builds nothing, pushes nothing, releases
+# nothing, and always exits green — it exists to answer one question: what would each image's
+# budget be if it were set today?
+#
+# WHY THIS EXISTS AS A WORKFLOW AND NOT AS 14 RELEASES
+#
+# cve-budgets.yaml says budgets are measured by the pipeline, not negotiated in the abstract. The
+# obvious way to measure 14 unmeasured images is to release each one and read the gate's warn
+# output — 14 releases, 14 new tags, each capable of failing for reasons that have nothing to do
+# with CVEs (this repo's release history makes that argument on its own). This workflow gets the
+# same numbers from the SAME gate binary in one run, against the digests the estate is actually
+# running today, without touching the release path.
+#
+# It deliberately measures the tag currently in Harbor, which for rarely-released images is
+# months old. That is a feature: it is the number the estate actually runs, and the budget an
+# image must hold from its NEXT release.
+#
+# TRIGGERS: push to its own diag branch (so a measurement needs no merge first), plus
+# workflow_dispatch once this lands on main so anyone can re-measure without a branch.
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      - 'diag/measure-cve-budgets*'
+
+jobs:
+  measure:
+    name: 'Scan every Harbor image against its budget'
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Measure
+        shell: bash
+        env:
+          REGISTRY: harbor.webgrip.dev
+          PROJECT: webgrip
+          HARBOR_USER: ${{ secrets.HARBOR_ROBOT_USER }}
+          HARBOR_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
+          # grype pulls the image it scans; Harbor is private.
+          GRYPE_REGISTRY_AUTH_USERNAME: ${{ secrets.HARBOR_ROBOT_USER }}
+          GRYPE_REGISTRY_AUTH_PASSWORD: ${{ secrets.HARBOR_ROBOT_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # Both binaries are baked into ci-runner (COPY --from the cve-gate image). A miss means
+          # the runner pool is on an older ci-runner digest — same contract as the cve-gate action.
+          for bin in cve-gate grype jq curl; do
+            command -v "$bin" >/dev/null || { echo "::error::${bin} is not on PATH"; exit 2; }
+          done
+
+          out="${RUNNER_TEMP:-/tmp}/measure"
+          mkdir -p "$out"
+          results="$out/results.jsonl"; : > "$results"
+
+          for d in ops/docker/*/; do
+            name="$(basename "$d")"
+            echo "::group::${name}"
+
+            # Tag discovery via the registry v2 API, not the Harbor REST API: a pull-only robot is
+            # guaranteed tags/list and manifest HEAD, and may or may not be granted the REST
+            # artifact routes. Highest semver tag = the release the estate runs.
+            tags="$(curl -fsS -u "${HARBOR_USER}:${HARBOR_TOKEN}" \
+              "https://${REGISTRY}/v2/${PROJECT}/${name}/tags/list" 2>/dev/null \
+              | jq -r '.tags[]?' || true)"
+            tag="$(printf '%s\n' "$tags" | grep -E '^[0-9]+\.[0-9]+\.[0-9]+$' | sort -V | tail -1 || true)"
+            if [ -z "$tag" ]; then
+              echo "::warning::${name}: no semver tag in Harbor — never released; skipping"
+              jq -nc --arg name "$name" '{name:$name, status:"not-in-harbor"}' >> "$results"
+              echo "::endgroup::"
+              continue
+            fi
+
+            digest="$(curl -fsSI -u "${HARBOR_USER}:${HARBOR_TOKEN}" \
+              -H 'Accept: application/vnd.oci.image.index.v1+json, application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.oci.image.manifest.v1+json, application/vnd.docker.distribution.manifest.v2+json' \
+              "https://${REGISTRY}/v2/${PROJECT}/${name}/manifests/${tag}" \
+              | tr -d '\r' | awk -F': ' 'tolower($1)=="docker-content-digest"{print $2}')"
+            if [ -z "$digest" ]; then
+              echo "::warning::${name}: could not resolve digest for ${tag}; skipping"
+              jq -nc --arg name "$name" --arg tag "$tag" '{name:$name, tag:$tag, status:"no-digest"}' >> "$results"
+              echo "::endgroup::"
+              continue
+            fi
+            echo "${name}:${tag} -> ${digest}"
+
+            # Per-image invocation of the gate itself — VEX subtraction and budget lookup included,
+            # so the numbers here are exactly what the release gate would compute.
+            #
+            # GITHUB_STEP_SUMMARY is blanked: 18 per-image tables would drown the one consolidated
+            # table this workflow writes at the end.
+            # STDERR MUST NOT BE A TTY (grype selects its interactive UI on a tty stderr and the
+            # JSON report never reaches the pipe) — under act it is one, so redirect and replay.
+            imgdir="$out/$name"; mkdir -p "$imgdir"
+            set +e
+            IMAGE_REF="${REGISTRY}/${PROJECT}/${name}@${digest}" \
+            IMAGE_NAME="$name" \
+            OUT_DIR="$imgdir" \
+            GITHUB_STEP_SUMMARY= \
+            TMPDIR="$imgdir" \
+              cve-gate >"$imgdir/stdout.log" 2>"$imgdir/stderr.log"
+            rc=$?
+            set -e
+            cat "$imgdir/stdout.log"
+            cat "$imgdir/stderr.log" >&2 || true
+
+            if [ -s "$imgdir/cve-budget.json" ]; then
+              jq -c --arg tag "$tag" --arg rc "$rc" '. + {tag:$tag, rc:($rc|tonumber), status:"measured"}' \
+                "$imgdir/cve-budget.json" >> "$results"
+            else
+              jq -nc --arg name "$name" --arg tag "$tag" --arg rc "$rc" \
+                '{name:$name, tag:$tag, rc:($rc|tonumber), status:"gate-error"}' >> "$results"
+            fi
+
+            # grype extracts the whole image under TMPDIR; playwright-runner alone is multi-GB.
+            # Reclaim between images so 18 scans cannot fill the runner's disk.
+            find "$imgdir" -mindepth 1 -maxdepth 1 ! -name 'cve-budget.json' ! -name '*.log' -exec rm -rf {} + || true
+            echo "::endgroup::"
+          done
+
+          # One consolidated table, and the same data between markers as JSON for scraping.
+          {
+            echo "## CVE budget measurement — every image, current Harbor tag"
+            echo ""
+            echo "| Image | Tag | Mode | Critical | High | VEX-suppressed | Verdict |"
+            echo "| --- | --- | --- | --- | --- | --- | --- |"
+            jq -rs 'sort_by(.imageName // .name)[] |
+              if .status == "measured" then
+                "| \(.imageName) | \(.tag) | \(.mode) | \(.found.critical)/\(.budget.critical) | \(.found.high)/\(.budget.high) | \(.vexSuppressed) | \(.verdict) |"
+              else
+                "| \(.name) | \(.tag // "—") | — | — | — | — | \(.status) |"
+              end' "$results"
+          } | tee -a "${GITHUB_STEP_SUMMARY:-/dev/null}"
+
+          echo "---BEGIN MEASUREMENTS---"
+          jq -s '.' "$results"
+          echo "---END MEASUREMENTS---"
