@@ -373,7 +373,18 @@ runs:
           -X POST "$url" -H 'Content-Type: application/json' \
           --data '{"scan_type":"sbom"}' || echo 000)"
         case "$code" in
-          200|202) echo "Harbor SBOM generation queued for ${project}/${repository}@${digest}" ;;
+          200|202)
+            # Harbor ACCEPTED the request. That is not the same as Harbor being able to honour it,
+            # and printing "queued" for both is how the SBOM tab stayed empty after a green release
+            # with nobody the wiser. Harbor only produces an SBOM if the registered scanner
+            # advertises the capability; without it the job is accepted and quietly does nothing.
+            caps="$(curl -sS -K "$cfg" -m 20 "https://${REGISTRY}/api/v2.0/scanners" 2>/dev/null || echo '[]')"
+            if printf '%s' "$caps" | grep -qi 'sbom'; then
+              echo "Harbor SBOM generation queued for ${project}/${repository}@${digest}"
+            else
+              echo "::warning::Harbor accepted the SBOM request (HTTP ${code}) but no registered scanner advertises SBOM generation, so Harbor's SBOM tab will stay empty. This does NOT affect the supply chain: the CycloneDX SBOM is cosign-attested as an OCI referrer and was uploaded to Dependency-Track. Fix by registering an SBOM-capable scanner in Harbor, or accept it and stop requesting."
+            fi
+            ;;
           *) echo "::warning::Harbor SBOM generation request returned HTTP ${code} (non-fatal): $(cat /tmp/sbom-gen.json 2>/dev/null)" ;;
         esac
 
