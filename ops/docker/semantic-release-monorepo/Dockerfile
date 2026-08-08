@@ -13,14 +13,16 @@
 # node_modules would not be found. One resolution root is the only shape that cannot half-work.
 ###############################################################################
 ARG REGISTRY_DOCKERHUB=docker.io
+# One ARG carrying tag AND digest (house pattern, see cve-gate): Renovate moves them together
+# via the digest-aware annotated-ARG manager, and a budget measured against this base stays a
+# statement about THIS base until Renovate says otherwise.
 # renovate: datasource=docker depName=docker.io/library/node versioning=docker
-ARG NODE_VERSION=24
-ARG DEBIAN_CODENAME=bookworm
+ARG NODE_IMAGE=${REGISTRY_DOCKERHUB}/library/node:24-bookworm-slim@sha256:3638d9a6fe4030bd716be989438248074489337ba3275657f93595428be4fc03
 
 ###############################################################################
 # Locked toolchain, built in a separate stage so npm's cache and metadata never reach the image
 ###############################################################################
-FROM ${REGISTRY_DOCKERHUB}/library/node:${NODE_VERSION}-${DEBIAN_CODENAME}-slim AS deps
+FROM ${NODE_IMAGE} AS deps
 WORKDIR /opt/semrel
 # @webgrip packages come from the Forgejo registry (anonymous read; no credential in .npmrc).
 # NB: this dir's package.json is BOTH the release manifest (its name is the tag prefix, its version
@@ -35,14 +37,13 @@ RUN NPM_CONFIG_USERCONFIG=/tmp/npmrc npm ci --omit=dev --no-audit --no-fund
 ###############################################################################
 # Runtime: node (which also runs the JS actions in a container job), git, yq
 ###############################################################################
-FROM ${REGISTRY_DOCKERHUB}/library/node:${NODE_VERSION}-${DEBIAN_CODENAME}-slim
+FROM ${NODE_IMAGE}
 
 ARG IMAGE_CREATED=1970-01-01T00:00:00Z
 ARG IMAGE_VERSION=dev
 ARG IMAGE_REVISION=unknown
 ARG REGISTRY_DOCKERHUB
-ARG NODE_VERSION
-ARG DEBIAN_CODENAME
+ARG NODE_IMAGE
 
 # Shared runtime — keep this block the same in all three semantic-release* images.
 # Duplicated on purpose. These images used to build FROM one another, which made a sibling's
@@ -115,7 +116,7 @@ LABEL org.opencontainers.image.title="WebGrip semantic-release Toolchain (monore
     org.opencontainers.image.vendor="WebGrip" \
     org.opencontainers.image.authors="Ryan Grippeling <ryan@webgrip.nl>" \
     org.opencontainers.image.licenses="MIT" \
-    org.opencontainers.image.base.name="${REGISTRY_DOCKERHUB}/library/node:${NODE_VERSION}-${DEBIAN_CODENAME}-slim" \
+    org.opencontainers.image.base.name="${NODE_IMAGE}" \
     org.opencontainers.image.created="${IMAGE_CREATED}" \
     org.opencontainers.image.version="${IMAGE_VERSION}" \
     org.opencontainers.image.revision="${IMAGE_REVISION}"
