@@ -6,12 +6,13 @@
   "customManagers": [
     {
       "customType": "regex",
-      "description": "Update ARGs annotated with '# renovate: datasource=… depName=…'. Needed because the base images compose multiple ARGs in FROM (e.g. ${REGISTRY_DOCKERHUB}/library/rust:${RUST_VERSION}-slim-bookworm), which the dockerfile manager cannot auto-replace.",
+      "description": "Update ARGs annotated with '# renovate: datasource=… depName=…'. Needed because the base images compose multiple ARGs in FROM (e.g. ${REGISTRY_DOCKERHUB}/library/rust:${RUST_VERSION}-slim-bookworm), which the dockerfile manager cannot auto-replace. Two matchStrings because ARGs come in two shapes, and the digest has to be captured SEPARATELY: the original single pattern captured '0.3.2@sha256:…' as one currentValue, which no versioning scheme can parse — so every digest-pinned ARG in the repo (cve-gate's three bases, ci-runner's CVE_GATE_VERSION and RUNNER_VERSION) was silently unmanaged. First pattern: ARGs whose value ends ':<tag>@<digest>' or is '<version>@<digest>'. Second: bare versions with no digest, digest-containing values excluded so the two patterns never both match.",
       "managerFilePatterns": [
         "/(^|/)Dockerfile$/"
       ],
       "matchStrings": [
-        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?\\s*\\nARG \\S+=(?<currentValue>\\S+)"
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?\\s*\\nARG \\S+=\"?(?:\\S*?[:/])?(?<currentValue>[^@:/\\s\"]+)@(?<currentDigest>sha256:[a-f0-9]{64})",
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?\\s*\\nARG \\S+=\"?(?<currentValue>[^@\\s\"]+)\"?\\s"
       ],
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
     },
