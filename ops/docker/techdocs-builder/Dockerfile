@@ -33,7 +33,8 @@ RUN pip3 install --no-cache-dir \
     mkdocs-mermaid2-plugin==1.2.1 \
     mkdocs-macros-plugin==1.3.7 \
     mkdocs-redirects==1.2.2 \
-    mkdocs-dracula-theme==1.0.7
+    mkdocs-dracula-theme==1.0.7 \
+    mkdocs-llms-source==1.2.0
 
 
 FROM ${JRE_IMAGE} AS openjdk
