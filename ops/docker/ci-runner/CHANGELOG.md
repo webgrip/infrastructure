@@ -1,3 +1,5 @@
+## [ci-runner-v1.2.4](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/ci-runner-v1.2.3...ci-runner-v1.2.4) (2026-08-09)
+
 ## [ci-runner-v1.2.3](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/ci-runner-v1.2.2...ci-runner-v1.2.3) (2026-08-07)
 
 ## [ci-runner-v1.2.2](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/ci-runner-v1.2.1...ci-runner-v1.2.2) (2026-08-05)
