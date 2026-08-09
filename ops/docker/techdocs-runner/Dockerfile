@@ -3,8 +3,10 @@
 # the old ${REGISTRY_GHCR} route stopped receiving new techdocs-builder versions when the GHCR
 # mirror was disabled, freezing this base at 1.2.7 while Harbor moved on.
 ARG REGISTRY_WEBGRIP=harbor.webgrip.dev/webgrip
-# renovate: datasource=docker depName=harbor.webgrip.dev/webgrip/techdocs-builder
-ARG TECHDOCS_BUILDER_VERSION=1.2.21
+# Tag AND digest (house pattern, cf. ci-runner's CVE_GATE_VERSION): the whole point of budgeting
+# this image is that its baseline names an exact artifact. Renovate moves both together (#106).
+# renovate: datasource=docker depName=harbor.webgrip.dev/webgrip/techdocs-builder versioning=docker
+ARG TECHDOCS_BUILDER_VERSION=1.2.21@sha256:f8db156c6c13b791211ab4a1d0b6a37997e5d7215ac4822146c17166f30b73ed
 FROM ${REGISTRY_WEBGRIP}/techdocs-builder:${TECHDOCS_BUILDER_VERSION} AS techdocs
 
 ARG IMAGE_CREATED=1970-01-01T00:00:00Z
