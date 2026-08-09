@@ -49,7 +49,7 @@ jobs:
           REGISTRY: harbor.webgrip.dev
           PROJECT: webgrip
           # Empty = measure everything. Dispatch can pass a space-separated subset.
-          ONLY: ${{ inputs.only || '' }}
+          ONLY: ${{ inputs.only || 'cve-gate' }}
           HARBOR_USER: ${{ secrets.HARBOR_ROBOT_USER }}
           HARBOR_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
           # grype pulls the image it scans; Harbor is private.
@@ -130,6 +130,15 @@ jobs:
             else
               jq -nc --arg name "$name" --arg tag "$tag" --arg rc "$rc" \
                 '{name:$name, tag:$tag, rc:($rc|tonumber), status:"gate-error"}' >> "$results"
+            fi
+
+            # Surviving findings by ID — the VEX statement that answers a finding must name the
+            # exact identifier grype reports (plus aliases), and the counts alone cannot tell you.
+            if [ -s "$imgdir/grype.json" ]; then
+              echo "surviving findings for ${name}:"
+              jq -r '.matches[] | select(.vulnerability.severity=="High" or .vulnerability.severity=="Critical")
+                | "  \(.vulnerability.id)  \(.vulnerability.severity)  \(.artifact.name)@\(.artifact.version)  fix=\(.vulnerability.fix.versions // [] | join(",") | if .=="" then "none" else . end)  aliases=\([.relatedVulnerabilities[]?.id] | join(","))"' \
+                "$imgdir/grype.json" || true
             fi
 
             # grype extracts the whole image under TMPDIR; playwright-runner alone is multi-GB.
