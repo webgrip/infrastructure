@@ -1,0 +1,5 @@
+# zensical's ISOLATED environment (/opt/zensical venv): it requires
+# pymdown-extensions>=11 while mkdocs-techdocs-core hard-pins ==10.x, so the two
+# can never share a resolver universe (pip ResolutionImpossible — killed the
+# v1.4.0 release gate, run 334). Locked with hashes like requirements.in.
+zensical==0.0.53

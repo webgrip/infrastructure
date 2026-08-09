@@ -27,15 +27,20 @@ FROM ${PYTHON_IMAGE} AS python
 
 RUN apk add --no-cache graphviz
 
-RUN pip3 install --no-cache-dir \
-    mkdocs-techdocs-core==1.5.3 \
-    markdown-inline-mermaid==1.0.4 \
-    mkdocs-mermaid2-plugin==1.2.1 \
-    mkdocs-macros-plugin==1.3.7 \
-    mkdocs-redirects==1.2.2 \
-    mkdocs-dracula-theme==1.0.7 \
-    mkdocs-llms-source==1.2.0 \
-    zensical==0.0.53
+# Hash-locked installs. Direct deps live in requirements*.in; the .txt locks are
+# regenerated with `pip-compile --generate-hashes --strip-extras --allow-unsafe`
+# INSIDE python:3.13-alpine (matching this stage) so resolution and hashes are
+# computed for the environment that actually installs them.
+COPY requirements.txt requirements-zensical.txt ./
+RUN pip3 install --no-cache-dir --require-hashes -r requirements.txt
+
+# zensical CANNOT share the mkdocs environment: mkdocs-techdocs-core hard-pins
+# pymdown-extensions==10.x (still true in 1.7.0) while zensical requires >=11 —
+# pip ResolutionImpossible, which is what killed the v1.4.0 release gate (run 334).
+# Own venv, own resolver universe; only the CLI lands on PATH.
+RUN python3 -m venv /opt/zensical \
+    && /opt/zensical/bin/pip install --no-cache-dir --require-hashes -r requirements-zensical.txt \
+    && ln -s /opt/zensical/bin/zensical /usr/local/bin/zensical
 
 
 FROM ${JRE_IMAGE} AS openjdk
@@ -66,6 +71,9 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 COPY --from=node /usr/local /usr/local
 COPY --from=python /usr/local /usr/local
+# zensical's isolated venv (see the python stage); its bin/python symlinks into
+# /usr/local, which the line above already carried over.
+COPY --from=python /opt/zensical /opt/zensical
 COPY --from=openjdk /opt/plantuml.jar /opt/plantuml.jar
 COPY --from=openjdk /usr/local/bin/plantuml /usr/local/bin/plantuml
 
@@ -84,4 +92,3 @@ LABEL org.opencontainers.image.title="WebGrip TechDocs Builder" \
     org.opencontainers.image.version="${IMAGE_VERSION}" \
     org.opencontainers.image.revision="${IMAGE_REVISION}"
 
-# Release retrigger 2026-08-09: run 334 release job failed with no retrievable logs; this comment forces a fresh attempt under live observation.
