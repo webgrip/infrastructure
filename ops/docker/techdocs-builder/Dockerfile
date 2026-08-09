@@ -1,8 +1,18 @@
-# Trigger a techdocs-builder release to see what happens now
 ARG REGISTRY_DOCKERHUB=docker.io
+# Every stage base pinned AND annotated. These digests were pinned without annotations, which is
+# why the node and python stages sat on alpine3.20 while the final stage moved to 3.23 — nothing
+# was watching them. The digests are unchanged here (annotating is not upgrading); Renovate now
+# proposes the catch-up bumps as reviewable PRs.
+# renovate: datasource=docker depName=docker.io/library/alpine versioning=docker
 ARG FINAL_BASE=${REGISTRY_DOCKERHUB}/library/alpine:3.23.4@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11
+# renovate: datasource=docker depName=docker.io/library/node versioning=docker
+ARG NODE_IMAGE=${REGISTRY_DOCKERHUB}/library/node:24.1.0-alpine3.20@sha256:8fe019e0d57dbdce5f5c27c0b63d2775cf34b00e3755a7dea969802d7e0c2b25
+# renovate: datasource=docker depName=docker.io/library/python versioning=docker
+ARG PYTHON_IMAGE=${REGISTRY_DOCKERHUB}/library/python:3.13.3-alpine3.20@sha256:40a4559d3d6b2117b1fbe426f17d55b9100fa40609733a1d0c3f39e2151d4b33
+# renovate: datasource=docker depName=docker.io/library/eclipse-temurin versioning=docker
+ARG JRE_IMAGE=${REGISTRY_DOCKERHUB}/library/eclipse-temurin:11.0.31_11-jre-jammy@sha256:76ffb747ad3a62a8b81ac3c76e2c3b1c06e475b1e10109d0a4dd604db627c9f5
 
-FROM ${REGISTRY_DOCKERHUB}/library/node:24.1.0-alpine3.20@sha256:8fe019e0d57dbdce5f5c27c0b63d2775cf34b00e3755a7dea969802d7e0c2b25 AS node
+FROM ${NODE_IMAGE} AS node
 
 RUN corepack enable && corepack prepare npm@latest --activate
 
@@ -13,7 +23,7 @@ RUN npm install -g \
     @mermaid-js/mermaid-cli@11.4.2
 
 
-FROM ${REGISTRY_DOCKERHUB}/library/python:3.13.3-alpine3.20@sha256:40a4559d3d6b2117b1fbe426f17d55b9100fa40609733a1d0c3f39e2151d4b33 AS python
+FROM ${PYTHON_IMAGE} AS python
 
 RUN apk add --no-cache graphviz
 
@@ -26,7 +36,7 @@ RUN pip3 install --no-cache-dir \
     mkdocs-dracula-theme==1.0.7
 
 
-FROM ${REGISTRY_DOCKERHUB}/library/eclipse-temurin:11.0.31_11-jre-jammy@sha256:76ffb747ad3a62a8b81ac3c76e2c3b1c06e475b1e10109d0a4dd604db627c9f5 AS openjdk
+FROM ${JRE_IMAGE} AS openjdk
 
 RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 
