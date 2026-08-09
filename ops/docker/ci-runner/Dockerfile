@@ -14,12 +14,17 @@ ARG REGISTRY_GHCR=ghcr.io
 # Copying the binaries out turns the gate into an ordinary step. cve-gate stays the ADR-0006 worked
 # example of a hardened image — it is simply no longer in the hot path of every release.
 #
-# Pinned by tag AND digest, same as every other base here. NOTE: cve-gate releases are currently
-# UNSIGNED (the gate could not sign itself while it was broken), so this pins an unsigned artifact
-# we built. That resolves the first time cve-gate releases through a working gate.
+# Pinned by tag AND digest, same as every other base here. (An earlier note warned this pinned an
+# UNSIGNED artifact, to be resolved "the first time cve-gate releases through a working gate" —
+# that release was 0.3.4, and this pin is it.)
 ARG REGISTRY_WEBGRIP=harbor.webgrip.dev/webgrip
+# 0.3.4 is the first cve-gate that signed: gate verdict pass at 0/0 enforce, cosign signature plus
+# SBOM, OpenVEX and cve-budget attestations on the digest. The previous pin, 0.3.2, shipped
+# unsigned (its release died in the container-era gate) — meaning the binaries that decide whether
+# every other image is fit to sign were themselves taken from an artifact that never passed. This
+# pin closes that loop: gate binaries now come only from a release the gate itself admitted.
 # renovate: datasource=docker depName=harbor.webgrip.dev/webgrip/cve-gate versioning=docker
-ARG CVE_GATE_VERSION=0.3.2@sha256:5c70b055ce8dcbcf02b04d66b1d78aeb8386b00efcc5fd98ba8107100e418883
+ARG CVE_GATE_VERSION=0.3.4@sha256:6afd2c3aea931364810835b4c2f0121ad57f0b5c20f0b2ce44c336124e683bf2
 FROM ${REGISTRY_WEBGRIP}/cve-gate:${CVE_GATE_VERSION} AS cve-gate-src
 
 FROM ${REGISTRY_GHCR}/actions/actions-runner:${RUNNER_VERSION} AS runner
@@ -70,15 +75,13 @@ RUN apt-get update && \
 # before gettext-base was added).
 RUN command -v envsubst
 
-RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
-    | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
-    chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg && \
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
-    | tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
-    apt-get update && \
-    apt-get install -y gh && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+# The GitHub CLI is deliberately NOT installed. The org runs on Forgejo; every CI path that used
+# gh was rewritten to curl against the Forgejo/GitHub REST APIs (see webgrip/workflows
+# sync-template-files.yml and the semantic-release composite's mirror step — both curl). What gh
+# bought was a third-party apt source (cli.github.com) trusted into the image that runs every job
+# in the org, kept fresh forever for a tool nothing execs. ADR-0006 names removing it as
+# ci-runner's remediation path. If an agent session genuinely needs gh, that belongs in
+# agent-runner, argued in its own PR.
 
 # Helm, baked in: CI jobs currently run azure/setup-helm per job — a WAN download plus an
 # action clone on every run. With helm on PATH the shared reusables' setup-helm fallback
