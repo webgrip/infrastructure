@@ -34,7 +34,8 @@ RUN pip3 install --no-cache-dir \
     mkdocs-macros-plugin==1.3.7 \
     mkdocs-redirects==1.2.2 \
     mkdocs-dracula-theme==1.0.7 \
-    mkdocs-llms-source==1.2.0
+    mkdocs-llms-source==1.2.0 \
+    zensical==0.0.53
 
 
 FROM ${JRE_IMAGE} AS openjdk
@@ -58,7 +59,8 @@ RUN apk add --no-cache \
     libstdc++ \
     libffi \
     graphviz \
-    chromium
+    chromium \
+    rclone
 
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
