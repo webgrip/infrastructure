@@ -83,3 +83,5 @@ LABEL org.opencontainers.image.title="WebGrip TechDocs Builder" \
     org.opencontainers.image.created="${IMAGE_CREATED}" \
     org.opencontainers.image.version="${IMAGE_VERSION}" \
     org.opencontainers.image.revision="${IMAGE_REVISION}"
+
+# Release retrigger 2026-08-09: run 334 release job failed with no retrievable logs; this comment forces a fresh attempt under live observation.
