@@ -42,6 +42,9 @@ nav:
   - ADRs: adr/index.md
 
 plugins:
+  # Agent affordances (homelab rfc-docs-platform-2026): /llms.txt + /llms-full.txt
+  # + per-page raw .md, grafted into the Zensical site by the deploy leg.
+  - llms-source
   - redirects:
       redirect_maps:
         'adrs/index.md': 'adr/index.md'
