@@ -39,6 +39,9 @@ RUN apk add --no-cache \
     lsb-release \
     openssl
 
+# DHI alpine-base ships no /usr/local/bin (stock alpine does); every tool below lands there.
+RUN install -d /usr/local/bin
+
 # Every tool below: version-pinned download, published checksum verified before install — the
 # pattern ci-runner adopted in #88. Previously all five installed UNVERIFIED, and this image's
 # whole job is holding credentials that can deploy to the cluster; a tampered kubectl or sops
