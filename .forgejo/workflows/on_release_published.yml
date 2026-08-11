@@ -73,56 +73,128 @@ jobs:
           echo "is_prerelease=${{ github.event_name == 'workflow_dispatch' && inputs.is_prerelease || github.event.release.prerelease }}" >> "$GITHUB_OUTPUT"
           echo "created=$created" >> "$GITHUB_OUTPUT"
 
-  # ONE distribute job for BOTH prereleases and final releases. Do NOT split into two
-  # is_prerelease-gated reusable-workflow jobs: Forgejo flattens a reusable workflow's inner jobs
-  # into this caller's graph and does NOT apply the caller job's `if:` to those flattened jobs — so
-  # a "skipped" prerelease distribute STILL ran its flattened build, giving two concurrent builds
-  # racing on the same Harbor tag + buildx :cache ref. The only prerelease difference is the
-  # :latest tag, gated inline in docker-tags below.
+  # ONE distribute job for BOTH prereleases and final releases, and — since ADR-0009 — a job that
+  # PROMOTES rather than builds whenever the verify build already pushed the artifact.
+  #
+  # The verify build on main (dockerVerifyGate, config >= 1.2) builds with the release flags and
+  # pushes :cand-<sha>. Rebuilding that here would only prove the same SOURCE builds twice;
+  # promoting the manifest by digest makes the verified bytes and the released bytes the SAME
+  # bytes, and turns the dominant cost of a release (a second full build) into one registry PUT.
+  # BuildKit's provenance + SBOM attestations live inside the pushed index, so they travel with
+  # the digest. No candidate (config lag, manual dispatch of an old tag, cand tag GC'd) -> the
+  # fallback step runs the exact composite the old reusable wrapped.
+  #
+  # This is deliberately NOT a `uses:` of the harbor-fast reusable with an `if:` around it:
+  # Forgejo flattens a reusable's inner jobs into this graph and does NOT apply the caller job's
+  # `if:` to them — a "skipped" reusable still ran its flattened build (the bug that raced two
+  # builds on one Harbor tag). Conditionals here must be STEP-level, which is what forced the
+  # reusable's guts inline. Side effect: two nested wrapper jobs disappear from every release.
   release-distribute-harbor:
     name: 'Distribute'
     needs: [parse-release-tag]
+    runs-on: docker
     permissions:
       contents: read
-    uses: webgrip/workflows/.forgejo/workflows/docker-build-and-push-harbor-fast.yml@546c0e02f6ca473419b9a8aa48e430304efaeebf # main
-    with:
-      registry: harbor.webgrip.dev
-      docker-context: "ops/docker/${{ needs.parse-release-tag.outputs.image }}"
-      docker-file: "Dockerfile"
-      # amd64-only: the homelab (and these runner images' only consumer) is amd64 Talos, so we drop
-      # the emulated arm64 build — the dominant build-time cost. The -fast wrapper skips setup-qemu
-      # for a pure-amd64 platforms value. See webgrip/homelab-cluster ADR-0036. To restore arm64,
-      # set platforms back to "linux/amd64,linux/arm64" (re-enables QEMU automatically).
-      platforms: "linux/amd64"
-      docker-build-args: |
-        IMAGE_CREATED=${{ needs.parse-release-tag.outputs.created }}
-        IMAGE_VERSION=${{ needs.parse-release-tag.outputs.version }}
-        IMAGE_REVISION=${{ github.sha }}
-        # Route base images through Harbor: the Dockerfiles default these to docker.io/ghcr.io
-        # (so .github/GHCR builds work unchanged); the in-cluster build overrides them to the
-        # Harbor pull-through proxy projects (+ webgrip for the techdocs-builder inter-image dep).
-        # Each image only consumes the prefixes it declares; the rest are harmlessly unused.
-        REGISTRY_DOCKERHUB=harbor.webgrip.dev/dockerhub
-        REGISTRY_GHCR=harbor.webgrip.dev/ghcr
-        REGISTRY_MCR=harbor.webgrip.dev/mcr
-        # REGISTRY_DHI is passed for symmetry and self-documentation, but unlike the three above it
-        # is NOT what makes the build work — cve-gate's Dockerfile already defaults it to the Harbor
-        # proxy. It has to, because dhi.io is the only upstream here that refuses anonymous pulls,
-        # and `dockerVerifyGate()` in @webgrip/semantic-release-config hardcodes its own --build-arg
-        # list that this workflow cannot reach. See ops/docker/cve-gate/Dockerfile.
-        REGISTRY_DHI=harbor.webgrip.dev/dhi
-      # Owner is hardcoded `webgrip` (the Harbor project): Forgejo leaves github.repository_owner
-      # EMPTY in this workflow_dispatch-triggered run, which produced `harbor.webgrip.dev//<image>`
-      # (empty owner -> double slash -> invalid tag). Bare OWNER/IMAGE[:TAG]; the Harbor workflow
-      # prefixes the registry, e.g. webgrip/<image>:<version> -> harbor.webgrip.dev/webgrip/<image>:<version>.
-      # :latest only on a FINAL release; on a prerelease the second line resolves to '' and the
-      # Harbor engine skips blank tags.
-      docker-tags: |
-        webgrip/${{ needs.parse-release-tag.outputs.image }}:${{ needs.parse-release-tag.outputs.version }}
-        ${{ needs.parse-release-tag.outputs.is_prerelease != 'true' && format('webgrip/{0}:latest', needs.parse-release-tag.outputs.image) || '' }}
-    secrets:
-      HARBOR_ROBOT_USER: ${{ secrets.HARBOR_ROBOT_USER }}
-      HARBOR_ROBOT_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
+    steps:
+      - name: Promote the verified candidate by digest
+        id: promote
+        shell: bash
+        env:
+          REGISTRY: harbor.webgrip.dev
+          IMAGE: ${{ needs.parse-release-tag.outputs.image }}
+          VERSION: ${{ needs.parse-release-tag.outputs.version }}
+          IS_PRERELEASE: ${{ needs.parse-release-tag.outputs.is_prerelease }}
+          TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
+          HARBOR_USER: ${{ secrets.HARBOR_ROBOT_USER }}
+          HARBOR_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
+        run: |
+          set -euo pipefail
+          repo="webgrip/${IMAGE}"
+          accept='application/vnd.oci.image.index.v1+json, application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.oci.image.manifest.v1+json, application/vnd.docker.distribution.manifest.v2+json'
+
+          # Resolve the released tag to its commit via the Forgejo API — no checkout needed, and
+          # github.sha is not dependable across release/dispatch triggers.
+          sha="$(curl -fsS -m 20 "${{ github.server_url }}/api/v1/repos/${{ github.repository }}/tags/${TAG}" | jq -r '.commit.sha // empty')"
+          if [ -z "$sha" ]; then
+            echo "::warning::could not resolve tag ${TAG} to a commit; falling back to a full build"
+            echo "promoted=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+
+          cand="cand-${sha}"
+          digest="$(curl -fsSI -u "${HARBOR_USER}:${HARBOR_TOKEN}" -H "Accept: ${accept}" \
+            "https://${REGISTRY}/v2/${repo}/manifests/${cand}" 2>/dev/null \
+            | tr -d '\r' | awk -F': ' 'tolower($1)=="docker-content-digest"{print $2}')" || true
+          if [ -z "${digest:-}" ]; then
+            echo "no candidate ${cand} in Harbor — building from source (pre-ADR-0009 path)"
+            echo "promoted=false" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+
+          # Byte-exact retag: GET the manifest by digest, PUT the SAME bytes under the release
+          # tag with the SAME content type. The registry dedups everything; this moves no data.
+          # The digest the PUT returns MUST equal the candidate digest — anything else means the
+          # bytes changed in flight, and a changed artifact must not be tagged as the release.
+          curl -fsS -u "${HARBOR_USER}:${HARBOR_TOKEN}" -H "Accept: ${accept}" -D /tmp/mh.txt \
+            -o /tmp/manifest.json "https://${REGISTRY}/v2/${repo}/manifests/${digest}"
+          ctype="$(tr -d '\r' < /tmp/mh.txt | awk -F': ' 'tolower($1)=="content-type"{print $2}' | tail -1)"
+
+          retag() {
+            local tag="$1"
+            local got
+            got="$(curl -fsS -u "${HARBOR_USER}:${HARBOR_TOKEN}" -X PUT \
+              -H "Content-Type: ${ctype}" --data-binary @/tmp/manifest.json -D - -o /dev/null \
+              "https://${REGISTRY}/v2/${repo}/manifests/${tag}" \
+              | tr -d '\r' | awk -F': ' 'tolower($1)=="docker-content-digest"{print $2}')"
+            [ "$got" = "$digest" ] || { echo "::error::retag ${tag}: digest changed in flight (${got} != ${digest})"; exit 1; }
+            echo "promoted ${repo}@${digest} to :${tag} (byte-exact)"
+          }
+          retag "${VERSION}"
+          if [ "${IS_PRERELEASE}" != "true" ]; then retag latest; fi
+
+          # Hygiene, fail-soft: the candidate served its purpose. A robot without delete rights
+          # just leaves it for the (recommended) Harbor retention rule on cand-*.
+          curl -fsS -u "${HARBOR_USER}:${HARBOR_TOKEN}" -X DELETE \
+            "https://${REGISTRY}/api/v2.0/projects/webgrip/repositories/${IMAGE}/artifacts/${digest}/tags/${cand}" \
+            >/dev/null 2>&1 && echo "deleted ${cand}" || echo "left ${cand} behind (no delete rights or API refusal — harmless)"
+
+          echo "promoted=true" >> "$GITHUB_OUTPUT"
+
+      # Fallback: exactly what the harbor-fast reusable wrapped, inline. Same composite, same
+      # inputs, same registry cache refs — a release with no candidate behaves as every release
+      # did before ADR-0009.
+      - name: Build and push (no candidate)
+        if: ${{ steps.promote.outputs.promoted != 'true' }}
+        uses: https://forgejo.webgrip.dev/webgrip/workflows/.forgejo/composite-actions/docker-build-push-registry-fast@main
+        env:
+          REGISTRY_USERNAME: ${{ secrets.HARBOR_ROBOT_USER }}
+          REGISTRY_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
+        with:
+          registry: harbor.webgrip.dev
+          docker-context: "ops/docker/${{ needs.parse-release-tag.outputs.image }}"
+          docker-file: "Dockerfile"
+          # amd64-only: the homelab (and these runner images' only consumer) is amd64 Talos, so we
+          # drop the emulated arm64 build — the dominant build-time cost. See webgrip/homelab-cluster
+          # ADR-0036. To restore arm64, set platforms to "linux/amd64,linux/arm64".
+          platforms: "linux/amd64"
+          docker-build-args: |
+            IMAGE_CREATED=${{ needs.parse-release-tag.outputs.created }}
+            IMAGE_VERSION=${{ needs.parse-release-tag.outputs.version }}
+            IMAGE_REVISION=${{ github.sha }}
+            # Route base images through Harbor: the Dockerfiles default these to docker.io/ghcr.io
+            # (so .github/GHCR builds work unchanged); the in-cluster build overrides them to the
+            # Harbor pull-through proxy projects. Each image only consumes the prefixes it
+            # declares; the rest are harmlessly unused. REGISTRY_DHI is symmetry/self-documentation
+            # only — cve-gate's Dockerfile already defaults it to the proxy (dhi.io refuses
+            # anonymous pulls).
+            REGISTRY_DOCKERHUB=harbor.webgrip.dev/dockerhub
+            REGISTRY_GHCR=harbor.webgrip.dev/ghcr
+            REGISTRY_MCR=harbor.webgrip.dev/mcr
+            REGISTRY_DHI=harbor.webgrip.dev/dhi
+          # Owner hardcoded `webgrip` (the Harbor project): github.repository_owner is EMPTY on
+          # Forgejo dispatch runs (double-slash refs otherwise). :latest only on a FINAL release;
+          # on a prerelease the second line resolves to '' and blank tags are skipped.
+          docker-tags: |
+            webgrip/${{ needs.parse-release-tag.outputs.image }}:${{ needs.parse-release-tag.outputs.version }}
+            ${{ needs.parse-release-tag.outputs.is_prerelease != 'true' && format('webgrip/{0}:latest', needs.parse-release-tag.outputs.image) || '' }}
 
   # ── Supply chain security ──────────────────────────────────────────────────
   # cosign signing + CycloneDX SBOM attestation via OpenBao Transit (the key never
