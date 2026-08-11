@@ -1,7 +1,9 @@
-# Release re-entry (2nd): v1.5.0 promoted by digest but shipped UNSIGNED — grype OOMed at the
-# runner pod's 3Gi ceiling scanning this, the estate's fattest image (run 354; the same silent
-# SIGKILL class as the 2026-07-18 syft kill). The limit is 6Gi since homelab-cluster#564; this
-# cuts the signed successor. Delete the unsigned 1.5.0 tag once this lands signed.
+# Release re-entry (3rd): v1.5.0 and v1.5.1 both promoted by digest but shipped UNSIGNED. The
+# kills were NODE-level, not pod-level — 512Mi requests bin-packed every runner onto worker-1
+# (75% requested, 332% overcommitted, pressure taint in the incident window) and the kernel
+# reaped syft/grype mid-scan; the 6Gi pod limit (homelab-cluster#564) could not help a starved
+# node. Requests are honest 2Gi since homelab-cluster#565 (verified live before this push).
+# Delete the unsigned 1.5.0/1.5.1 tags once this lands signed.
 ARG REGISTRY_DOCKERHUB=docker.io
 # Every stage base pinned AND annotated. These digests were pinned without annotations, which is
 # why the node and python stages sat on alpine3.20 while the final stage moved to 3.23 — nothing
