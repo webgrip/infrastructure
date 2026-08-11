@@ -1,6 +1,15 @@
-# Release re-entry touch: run 135 dropped this train (npm 404); the matrix is push-diff.
-ARG REGISTRY_DOCKERHUB=docker.io
-ARG BASE_IMAGE=${REGISTRY_DOCKERHUB}/library/alpine:3.23.4@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11
+# ADR-0006 Stage 2: Docker Hardened Images base. The -dev variant on purpose — this image
+# installs packages (docker, git, bash, curl) and act itself needs a shell and the docker CLI at
+# runtime, so the shell-less runtime variant cannot carry it. Same Alpine lineage as before;
+# apk behaves identically. The dev-variant tradeoff is the one ADR-0006 documents for CI images:
+# less of the theoretical benefit than a production service would capture, in exchange for a
+# continuously-rebuilt, advisory-tracked, signed base.
+#
+# BUILD PREREQUISITE: the `dhi` Harbor proxy project (homelab-cluster ADR-0023) — dhi.io refuses
+# anonymous pulls, so unlike the other REGISTRY_* ARGs this one DEFAULTS to the proxy.
+ARG REGISTRY_DHI=harbor.webgrip.dev/dhi
+# renovate: datasource=docker depName=dhi.io/alpine-base versioning=docker
+ARG BASE_IMAGE=${REGISTRY_DHI}/alpine-base:3.23-dev@sha256:a5d8ac99e233c9141bbefb2afa1809923f420aeeeb11e9dbb463d0bddb943327
 FROM ${BASE_IMAGE}
 
 ARG BASE_IMAGE
