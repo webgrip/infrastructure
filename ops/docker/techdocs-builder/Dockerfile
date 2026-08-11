@@ -91,6 +91,18 @@ COPY --from=python /opt/zensical /opt/zensical
 # renovate: datasource=docker depName=ghcr.io/gitleaks/gitleaks versioning=docker
 COPY --from=harbor.webgrip.dev/ghcr/gitleaks/gitleaks:v8.30.1 /usr/bin/gitleaks /usr/local/bin/gitleaks
 COPY gitleaks-docs.toml /etc/gitleaks/docs.toml
+
+# lychee: external link-rot checking (homelab estate item #15). Static musl
+# build straight from the release tarball; lives here (not its own CI image)
+# because this IS the docs toolchain — and the lycheeverse image mysteriously
+# never started as a job container on the shared dind (7s failures, 2026-08-11).
+# renovate: datasource=github-releases depName=lycheeverse/lychee versioning=semver
+ARG LYCHEE_VERSION=0.24.2
+RUN wget -qO- "https://github.com/lycheeverse/lychee/releases/download/lychee-v${LYCHEE_VERSION}/lychee-x86_64-unknown-linux-musl.tar.gz" \
+    | tar -xz -C /tmp \
+    && mv "/tmp/lychee-x86_64-unknown-linux-musl/lychee" /usr/local/bin/lychee \
+    && rm -rf /tmp/lychee-x86_64-unknown-linux-musl \
+    && lychee --version
 COPY --from=openjdk /opt/plantuml.jar /opt/plantuml.jar
 COPY --from=openjdk /usr/local/bin/plantuml /usr/local/bin/plantuml
 
