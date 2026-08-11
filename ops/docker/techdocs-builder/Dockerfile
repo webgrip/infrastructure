@@ -26,7 +26,8 @@ RUN apk add --no-cache python3 make g++
 
 RUN npm install -g \
     @techdocs/cli@1.9.0 \
-    @mermaid-js/mermaid-cli@11.4.2
+    @mermaid-js/mermaid-cli@11.4.2 \
+    pagefind@1.5.2
 
 
 FROM ${PYTHON_IMAGE} AS python
