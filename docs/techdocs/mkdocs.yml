@@ -1,6 +1,6 @@
 site_name: "WebGrip Infrastructure"
 site_description: "CI/CD Infrastructure and Docker Images for WebGrip"
-site_url: "https://webgrip.github.io/infrastructure"
+site_url: "https://docs.webgrip.dev/infrastructure/"
 
 nav:
   - Home: index.md
