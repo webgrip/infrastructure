@@ -37,6 +37,15 @@ inputs:
   github-release-token:
     description: "GitHub PAT (classic: repo, or fine-grained: contents+read/write) used to mirror the Release object onto the github.com mirror so its Releases tab stays populated. When unset, the mirror step is skipped."
     required: false
+  sbom-generator:
+    description: >-
+      Image BuildKit uses to generate the candidate build's SBOM attestation (ADR-0009). Mirrors
+      the pin in webgrip/workflows' docker-build-push-registry-fast so the candidate carries the
+      same attestations the publish path would have produced — that equivalence is the whole
+      point of promoting by digest.
+    required: false
+    # renovate: datasource=docker depName=docker/buildkit-syft-scanner versioning=docker
+    default: "harbor.webgrip.dev/dockerhub/docker/buildkit-syft-scanner:stable-1@sha256:79e7b013cbec16bbb436f312819a49a4a57752b2270c1a9332ae1a10fcc82a68"
 
 outputs:
   version:
@@ -153,6 +162,13 @@ runs:
       # `<registry>//<image>:cache` (double slash) — an invalid ref that never matches the cache.
       run: |
         echo "BUILD_CACHE_REF=${{ inputs.registry }}/webgrip/${{ inputs.package-name }}:cache" >> "$GITHUB_ENV"
+        # ADR-0009: with these two set, dockerVerifyGate() (config >= 1.2) upgrades the verify
+        # build from --output=type=cacheonly to a full release-grade build — provenance, SBOM,
+        # version labels — pushed as :cand-<sha>. on_release_published then promotes that digest
+        # instead of rebuilding. A config without candidate support ignores both, and a release
+        # pipeline that finds no candidate builds as before: either side can lag the other.
+        echo "BUILD_CANDIDATE_REF=${{ inputs.registry }}/webgrip/${{ inputs.package-name }}:cand-${GITHUB_SHA}" >> "$GITHUB_ENV"
+        echo "BUILD_SBOM_GENERATOR=${{ inputs.sbom-generator }}" >> "$GITHUB_ENV"
 
     - name: Run semantic-release
       shell: bash
