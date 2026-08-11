@@ -15,16 +15,18 @@
 # (semantic-release-monorepo, semantic-release-rust) are INDEPENDENT images that repeat the runtime
 # block below verbatim rather than building FROM this one; see that block for why.
 ###############################################################################
-# ADR-0006 Stage 2: Docker Hardened Images base. Debian 12 (bookworm) -> Debian 13 lineage
-# step: DHI publishes node on debian13, and the toolchain's dependency set is LOCKED
-# (package-lock.json) so the runtime's apt surface is the only thing that moves. -dev variant
-# for apt and the runtime shell (root, as before) — the documented CI-image tradeoff.
+# ADR-0006 Stage 2, second iteration: DHI node on ALPINE. The first iteration took
+# node:24.19.0-debian13-dev and the gate measured it WORSE than stock bookworm-slim
+# (36/73 -> 62/114, v0.2.0): the debian13 -dev variant ships perl, curl and friends that
+# slim never carried, and trixie's advisory backlog is young. The alpine variant is the
+# in-estate counter-proof — node-ci-runner on this exact base measures 0 critical / 5 high.
+# This toolchain is pure JS + git + a static yq; nothing here needs glibc.
 #
 # BUILD PREREQUISITE: the `dhi` Harbor proxy project (homelab-cluster ADR-0023) — dhi.io refuses
 # anonymous pulls, so unlike the other REGISTRY_* ARGs this one DEFAULTS to the proxy.
 ARG REGISTRY_DHI=harbor.webgrip.dev/dhi
 # renovate: datasource=docker depName=dhi.io/node versioning=docker
-ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.19.0-debian13-dev@sha256:dfbe5b95d1fcf228c70dcb17bcbd46b790d87bac938b272bb4df40be37d7867b
+ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.19.0-alpine3.23-dev@sha256:d00350837e082dc254939ffcf53861b3b965ff159e506d6ab1775710f91a82fe
 
 ###############################################################################
 # Locked toolchain, built in a separate stage so npm's cache and metadata never reach the image
@@ -58,14 +60,7 @@ ARG NODE_IMAGE
 # runs on a FROM that could never resolve. Independent images cannot fail that way. The duplication
 # costs text, not bytes: identical instructions on an identical base produce identical layer
 # digests, so Harbor stores them once and a runner pulls them once.
-ENV DEBIAN_FRONTEND=noninteractive
-
-RUN apt-get update -yq && \
-    apt-get install -y --no-install-recommends \
-        git \
-        ca-certificates \
-        curl \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache git ca-certificates curl
 
 # yq — required by @webgrip/semantic-release-config's Chart.yaml version/appVersion bump and by
 # repo prepareCmds. Downloading and checksum-verifying a binary is BUILD work; it used to happen
@@ -76,7 +71,7 @@ RUN set -eux; \
     # DHI's node image ships no /usr/local/bin (stock node puts the binary there; the hardened
     # build relocates it) — same finding as dhi/alpine-base, debian flavor.
     install -d /usr/local/bin; \
-    arch="$(dpkg --print-architecture)"; \
+    case "$(uname -m)" in x86_64) arch=amd64 ;; aarch64) arch=arm64 ;; *) arch="$(uname -m)" ;; esac; \
     # Checksums as published with the version pinned above (the release's own `checksums` asset).
     # A Renovate bump lands here with no recorded hash: that WARNS rather than failing, so an
     # automated bump cannot break the image build — but the warning is the signal to record the
