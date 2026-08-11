@@ -73,6 +73,9 @@ RUN apt-get update -yq && \
 # renovate: datasource=github-releases depName=mikefarah/yq
 ARG YQ_VERSION=v4.44.3
 RUN set -eux; \
+    # DHI's node image ships no /usr/local/bin (stock node puts the binary there; the hardened
+    # build relocates it) — same finding as dhi/alpine-base, debian flavor.
+    install -d /usr/local/bin; \
     arch="$(dpkg --print-architecture)"; \
     # Checksums as published with the version pinned above (the release's own `checksums` asset).
     # A Renovate bump lands here with no recorded hash: that WARNS rather than failing, so an
