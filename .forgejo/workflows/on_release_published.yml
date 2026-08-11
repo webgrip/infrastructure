@@ -117,7 +117,12 @@ jobs:
           # node-ci-runner-v1.0.2: tag targets the [skip ci] commit, parent of the push that
           # built the candidate). The version is the one name the gate and this job derive
           # independently, with no git archaeology in between.
-          cand="cand-${VERSION}"
+          #
+          # Dots become DASHES: Harbor's semver-immutability pattern (**.**.**) matches any
+          # two-dotted tag, so cand-1.5.1 was born immutable — the cleanup delete 412'd (measured
+          # as the robot; never a permissions problem) and a same-version retry could not even
+          # re-push its candidate. cand-1-5-1 matches nothing but itself.
+          cand="cand-${VERSION//./-}"
           digest="$(curl -fsSI -u "${HARBOR_USER}:${HARBOR_TOKEN}" -H "Accept: ${accept}" \
             "https://${REGISTRY}/v2/${repo}/manifests/${cand}" 2>/dev/null \
             | tr -d '\r' | awk -F': ' 'tolower($1)=="docker-content-digest"{print $2}')" || true
