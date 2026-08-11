@@ -29,6 +29,7 @@ ARG ACT_VERSION=0.2.89
 ARG ACT_SHA256=0191d6f1f3b716b5c55820032605d05fc3c1cdbf581ebeff655019e5dd1524c0
 
 RUN set -eux; \
+    install -d /usr/local/bin; \
     curl -fsSL -o /tmp/act.tar.gz \
       "https://github.com/nektos/act/releases/download/v${ACT_VERSION}/act_Linux_x86_64.tar.gz"; \
     echo "${ACT_SHA256}  /tmp/act.tar.gz" | sha256sum -c -; \
