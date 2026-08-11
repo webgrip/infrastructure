@@ -25,13 +25,13 @@ on:
 jobs:
   generate-documentation:
     name: 'Generate'
-    uses: webgrip/workflows/.forgejo/workflows/techdocs-generate.yml@c7a05bc236ae28bf582537a218c04f25e8ef5457 # main
+    uses: webgrip/workflows/.forgejo/workflows/techdocs-generate.yml@d531c756f1a58faa238ab545b3d3000786eed566 # main
     with:
       source-dir: ${{ github.event.inputs.source-dir || 'docs/techdocs' }}
 
   deploy-docs-site:
     name: 'Deploy (docs site / Garage web)'
-    uses: webgrip/workflows/.forgejo/workflows/techdocs-deploy-docs-site.yml@c7a05bc236ae28bf582537a218c04f25e8ef5457 # main
+    uses: webgrip/workflows/.forgejo/workflows/techdocs-deploy-docs-site.yml@d531c756f1a58faa238ab545b3d3000786eed566 # main
     needs: generate-documentation
     if: github.ref == 'refs/heads/main'
     with:
