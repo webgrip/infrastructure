@@ -38,8 +38,8 @@ RUN apk add --no-cache \
 # pinned path is now the only path. A Renovate version bump without its checksum fails the
 # build rather than shipping unverified.
 # renovate: datasource=github-releases depName=kubernetes/kubernetes
-ARG KUBECTL_VERSION="v1.34.0"
-ARG KUBECTL_SHA256="cfda68cba5848bc3b6c6135ae2f20ba2c78de20059f68789c090166d6abc3e2c"
+ARG KUBECTL_VERSION="v1.34.10"
+ARG KUBECTL_SHA256="95bd70842bd11a524d24acd5b68726899e3488e153e45e2b4ae846545beda050"
 RUN curl -fsSLO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" && \
     echo "${KUBECTL_SHA256}  kubectl" | sha256sum -c - && \
     install -m 0755 kubectl /usr/local/bin/kubectl && \
