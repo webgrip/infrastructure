@@ -72,7 +72,8 @@ RUN apk add --no-cache \
     libffi \
     graphviz \
     chromium \
-    rclone
+    rclone \
+    git
 
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
