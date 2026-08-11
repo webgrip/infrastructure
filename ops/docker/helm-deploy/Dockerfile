@@ -56,8 +56,8 @@ RUN curl -fsSLO "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz" &
     rm -rf linux-amd64 "helm-v${HELM_VERSION}-linux-amd64.tar.gz"
 
 # renovate: datasource=github-releases depName=digitalocean/doctl
-ARG DO_CLI_VERSION="1.141.0"
-ARG DO_CLI_SHA256="72045e8e6fc16a5e52eaf3ceef8c5cbe92f6ba2d02e3ed79996f3125f4efd932"
+ARG DO_CLI_VERSION="1.166.0"
+ARG DO_CLI_SHA256="1596424b64091a7939bde561daf2402ca8a141966429928e688d20d17091ec89"
 RUN curl -fsSL -o doctl.tar.gz "https://github.com/digitalocean/doctl/releases/download/v${DO_CLI_VERSION}/doctl-${DO_CLI_VERSION}-linux-amd64.tar.gz" && \
     echo "${DO_CLI_SHA256}  doctl.tar.gz" | sha256sum -c - && \
     tar -xzf doctl.tar.gz && \
@@ -65,8 +65,8 @@ RUN curl -fsSL -o doctl.tar.gz "https://github.com/digitalocean/doctl/releases/d
     rm doctl.tar.gz
 
 # renovate: datasource=github-releases depName=mikefarah/yq
-ARG YQ_VERSION="4.47.1"
-ARG YQ_SHA256="0fb28c6680193c41b364193d0c0fc4a03177aecde51cfc04d506b1517158c2fb"
+ARG YQ_VERSION="4.53.3"
+ARG YQ_SHA256="fa52a4e758c63d38299163fbdd1edfb4c4963247918bf9c1c5d31d84789eded4"
 RUN wget -q "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64" -O /usr/local/bin/yq && \
     echo "${YQ_SHA256}  /usr/local/bin/yq" | sha256sum -c - && \
     chmod +x /usr/local/bin/yq
@@ -74,8 +74,8 @@ RUN wget -q "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq
 # getsops/sops — the project moved out of mozilla/; the old org redirects today and will not
 # forever.
 # renovate: datasource=github-releases depName=getsops/sops
-ARG SOPS_VERSION="3.10.2"
-ARG SOPS_SHA256="79b0f844237bd4b0446e4dc884dbc1765fc7dedc3968f743d5949c6f2e701739"
+ARG SOPS_VERSION="3.13.3"
+ARG SOPS_SHA256="e5bec3346a873ae91d871550f3e698c1aad962aff462a080e40f25fde17fef6b"
 RUN wget -q "https://github.com/getsops/sops/releases/download/v${SOPS_VERSION}/sops-v${SOPS_VERSION}.linux.amd64" -O /usr/local/bin/sops && \
     echo "${SOPS_SHA256}  /usr/local/bin/sops" | sha256sum -c - && \
     chmod +x /usr/local/bin/sops
