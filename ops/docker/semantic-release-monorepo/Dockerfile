@@ -12,12 +12,15 @@
 # resolves plugins relative to its own install and the cwd, not via NODE_PATH, so a second
 # node_modules would not be found. One resolution root is the only shape that cannot half-work.
 ###############################################################################
-ARG REGISTRY_DOCKERHUB=docker.io
-# One ARG carrying tag AND digest (house pattern, see cve-gate): Renovate moves them together
-# via the digest-aware annotated-ARG manager, and a budget measured against this base stays a
-# statement about THIS base until Renovate says otherwise.
-# renovate: datasource=docker depName=docker.io/library/node versioning=docker
-ARG NODE_IMAGE=${REGISTRY_DOCKERHUB}/library/node:24-bookworm-slim@sha256:3638d9a6fe4030bd716be989438248074489337ba3275657f93595428be4fc03
+# ADR-0006 Stage 2: Docker Hardened Images base, cloned from the semantic-release image after
+# its build-check proved the Debian 12 -> 13 lineage step. Locked package-lock; apt surface is
+# the only moving part. -dev variant for apt and the runtime shell (root, as before).
+#
+# BUILD PREREQUISITE: the `dhi` Harbor proxy project (homelab-cluster ADR-0023) — dhi.io refuses
+# anonymous pulls, so unlike the other REGISTRY_* ARGs this one DEFAULTS to the proxy.
+ARG REGISTRY_DHI=harbor.webgrip.dev/dhi
+# renovate: datasource=docker depName=dhi.io/node versioning=docker
+ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.19.0-debian13-dev@sha256:dfbe5b95d1fcf228c70dcb17bcbd46b790d87bac938b272bb4df40be37d7867b
 
 ###############################################################################
 # Locked toolchain, built in a separate stage so npm's cache and metadata never reach the image
@@ -42,7 +45,6 @@ FROM ${NODE_IMAGE}
 ARG IMAGE_CREATED=1970-01-01T00:00:00Z
 ARG IMAGE_VERSION=dev
 ARG IMAGE_REVISION=unknown
-ARG REGISTRY_DOCKERHUB
 ARG NODE_IMAGE
 
 # Shared runtime — keep this block the same in all three semantic-release* images.
@@ -67,6 +69,9 @@ RUN apt-get update -yq && \
 # renovate: datasource=github-releases depName=mikefarah/yq
 ARG YQ_VERSION=v4.44.3
 RUN set -eux; \
+    # DHI's node image ships no /usr/local/bin (the hardened build relocates node) — same
+    # finding as dhi/alpine-base, learned on the semantic-release build-check.
+    install -d /usr/local/bin; \
     arch="$(dpkg --print-architecture)"; \
     # Checksums as published with the version pinned above (the release's own `checksums` asset).
     # A Renovate bump lands here with no recorded hash: that WARNS rather than failing, so an
