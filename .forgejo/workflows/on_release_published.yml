@@ -104,7 +104,6 @@ jobs:
           IMAGE: ${{ needs.parse-release-tag.outputs.image }}
           VERSION: ${{ needs.parse-release-tag.outputs.version }}
           IS_PRERELEASE: ${{ needs.parse-release-tag.outputs.is_prerelease }}
-          TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
           HARBOR_USER: ${{ secrets.HARBOR_ROBOT_USER }}
           HARBOR_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
         run: |
@@ -112,15 +111,13 @@ jobs:
           repo="webgrip/${IMAGE}"
           accept='application/vnd.oci.image.index.v1+json, application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.oci.image.manifest.v1+json, application/vnd.docker.distribution.manifest.v2+json'
 
-          # Resolve the released tag to its commit via the Forgejo API — no checkout needed, and
-          # github.sha is not dependable across release/dispatch triggers.
-          sha="$(curl -fsS -m 20 "${{ github.server_url }}/api/v1/repos/${{ github.repository }}/tags/${TAG}" | jq -r '.commit.sha // empty')"
-          if [ -z "$sha" ]; then
-            echo "::warning::could not resolve tag ${TAG} to a commit; falling back to a full build"
-            echo "promoted=false" >> "$GITHUB_OUTPUT"; exit 0
-          fi
-
-          cand="cand-${sha}"
+          # Candidates are keyed by VERSION, not commit: @semantic-release/git creates the
+          # version-bump commit after the verify build, and the release tag points at that bump
+          # commit — so a sha-keyed candidate can never be found from the tag (measured on
+          # node-ci-runner-v1.0.2: tag targets the [skip ci] commit, parent of the push that
+          # built the candidate). The version is the one name the gate and this job derive
+          # independently, with no git archaeology in between.
+          cand="cand-${VERSION}"
           digest="$(curl -fsSI -u "${HARBOR_USER}:${HARBOR_TOKEN}" -H "Accept: ${accept}" \
             "https://${REGISTRY}/v2/${repo}/manifests/${cand}" 2>/dev/null \
             | tr -d '\r' | awk -F': ' 'tolower($1)=="docker-content-digest"{print $2}')" || true
