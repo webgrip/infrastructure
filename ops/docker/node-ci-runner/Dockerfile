@@ -12,12 +12,16 @@
 # restricted egress and cannot reach dl-cdn.alpinelinux.org ("unable to select packages").
 # So git — and the handful of tools the web/preview jobs shell out to — are baked here, at
 # BUILD time (which has egress), not fetched per run.
-ARG REGISTRY_DOCKERHUB=docker.io
-# Pinned by digest: a floating tag means the image contents — and therefore its CVE count — change
-# with every upstream rebuild, and a budget measured against Monday's base is not the budget the
-# gate sees on Tuesday. Renovate moves tag and digest together via the annotated-ARG manager.
-# renovate: datasource=docker depName=docker.io/library/node versioning=docker
-ARG NODE_IMAGE=${REGISTRY_DOCKERHUB}/library/node:24-alpine@sha256:d32cdf619f63fe0471182d08996dd516c6275bb5fd31ae06e55a570bd9e1ad43
+# ADR-0006 Stage 2: Docker Hardened Images base, same node-24-on-alpine lineage. The -dev
+# variant on purpose (apk installs below; moon jobs shell out at runtime) — the documented
+# CI-image tradeoff. Runs as root like the stock image did (-dev variants are root; the
+# shell-less runtime variants are the nonroot ones).
+#
+# BUILD PREREQUISITE: the `dhi` Harbor proxy project (homelab-cluster ADR-0023) — dhi.io refuses
+# anonymous pulls, so unlike the other REGISTRY_* ARGs this one DEFAULTS to the proxy.
+ARG REGISTRY_DHI=harbor.webgrip.dev/dhi
+# renovate: datasource=docker depName=dhi.io/node versioning=docker
+ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.19.0-alpine3.23-dev@sha256:d00350837e082dc254939ffcf53861b3b965ff159e506d6ab1775710f91a82fe
 
 FROM ${NODE_IMAGE}
 
