@@ -164,10 +164,19 @@ runs:
         echo "BUILD_CACHE_REF=${{ inputs.registry }}/webgrip/${{ inputs.package-name }}:cache" >> "$GITHUB_ENV"
         # ADR-0009: with these two set, dockerVerifyGate() (config >= 1.2) upgrades the verify
         # build from --output=type=cacheonly to a full release-grade build — provenance, SBOM,
-        # version labels — pushed as :cand-<sha>. on_release_published then promotes that digest
-        # instead of rebuilding. A config without candidate support ignores both, and a release
-        # pipeline that finds no candidate builds as before: either side can lag the other.
-        echo "BUILD_CANDIDATE_REF=${{ inputs.registry }}/webgrip/${{ inputs.package-name }}:cand-${GITHUB_SHA}" >> "$GITHUB_ENV"
+        # version labels — pushed as a candidate tag. on_release_published then promotes that
+        # digest instead of rebuilding. A config without candidate support ignores both, and a
+        # release pipeline that finds no candidate builds as before: either side can lag the
+        # other.
+        #
+        # This is a tag PREFIX: the gate appends -<version> (which only it knows — the version
+        # exists after commit analysis, inside semantic-release). Keying by version, not by
+        # GITHUB_SHA, is load-bearing: @semantic-release/git creates the version-bump commit
+        # AFTER verify and the release tag points at THAT commit, so a sha-keyed candidate
+        # (cand-<push sha>) can never be found from the tag — measured on node-ci-runner-v1.0.2,
+        # whose tag targets the [skip ci] bump commit, parent of the push that built the
+        # candidate. The version is the one name both sides derive independently.
+        echo "BUILD_CANDIDATE_REF=${{ inputs.registry }}/webgrip/${{ inputs.package-name }}:cand" >> "$GITHUB_ENV"
         echo "BUILD_SBOM_GENERATOR=${{ inputs.sbom-generator }}" >> "$GITHUB_ENV"
 
     - name: Run semantic-release
