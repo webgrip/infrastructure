@@ -73,7 +73,8 @@ RUN apk add --no-cache \
     graphviz \
     chromium \
     rclone \
-    git
+    git \
+    tzdata
 
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
