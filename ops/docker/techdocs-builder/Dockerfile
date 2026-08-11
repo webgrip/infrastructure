@@ -1,3 +1,6 @@
+# Release re-entry: the gitleaks/zensical feat wave (run 351) was cancelled by the push-main
+# concurrency group when the plumbing-consolidation merge landed seconds later. This touch
+# re-enters the train; the pending feat commit decides the version.
 ARG REGISTRY_DOCKERHUB=docker.io
 # Every stage base pinned AND annotated. These digests were pinned without annotations, which is
 # why the node and python stages sat on alpine3.20 while the final stage moved to 3.23 — nothing
