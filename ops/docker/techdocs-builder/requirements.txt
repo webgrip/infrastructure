@@ -7,7 +7,9 @@
 babel==2.18.0 \
     --hash=sha256:b80b99a14bd085fcacfa15c9165f651fbb3406e66cc603abf11c5750937c992d \
     --hash=sha256:e2b422b277c2b9a9630c1d7903c2a00d0830c409c59ac8cae9081c92f1aeba35
-    # via mkdocs-material
+    # via
+    #   mkdocs-git-revision-date-localized-plugin
+    #   mkdocs-material
 backrefs==8.0 \
     --hash=sha256:4a627b817fd2dce43b79ab48da63613340509381cd8ce0897078a0bce79a2ab8 \
     --hash=sha256:601ce68ca12385dbda06ce264406b4c4210cf5b79fd0fd627592365c92f29a88 \
@@ -140,6 +142,14 @@ ghp-import==2.1.0 \
     # via
     #   mkdocs
     #   properdocs
+gitdb==4.0.12 \
+    --hash=sha256:5ef71f855d191a3326fcfbc0d5da835f26b13fbcba60c32c21091c349ffdb571 \
+    --hash=sha256:67073e15955400952c6565cc3e707c554a4eea2e428946f7a4c162fab9bd9bcf
+    # via gitpython
+gitpython==3.1.59 \
+    --hash=sha256:0a1475cfdc38a5bfba1a3e9a4a9da52a39749ecec322b772915c019f94e5b7e4 \
+    --hash=sha256:67a82f537384578643624c8b2c531938a9b82be431663e575dcf638526631d4c
+    # via mkdocs-git-revision-date-localized-plugin
 hjson==3.1.0 \
     --hash=sha256:55af475a27cf83a7969c808399d7bccdec8fb836a07ddbd574587593b9cdcf75 \
     --hash=sha256:65713cdcf13214fb554eb8b4ef803419733f4f5e551047c9b711098ab7186b89
@@ -290,6 +300,7 @@ mkdocs==1.6.1 \
     --hash=sha256:db91759624d1647f3f34aa0c3f327dd2601beae39a366d6e064c03468d35c20e
     # via
     #   mkdocs-dracula-theme
+    #   mkdocs-git-revision-date-localized-plugin
     #   mkdocs-github-admonitions-plugin
     #   mkdocs-llms-source
     #   mkdocs-macros-plugin
@@ -306,6 +317,10 @@ mkdocs-get-deps==0.2.2 \
     --hash=sha256:8ee8d5f316cdbbb2834bc1df6e69c08fe769a83e040060de26d3c19fad3599a1 \
     --hash=sha256:e7878cbeac04860b8b5e0ca31d3abad3df9411a75a32cde82f8e44b6c16ff650
     # via mkdocs
+mkdocs-git-revision-date-localized-plugin==1.5.3 \
+    --hash=sha256:873444b54cab4d47c69bd6e85da05ef5fbe81fee27e64508114c46a0e4f81e37 \
+    --hash=sha256:cd96e432de6a7e59b31c7041574b22f84179c8636835419ff458877ecfaaaf05
+    # via -r requirements.in
 mkdocs-github-admonitions-plugin==0.1.1 \
     --hash=sha256:7f81520a0681b9955952d73b21ce99b923921830b6b6d1ace9b3fb95cd1fb61f \
     --hash=sha256:824dc821764171943c1043c88218d4af0329693870ba9be657f890d484a0aa85
@@ -497,6 +512,10 @@ six==1.17.0 \
     --hash=sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274 \
     --hash=sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81
     # via python-dateutil
+smmap==5.0.3 \
+    --hash=sha256:4d9debb8b99007ae47165abc08670bd74cb74b5227dda7f643eccc4e9eb5642c \
+    --hash=sha256:c106e05d5a61449cf6ba9a1e650227ecfb141590d2a98412103ff35d89fc7b2f
+    # via gitdb
 soupsieve==2.9.2 \
     --hash=sha256:4a55d8cf158a9c2e587fa4922f1bbb91d68ac829e2d6f25403a85747c71daf74 \
     --hash=sha256:8089a26fd974ca7a1f30276d3d8492ab266ab15af581642dfe8aa162e0c1c823

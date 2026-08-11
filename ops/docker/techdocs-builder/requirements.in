@@ -12,3 +12,4 @@ mkdocs-macros-plugin==1.5.0
 mkdocs-redirects==1.2.3
 mkdocs-dracula-theme==1.0.9
 mkdocs-llms-source==1.2.0
+mkdocs-git-revision-date-localized-plugin==1.5.3
