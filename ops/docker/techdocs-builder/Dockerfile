@@ -74,6 +74,14 @@ COPY --from=python /usr/local /usr/local
 # zensical's isolated venv (see the python stage); its bin/python symlinks into
 # /usr/local, which the line above already carried over.
 COPY --from=python /opt/zensical /opt/zensical
+
+# gitleaks: static (CGO_ENABLED=0) binary from the official Alpine-based image,
+# via the Harbor ghcr pull-through. Gates every docs-site publish (`gitleaks dir
+# site/ --config /etc/gitleaks/docs.toml`) — see gitleaks-docs.toml for the
+# deliberately-narrow allowlist rationale.
+# renovate: datasource=docker depName=ghcr.io/gitleaks/gitleaks versioning=docker
+COPY --from=harbor.webgrip.dev/ghcr/gitleaks/gitleaks:v8.30.1 /usr/bin/gitleaks /usr/local/bin/gitleaks
+COPY gitleaks-docs.toml /etc/gitleaks/docs.toml
 COPY --from=openjdk /opt/plantuml.jar /opt/plantuml.jar
 COPY --from=openjdk /usr/local/bin/plantuml /usr/local/bin/plantuml
 

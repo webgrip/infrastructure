@@ -3,3 +3,9 @@
 # can never share a resolver universe (pip ResolutionImpossible — killed the
 # v1.4.0 release gate, run 334). Locked with hashes like requirements.in.
 zensical==0.0.53
+# Inline-diagram markdown extensions used by 9 estate repos: Zensical runs
+# Python Markdown extensions from THIS venv, so they must exist here too (the
+# Material lane already ships both — inline-mermaid directly, graphviz-inline
+# via techdocs-core; the `dot` binary is in the image).
+markdown-inline-mermaid==1.0.4
+markdown-graphviz-inline==1.1.3

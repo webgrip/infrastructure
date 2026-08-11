@@ -20,8 +20,17 @@ markdown==3.10.3 \
     --hash=sha256:3589362618f743188b4d955b874402bc814f4f83f544dc207719f4baa7d9c45f \
     --hash=sha256:fa6c92a00a4a3c98b22728c64a935ae1928250ae65058a6ded814d2cc29a4cea
     # via
+    #   markdown-graphviz-inline
+    #   markdown-inline-mermaid
     #   pymdown-extensions
     #   zensical
+markdown-graphviz-inline==1.1.3 \
+    --hash=sha256:3571f7da594533b6c2c9ef08a6ce582396b64f778e47ac3678f00e75b2652909 \
+    --hash=sha256:972f52b090426742cac0742edb1c3893306df59e601fa16ce610f7542cb2657d
+    # via -r requirements-zensical.in
+markdown-inline-mermaid==1.0.4 \
+    --hash=sha256:3b354b830bec391d992caaa93f34949d97dc82d6aeb1d2d70cede3cb57ba7426
+    # via -r requirements-zensical.in
 markupsafe==3.0.3 \
     --hash=sha256:0303439a41979d9e74d18ff5e2dd8c43ed6c6001fd40e5bf2e43f7bd9bbc523f \
     --hash=sha256:068f375c472b3e7acbe2d5318dea141359e6900156b5b2ba06a30b169086b91a \
