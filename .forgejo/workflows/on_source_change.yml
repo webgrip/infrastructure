@@ -50,12 +50,39 @@ jobs:
   # per-image release, no --config) falls back to the built-in default tagFormat 'v${version}',
   # cuts ROOT tags, and never emits a version -> the image is never built/pushed/signed. This
   # already bit two new image dirs (erfbeeld-ci, node-ci-runner) silently. Fail loudly instead.
-  guard-releaserc:
-    name: 'Guard: per-image .releaserc.cjs present'
+  # ONE producer job: guards, change detection, and matrix resolution — three jobs and a
+  # reusable-workflow call folded into linear steps (2026-08-11). What it replaced and why:
+  #
+  #   - guard-releaserc (own job) + 'Determine changed images' (a reusable that did a full
+  #     checkout + tj-actions/changed-files + jq) + 'Resolve release matrix' (own job). Three
+  #     runner pods and ~20-40s of scheduling per push, for work that is a git diff and thirty
+  #     lines of shell. The reusable call was also this workflow's one remaining instance of the
+  #     intermittent flattened-job "Set up job" failure class (see runs 339/271/276).
+  #
+  #   - The max-level guard is GONE because the failure it guarded against is now structurally
+  #     impossible: detection takes the FIRST path segment under ops/docker, so a file at
+  #     ops/docker/<image>/<subdir>/... can only ever map to <image>. (History: run 166 —
+  #     ops/docker/semantic-release-rust/toolchain/package-lock.json became a phantom 'toolchain'
+  #     train and cut a ROOT v2.2.0, because the old detection truncated at TWO segments by
+  #     default.) Deleted image dirs are likewise skipped: a diff can name a directory that no
+  #     longer exists, and a matrix entry for it would fail deep in semantic-release.
+  #
+  # The matrix producer must stay a SEPARATE job from its consumers — a job cannot compute its
+  # own strategy.matrix. This is the floor: one producer, two matrixed consumers.
+  plan:
+    name: 'Plan: guards + changed images + release matrix'
     runs-on: docker
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
     steps:
+      # fetch-depth 0: the push diff needs github.event.before, which an ordinary shallow
+      # checkout does not fetch. The in-cluster mirror makes the full clone cheap.
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-      - shell: bash
+        with:
+          fetch-depth: 0
+
+      - name: 'Guard: per-image .releaserc.cjs present'
+        shell: bash
         run: |
           set -euo pipefail
           missing=0
@@ -68,42 +95,51 @@ jobs:
           [ "$missing" -eq 0 ] && echo "all ops/docker/* dirs carry a .releaserc.cjs"
           exit "$missing"
 
-      # Second half of the same guarantee, and the one the loop above cannot see. It iterates
-      # ops/docker/*/ only, so a matrix entry for ops/docker/<image>/<subdir> is invisible to it —
-      # which is how run 166 cut a root v2.2.0 from ops/docker/semantic-release-rust/toolchain.
-      # max-level: 1 is what keeps a matrix entry an IMMEDIATE child; if it is ever dropped, the
-      # reusable's default of 2 silently restores the phantom-image path. Fail here instead.
-      - name: 'Guard: image matrix stays one level deep'
+      - name: 'Detect changed images and resolve the matrix'
+        id: plan
         shell: bash
+        env:
+          DISPATCH_IMAGE: ${{ inputs.image }}
+          BEFORE: ${{ github.event.before }}
         run: |
           set -euo pipefail
-          if ! grep -qE "^\s*max-level: '1'" .forgejo/workflows/on_source_change.yml; then
-            echo "::error::changed-images must pass max-level: '1' — without it a file inside an image dir's subdirectory becomes its own release train and cuts a ROOT tag (run 166: v2.2.0)"
-            exit 1
-          fi
-          echo "changed-images pins max-level: 1"
 
-  # NB: the caller job id must NOT equal the reusable workflow's inner job id. Forgejo v15
-  # flattens an expanded reusable workflow's inner jobs into the caller's graph; when the ids
-  # collide the resulting plan has no dependency-free job and Forgejo rejects the workflow with
-  # "the workflow must contain at least one job without dependencies". The reusable's inner job is
-  # `determine-changed-directories`, so this caller job is named `changed-images`. (GitHub
-  # namespaces inner jobs under the caller, so the same file is fine on the .github side.)
-  changed-images:
-    name: 'Determine changed images'
-    uses: webgrip/workflows/.forgejo/workflows/determine-changed-directories.yml@546c0e02f6ca473419b9a8aa48e430304efaeebf # main
-    with:
-      inside-dir: 'ops/docker'
-      # max-level MUST be 1: one image is one IMMEDIATE child of ops/docker. The reusable defaults
-      # to 2, which truncates changed paths at two segments instead of one — so a file inside a
-      # SUBDIRECTORY of an image dir yields `ops/docker/<image>/<subdir>` as its own matrix entry:
-      # a phantom image. Run 166:
-      # ops/docker/semantic-release-rust/toolchain/package-lock.json produced a release train named
-      # `toolchain`, which (having no .releaserc.cjs of its own) fell through to semantic-release's
-      # default tagFormat and cut a ROOT release, v2.2.0, on this repository. That is exactly what
-      # the guard-releaserc job above exists to prevent, arriving by a route the guard cannot see:
-      # it only iterates ops/docker/*/.
-      max-level: '1'
+          if [ -n "${DISPATCH_IMAGE:-}" ]; then
+            # Guard the input: a typo would otherwise produce a matrix entry pointing at a
+            # directory that does not exist, and semantic-release would fail deep in the job
+            # with a confusing error instead of here with an obvious one.
+            if [ ! -d "ops/docker/${DISPATCH_IMAGE}" ]; then
+              echo "::error::ops/docker/${DISPATCH_IMAGE} does not exist. Pass the directory name, e.g. ci-runner."
+              exit 1
+            fi
+            matrix="$(printf '[{"basename":"%s","path":"ops/docker/%s"}]' "$DISPATCH_IMAGE" "$DISPATCH_IMAGE")"
+            echo "manual release requested for ${DISPATCH_IMAGE}"
+          else
+            # Push diff. github.event.before is all-zeros on a branch's first push and may be
+            # unfetchable after a force-push; fall back to the head commit's own changes.
+            base="${BEFORE:-}"
+            if [ -z "$base" ] || ! echo "$base" | grep -qE '^[0-9a-f]{40}$' || echo "$base" | grep -qE '^0{40}$' || ! git cat-file -e "$base" 2>/dev/null; then
+              base="$(git rev-parse HEAD^ 2>/dev/null || git mktree </dev/null)"
+              echo "::notice::event.before unusable; diffing against ${base}"
+            fi
+            changed="$(git diff --name-only "$base" HEAD -- ops/docker/ | awk -F/ '$1=="ops" && $2=="docker" && NF>=3 {print $3}' | sort -u)"
+            matrix='[]'
+            for b in $changed; do
+              # A diff can name a directory that no longer exists (deleted image) — skip it.
+              [ -d "ops/docker/${b}" ] || { echo "skipping ${b}: dir no longer exists"; continue; }
+              matrix="$(printf '%s' "$matrix" | jq -c --arg b "$b" '. + [{basename:$b, path:("ops/docker/"+$b)}]')"
+            done
+          fi
+
+          # HEREDOC, NOT `key=value`. $GITHUB_OUTPUT is line-oriented; multi-line JSON written as
+          # `matrix=[` took down run 253 and every push-triggered release with it. The JSON here
+          # is compact single-line, but the heredoc form is the one that cannot regress.
+          {
+            echo 'matrix<<__MATRIX_EOF__'
+            printf '%s\n' "$matrix"
+            echo '__MATRIX_EOF__'
+          } >> "$GITHUB_OUTPUT"
+          echo "resolved matrix:"; printf '%s\n' "$matrix"
 
   # Builds every changed image ON THE BRANCH, without releasing or pushing anything.
   #
@@ -120,15 +156,15 @@ jobs:
   # pushes nothing, and cuts no tag. Main stops being the test environment.
   build-check:
     name: 'Build check'
-    needs: [changed-images]
+    needs: [plan]
     # Only off main/development: there, release-per-image already builds the same thing via
     # verifyRelease, and running both would double every release's build time.
     if: >
       always()
       && github.ref != 'refs/heads/main'
       && github.ref != 'refs/heads/development'
-      && needs.changed-images.result == 'success'
-      && needs.changed-images.outputs.matrix != '[]'
+      && needs.plan.result == 'success'
+      && needs.plan.outputs.matrix != '[]'
     runs-on: docker
     strategy:
       # Report every broken image in one run rather than stopping at the first.
@@ -137,7 +173,7 @@ jobs:
       # version-bump commits those jobs push, and Forgejo ignores it anyway. Nothing here writes, so
       # concurrency is bounded only by the runner pool.
       matrix:
-        include: ${{ fromJson(needs.changed-images.outputs.matrix) }}
+        include: ${{ fromJson(needs.plan.outputs.matrix) }}
     # Hoisted to job env so the login step can be skipped when unset. The `secrets` context is not
     # dependably available in a step-level `if:` — `env` is, so the secret is mapped once here and
     # the condition reads that.
@@ -287,64 +323,14 @@ jobs:
           docker logout harbor.webgrip.dev >/dev/null 2>&1
           exit 0
 
-  # Resolves the matrix from EITHER source: the push diff, or the dispatch input. Kept as its own
-  # job so release-per-image has a single `include:` expression rather than a conditional buried in
-  # a matrix, which Forgejo evaluates before `if:` and therefore cannot be made to short-circuit.
-  release-matrix:
-    name: 'Resolve release matrix'
-    needs: [changed-images]
-    if: always()
-    runs-on: docker
-    outputs:
-      matrix: ${{ steps.pick.outputs.matrix }}
-    steps:
-      # Needed for the directory guard below — without a checkout the `-d` test always fails and a
-      # legitimate dispatch would be rejected as a typo.
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-      - id: pick
-        shell: bash
-        env:
-          DISPATCH_IMAGE: ${{ inputs.image }}
-          PUSH_MATRIX: ${{ needs.changed-images.outputs.matrix }}
-        run: |
-          set -euo pipefail
-          if [ -n "${DISPATCH_IMAGE:-}" ]; then
-            # Guard the input: a typo would otherwise produce a matrix entry pointing at a
-            # directory that does not exist, and semantic-release would fail deep in the job with
-            # a confusing error instead of here with an obvious one.
-            if [ ! -d "ops/docker/${DISPATCH_IMAGE}" ]; then
-              echo "::error::ops/docker/${DISPATCH_IMAGE} does not exist. Pass the directory name, e.g. ci-runner."
-              exit 1
-            fi
-            matrix="$(printf '[{"basename":"%s","path":"ops/docker/%s"}]' "$DISPATCH_IMAGE" "$DISPATCH_IMAGE")"
-            echo "manual release requested for ${DISPATCH_IMAGE}"
-          else
-            matrix="${PUSH_MATRIX:-[]}"
-          fi
-
-          # HEREDOC, NOT `key=value`. $GITHUB_OUTPUT is line-oriented, and
-          # determine-changed-directories returns PRETTY-PRINTED JSON — so a bare
-          # `echo "matrix=$PUSH_MATRIX"` writes the first line as `matrix=[` and the runner then
-          # reads `  {` as a malformed entry:
-          #   invalid format '  {', expected a line with '=' or '<<'
-          # which is exactly what took down run 253 and, with it, every push-triggered release.
-          # The previous code never hit this because it fed the reusable's output straight into
-          # fromJson() in the matrix expression and never round-tripped it through a file.
-          {
-            echo 'matrix<<__MATRIX_EOF__'
-            printf '%s\n' "$matrix"
-            echo '__MATRIX_EOF__'
-          } >> "$GITHUB_OUTPUT"
-          echo "resolved matrix:"; printf '%s\n' "$matrix"
-
   release-per-image:
     name: 'Release'
-    needs: [changed-images, release-matrix]
+    needs: [plan]
     if: >
       always()
       && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/development')
-      && needs.release-matrix.result == 'success'
-      && needs.release-matrix.outputs.matrix != '[]'
+      && needs.plan.result == 'success'
+      && needs.plan.outputs.matrix != '[]'
     permissions:
       contents: write
     strategy:
@@ -354,7 +340,7 @@ jobs:
       # and its release silently never cuts (bit ci-runner in run 124/125). One at a time.
       max-parallel: 1
       matrix:
-        include: ${{ fromJson(needs.release-matrix.outputs.matrix) }}
+        include: ${{ fromJson(needs.plan.outputs.matrix) }}
     # In-cluster Forgejo has a single ephemeral DinD runner pool advertising `docker`.
     # (semantic-release's verifyReleaseCmd runs `docker build`, so it needs the DinD backend.)
     runs-on: docker
