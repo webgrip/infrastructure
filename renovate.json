@@ -6,7 +6,7 @@
   "customManagers": [
     {
       "customType": "regex",
-      "description": "Update ARGs annotated with '# renovate: datasource=… depName=…'. Needed because the base images compose multiple ARGs in FROM (e.g. ${REGISTRY_DOCKERHUB}/library/rust:${RUST_VERSION}-slim-bookworm), which the dockerfile manager cannot auto-replace. Two matchStrings because ARGs come in two shapes, and the digest has to be captured SEPARATELY: the original single pattern captured '0.3.2@sha256:…' as one currentValue, which no versioning scheme can parse — so every digest-pinned ARG in the repo (cve-gate's three bases, ci-runner's CVE_GATE_VERSION and RUNNER_VERSION) was silently unmanaged. First pattern: ARGs whose value ends ':<tag>@<digest>' or is '<version>@<digest>'. Second: bare versions with no digest, digest-containing values excluded so the two patterns never both match.",
+      "description": "Update ARGs annotated with '# renovate: datasource=\u2026 depName=\u2026'. Needed because the base images compose multiple ARGs in FROM (e.g. ${REGISTRY_DOCKERHUB}/library/rust:${RUST_VERSION}-slim-bookworm), which the dockerfile manager cannot auto-replace. Two matchStrings because ARGs come in two shapes, and the digest has to be captured SEPARATELY: the original single pattern captured '0.3.2@sha256:\u2026' as one currentValue, which no versioning scheme can parse \u2014 so every digest-pinned ARG in the repo (cve-gate's three bases, ci-runner's CVE_GATE_VERSION and RUNNER_VERSION) was silently unmanaged. First pattern: ARGs whose value ends ':<tag>@<digest>' or is '<version>@<digest>'. Second: bare versions with no digest, digest-containing values excluded so the two patterns never both match.",
       "managerFilePatterns": [
         "/(^|/)Dockerfile$/"
       ],
@@ -18,7 +18,7 @@
     },
     {
       "customType": "regex",
-      "description": "Update tool versions that composite actions pass as INPUT DEFAULTS (syft, cosign). Renovate's action manager pins the `uses:` ref but is blind to a version string handed to that action via `with:` — which is how syft sat on v1.21.0 from 2026-06-16 until v1.48.0 shipped, with nothing watching it.",
+      "description": "Update tool versions that composite actions pass as INPUT DEFAULTS (syft, cosign). Renovate's action manager pins the `uses:` ref but is blind to a version string handed to that action via `with:` \u2014 which is how syft sat on v1.21.0 from 2026-06-16 until v1.48.0 shipped, with nothing watching it.",
       "managerFilePatterns": [
         "/(^|/)action\\.ya?ml$/"
       ],
@@ -30,7 +30,7 @@
   ],
   "packageRules": [
     {
-      "description": "These Dockerfiles compose their FROM refs from multiple ARGs; the dockerfile manager resolves the ARGs at extraction but then cannot find the resolved string in the raw file ('Cannot find replaceString' → the whole branch silently produces no commit). The annotated-ARG custom manager above owns these deps instead.",
+      "description": "These Dockerfiles compose their FROM refs from multiple ARGs; the dockerfile manager resolves the ARGs at extraction but then cannot find the resolved string in the raw file ('Cannot find replaceString' \u2192 the whole branch silently produces no commit). The annotated-ARG custom manager above owns these deps instead.",
       "matchManagers": [
         "dockerfile"
       ],
@@ -45,7 +45,7 @@
       "enabled": false
     },
     {
-      "description": "The release toolchain (webgrip/workflows ADR-0005) is the one npm dependency set in this repo that is LOCKED, because it decides every repo's version numbers. These package.json files are also their image's release manifest — Renovate owns the dependencies; semantic-release owns the version. It upgrades as ONE reviewed PR across all three images — they must stay on the same semantic-release version, since the derived images replace the base's tree wholesale. A MAJOR bump is expected to FAIL the image build: each Dockerfile asserts the major that webgrip/workflows' composites target.",
+      "description": "The release toolchain (webgrip/workflows ADR-0005) is the one npm dependency set in this repo that is LOCKED, because it decides every repo's version numbers. These package.json files are also their image's release manifest \u2014 Renovate owns the dependencies; semantic-release owns the version. It upgrades as ONE reviewed PR across all three images \u2014 they must stay on the same semantic-release version, since the derived images replace the base's tree wholesale. A MAJOR bump is expected to FAIL the image build: each Dockerfile asserts the major that webgrip/workflows' composites target.",
       "matchFileNames": [
         "ops/docker/semantic-release*/package.json"
       ],
@@ -59,6 +59,20 @@
         "custom.regex"
       ],
       "pinDigests": false
+    },
+    {
+      "description": "techdocs-builder's python env is pip-compile hash-locked (requirements*.in -> .txt, compiled for python:3.13-alpine). Renovate re-runs the header command to refresh locks+hashes. mkdocs-techdocs-core pins most of the mkdocs universe with == constraints, so most transitive 'updates' are impossible until techdocs-core itself bumps \u2014 expect small PRs. zensical lives in a SEPARATE lock (requirements-zensical) because it cannot coexist with techdocs-core (pymdown-extensions conflict).",
+      "matchManagers": [
+        "pip-compile"
+      ],
+      "groupName": "techdocs-builder python locks",
+      "semanticCommitType": "fix",
+      "semanticCommitScope": "techdocs-builder"
     }
-  ]
+  ],
+  "pip-compile": {
+    "managerFilePatterns": [
+      "/^ops/docker/techdocs-builder/requirements.*\\.txt$/"
+    ]
+  }
 }
