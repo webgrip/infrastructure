@@ -68,16 +68,16 @@ deleting that retires findings permanently and needs no justification from anyon
 | Delete `ops/kyverno/cluster-policies/` | One source of truth for admission, in `homelab-cluster` |
 | Retire `image-verify-audit`, `image-attestations-audit` | Both had zero PolicyReport results; no `ghcr.io/webgrip` image runs |
 | Repoint OCI `source`/`url`/`documentation` labels at Forgejo | Image provenance points at the actual source of truth |
-| [ADR-0004](../../../adrs/0004-supply-chain-on-forgejo-harbor-openbao.md) supersedes ADR-0002 | The decision record matches the running system, including what the migration cost |
+| [ADR-0004](https://forgejo.webgrip.dev/webgrip/infrastructure/src/branch/main/docs/adrs/0004-supply-chain-on-forgejo-harbor-openbao.md) supersedes ADR-0002 | The decision record matches the running system, including what the migration cost |
 
 ## Wave 2 — make the evidence mean something (complete, 2026-08-08)
 
-**OpenVEX** ([`ops/vex/`](../../../../ops/vex/README.md)). Hand-authored, PR-reviewed statements
+**OpenVEX** ([`ops/vex/`](https://forgejo.webgrip.dev/webgrip/infrastructure/src/branch/main/ops/vex/README.md)). Hand-authored, PR-reviewed statements
 with a justification from OpenVEX's closed vocabulary. Stamped with the built digest and attested
 with the same OpenBao key as the SBOM. Harbor's project-wide `cve_allowlist` stays empty — it has no
 product scope, no justification, no author and no expiry, and is an allowlist wearing a VEX costume.
 
-**CVE budgets** ([`ops/security/cve-budgets.yaml`](../../../../ops/security/cve-budgets.yaml)).
+**CVE budgets** ([`ops/security/cve-budgets.yaml`](https://forgejo.webgrip.dev/webgrip/infrastructure/src/branch/main/ops/security/cve-budgets.yaml)).
 Per-image `critical`/`high` ceilings with `warn`/`enforce` modes. New images start in `warn`, the
 pipeline measures them, the budget is set at the observed number, then it only goes down.
 
@@ -85,7 +85,7 @@ pipeline measures them, the budget is set at the observed number, then it only g
 Harbor but unsigned — and unsigned is what admission refuses. This makes a webgrip signature mean
 *"built by CI **and** within budget"* rather than *"built by CI"*.
 
-See [ADR-0005](../../../adrs/0005-openvex-and-cve-budgets.md).
+See [ADR-0005](https://forgejo.webgrip.dev/webgrip/infrastructure/src/branch/main/docs/adrs/0005-openvex-and-cve-budgets.md).
 
 **Closed 2026-08-08 by `cve-gate` 0.3.4** — the first image out of this pipeline carrying a
 signature:
@@ -108,7 +108,7 @@ a TTY, and finally VEX statements naming CVEs while grype matches on GHSA.
 The last one is the one worth remembering: **five reviewed statements suppressed nothing for eight
 releases, and every number the gate printed looked identical to having no statements at all.** The
 fix was one `aliases` field. The lasting change is the guard that now warns when statements are
-applied and nothing is suppressed — see [ADR-0008](../../../adrs/0008-cve-gate-runs-as-a-step.md)
+applied and nothing is suppressed — see [ADR-0008](https://forgejo.webgrip.dev/webgrip/infrastructure/src/branch/main/docs/adrs/0008-cve-gate-runs-as-a-step.md)
 for why the gate stopped running in a container at all.
 
 ## Wave 3 — bring the numbers down
@@ -244,7 +244,7 @@ is to find out what breaks before it breaks something that matters.
 **Then, and only then, `warn` → `enforce`.** An image is promoted when its measured budget has been
 stable across two releases. Flipping earlier converts a monitoring signal into an outage.
 
-[ADR-0006](../../../adrs/0006-hardened-base-images.md) — **Docker Hardened Images** as the default
+[ADR-0006](https://forgejo.webgrip.dev/webgrip/infrastructure/src/branch/main/docs/adrs/0006-hardened-base-images.md) — **Docker Hardened Images** as the default
 base. The catalog went Apache 2.0 and free in December 2025, which is what makes this viable:
 Chainguard's free tier is five images restricted to `latest`, structurally incompatible with a repo
 that digest-pins everything and lets Renovate move it.
@@ -497,8 +497,8 @@ images, the other addresses the one image where the numbers were never the point
 
 ## Related records
 
-- [ADR-0004 — Signing, SBOM and attestation on Forgejo/Harbor/OpenBao](../../../adrs/0004-supply-chain-on-forgejo-harbor-openbao.md)
-- [ADR-0005 — OpenVEX statements and per-image CVE budgets](../../../adrs/0005-openvex-and-cve-budgets.md)
-- [ADR-0006 — Docker Hardened Images as the default base](../../../adrs/0006-hardened-base-images.md)
-- [ADR-0002 — superseded, retained for why keyless was chosen](../../../adrs/0002-supply-chain-security.md)
-- [`ops/vex/README.md`](../../../../ops/vex/README.md) — VEX authoring and review discipline
+- [ADR-0004 — Signing, SBOM and attestation on Forgejo/Harbor/OpenBao](https://forgejo.webgrip.dev/webgrip/infrastructure/src/branch/main/docs/adrs/0004-supply-chain-on-forgejo-harbor-openbao.md)
+- [ADR-0005 — OpenVEX statements and per-image CVE budgets](https://forgejo.webgrip.dev/webgrip/infrastructure/src/branch/main/docs/adrs/0005-openvex-and-cve-budgets.md)
+- [ADR-0006 — Docker Hardened Images as the default base](https://forgejo.webgrip.dev/webgrip/infrastructure/src/branch/main/docs/adrs/0006-hardened-base-images.md)
+- [ADR-0002 — superseded, retained for why keyless was chosen](https://forgejo.webgrip.dev/webgrip/infrastructure/src/branch/main/docs/adrs/0002-supply-chain-security.md)
+- [`ops/vex/README.md`](https://forgejo.webgrip.dev/webgrip/infrastructure/src/branch/main/ops/vex/README.md) — VEX authoring and review discipline

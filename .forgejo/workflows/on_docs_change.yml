@@ -37,7 +37,7 @@ jobs:
     with:
       dest-prefix: infrastructure
       # strict:false until this repo's links are cleaned; flip like homelab did.
-      strict: 'false'
+      strict: 'true'
     secrets:
       TECHDOCS_S3_ACCESS_KEY_ID: ${{ secrets.TECHDOCS_S3_ACCESS_KEY_ID }}
       TECHDOCS_S3_SECRET_ACCESS_KEY: ${{ secrets.TECHDOCS_S3_SECRET_ACCESS_KEY }}
