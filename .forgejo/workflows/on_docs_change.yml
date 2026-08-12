@@ -35,7 +35,9 @@ jobs:
     needs: generate-documentation
     if: github.ref == 'refs/heads/main'
     with:
-      dest-prefix: infrastructure
+      # Own bucket (estate #2): this repo's key can touch nothing but
+      # docs-infrastructure(-trash), so a bad sync can never clobber the estate.
+      bucket: docs-infrastructure
       # strict:false until this repo's links are cleaned; flip like homelab did.
       strict: 'true'
     secrets:
