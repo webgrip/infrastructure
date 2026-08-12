@@ -1,3 +1,5 @@
+## [mkdocs-runner-v1.1.0](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/mkdocs-runner-v1.0.3...mkdocs-runner-v1.1.0) (2026-08-12)
+
 ## [mkdocs-runner-v1.0.3](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/mkdocs-runner-v1.0.2...mkdocs-runner-v1.0.3) (2026-08-09)
 
 ## [mkdocs-runner-v1.0.2](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/mkdocs-runner-v1.0.1...mkdocs-runner-v1.0.2) (2026-07-27)
