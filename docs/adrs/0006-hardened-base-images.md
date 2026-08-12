@@ -207,6 +207,32 @@ yq -r '.images | to_entries[] | select(.value.note) | .key' ops/security/cve-bud
   the gate's binaries are baked into `ci-runner` instead. The standard this ADR sets is unaffected
   — what changed is that demonstrating it and enforcing it are no longer the same artifact. See
   [ADR-0008](0008-cve-gate-runs-as-a-step.md).
+* 2026-08-11/12 — **Stage 1/2 executed and measured** across six swaps, one release each, every
+  number from the release gate (critical/high after VEX):
+
+  | image | stock base | DHI base | before | after |
+  | --- | --- | --- | --- | --- |
+  | act-runner | alpine:3.23.4 | alpine-base:3.23-dev | 40/123 | 6/25 |
+  | helm-deploy | alpine:3.23.4 | alpine-base:3.23-dev | 16/63 | 8/54 |
+  | node-ci-runner | node:24-alpine | node:24.19.0-alpine3.23-dev | 1/11 | **0/5** |
+  | semantic-release | node:24-bookworm-slim | node:24.19.0-alpine3.23-dev | 36/73 | **0/9** |
+  | semantic-release-monorepo | node:24-bookworm-slim | node:24.19.0-alpine3.23-dev | 36/72 | **0/8** |
+  | semantic-release (1st attempt) | node:24-bookworm-slim | node:24.19.0-**debian13**-dev | 36/73 | 62/114 — **reverted same day** |
+
+  Three lessons this execution adds to the record:
+  1. **Variant choice decides whether DHI helps.** The debian13 `-dev` node variant measured
+     WORSE than stock `bookworm-slim` — it ships perl, curl and libssh2 that slim never carried,
+     and trixie's advisory backlog is young. The alpine `-dev` variants measured dramatically
+     better everywhere. "Hardened" is not a number; the gate is.
+  2. **DHI bases ship no `/usr/local/bin`** on either lineage — every image installing tools
+     there needs `install -d /usr/local/bin` first (bit both the alpine-base and node swaps).
+  3. **`-dev` variants run as root** like the stock CI bases; the shell-less runtime variants
+     are the nonroot ones. No runtime USER surprise for job containers.
+* 2026-08-12 — two scope corrections. `vikunja-mcp` is NOT migratable: its base is the upstream
+  supergateway application image, not a distro. `semantic-release-rust` is HELD on
+  `bookworm-slim`: `semantic-release-cargo` runs cargo verification compiles, where musl-vs-glibc
+  is a real behavioral change for sys-crates — its move needs a consumer-crate compatibility
+  check first.
 * Refines: [ADR-0005](0005-openvex-and-cve-budgets.md) — this is how the budgets come down
 * Refined by: [ADR-0008](0008-cve-gate-runs-as-a-step.md) — the example leaves the hot path
 * External: [Docker Hardened Images catalog](https://github.com/docker-hardened-images/catalog)

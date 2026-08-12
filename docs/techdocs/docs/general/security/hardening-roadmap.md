@@ -174,6 +174,36 @@ owning OS package, ~1200 per node-slim image — not just reviewed OpenVEX suppr
 and high counts are unaffected. The gate should count only ignores whose applied rule is the VEX
 rule; tracked for the next cve-gate release.)
 
+### Stage 1/2 executed — the measured table (2026-08-11/12)
+
+Six swaps landed, one release each, every number from the release gate itself:
+
+| image | move | before | after |
+| --- | --- | --- | --- |
+| act-runner | alpine -> dhi/alpine-base | 40/123 | 6/25 |
+| helm-deploy | alpine -> dhi/alpine-base | 16/63 | 8/54 |
+| node-ci-runner | node-alpine -> dhi/node-alpine | 1/11 | **0/5** |
+| semantic-release | node-slim -> dhi/node-alpine | 36/73 | **0/9** |
+| semantic-release-monorepo | node-slim -> dhi/node-alpine | 36/72 | **0/8** |
+
+**Four images in the estate now hold critical-zero** (with cve-gate). Every budget was ratcheted
+to its measured floor the same day.
+
+**The negative result matters most**: semantic-release's first swap took the debian13 `-dev`
+variant and the gate measured it WORSE than stock (62/114 vs 36/73 — the -dev image ships perl,
+curl and libssh2 that `bookworm-slim` never carried, and trixie's advisory backlog is young). It
+was corrected to the alpine variant the same day. That is the whole argument for
+measure-every-swap: "hardened" is a marketing word; the gate's number is not. Details and the
+two portability gotchas (`/usr/local/bin` absent on all DHI bases; `-dev` variants are the root
+ones) live in ADR-0006's history.
+
+**Held back, with reasons**: `vikunja-mcp` (upstream app-image base — nothing to swap);
+`semantic-release-rust` (cargo verification compiles make musl-vs-glibc a behavioral change —
+needs a consumer-crate check); `playwright-runner` and `ci-runner` (the standing ADR-0006
+structural exceptions). Remaining migratable: the techdocs chain (the 141/502 prize — DHI
+node+python stages plus the Java 11 question), `agent-runner` (dhi/python), `php-ci-runner`
+(dhi/php availability to confirm), `rust-ci-runner`/`rust-releaser` (dhi/rust).
+
 ### Order of operations, and why
 
 **Pin before measuring, measure before hardening.** The first measurement found ten images whose
