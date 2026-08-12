@@ -15,6 +15,9 @@
 # (semantic-release-monorepo, semantic-release-rust) are INDEPENDENT images that repeat the runtime
 # block below verbatim rather than building FROM this one; see that block for why.
 ###############################################################################
+# Release re-entry: the alpine commit's wave was cancelled by the monorepo push that followed
+# it too quickly (the push-main concurrency group; self-inflicted, documented). Sibling result
+# on the identical base: monorepo v0.3.0 measured 0 critical / 8 high.
 # ADR-0006 Stage 2, second iteration: DHI node on ALPINE. The first iteration took
 # node:24.19.0-debian13-dev and the gate measured it WORSE than stock bookworm-slim
 # (36/73 -> 62/114, v0.2.0): the debian13 -dev variant ships perl, curl and friends that
