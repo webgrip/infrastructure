@@ -1,3 +1,5 @@
+## [semantic-release-monorepo-v0.3.0](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/semantic-release-monorepo-v0.2.0...semantic-release-monorepo-v0.3.0) (2026-08-12)
+
 ## [semantic-release-monorepo-v0.2.0](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/semantic-release-monorepo-v0.1.1...semantic-release-monorepo-v0.2.0) (2026-08-11)
 
 ## [semantic-release-monorepo-v0.1.1](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/semantic-release-monorepo-v0.1.0...semantic-release-monorepo-v0.1.1) (2026-08-08)
