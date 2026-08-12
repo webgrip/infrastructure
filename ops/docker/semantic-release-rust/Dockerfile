@@ -115,7 +115,10 @@ ENV RUSTUP_HOME=/usr/local/rustup
 ENV CARGO_HOME=/usr/local/cargo
 ENV PATH=/usr/local/cargo/bin:$PATH
 
-ARG RUST_TOOLCHAIN=stable
+# Pinned: 'stable' resolves to whatever rust-lang shipped most recently — the float the
+# 2026-08-08 pin train fixed in rust-releaser and missed here. Same version as the rust images.
+# renovate: datasource=docker depName=docker.io/library/rust versioning=docker
+ARG RUST_TOOLCHAIN=1.97.0
 RUN apt-get update -yq && \
     apt-get install -y --no-install-recommends \
         build-essential \
