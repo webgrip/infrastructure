@@ -115,6 +115,9 @@ ENV RUSTUP_HOME=/usr/local/rustup
 ENV CARGO_HOME=/usr/local/cargo
 ENV PATH=/usr/local/cargo/bin:$PATH
 
+# Release re-entry: v0.1.3 promoted by digest but its sign scan was killed by node pressure
+# (run 401; runner request raised to 3Gi in homelab-cluster 97361c7b). This cuts the signed
+# successor.
 # Pinned: 'stable' resolves to whatever rust-lang shipped most recently — the float the
 # 2026-08-08 pin train fixed in rust-releaser and missed here. Same version as the rust images.
 # renovate: datasource=docker depName=docker.io/library/rust versioning=docker
