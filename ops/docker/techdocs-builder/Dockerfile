@@ -1,20 +1,33 @@
-# Release re-entry (3rd): v1.5.0 and v1.5.1 both promoted by digest but shipped UNSIGNED. The
-# kills were NODE-level, not pod-level — 512Mi requests bin-packed every runner onto worker-1
-# (75% requested, 332% overcommitted, pressure taint in the incident window) and the kernel
-# reaped syft/grype mid-scan; the 6Gi pod limit (homelab-cluster#564) could not help a starved
-# node. Requests are honest 2Gi since homelab-cluster#565 (verified live before this push).
-# Delete the unsigned 1.5.0/1.5.1 tags once this lands signed.
+# ADR-0006 Stage 2: the techdocs chain — the estate's worst surface (131 critical / 501 high
+# measured on the stock stages). Three structural changes, forced by how DHI lays images out:
+#
+#   1. The FINAL stage IS dhi/python now. The old final was bare alpine that received its whole
+#      python runtime via `COPY --from=python /usr/local` — stock alpine-python lives in
+#      /usr/local, but dhi/python puts the interpreter in /usr/bin and site-packages in
+#      /usr/lib/python3.13, so that transfer cannot survive the swap. Making the final stage the
+#      python base itself dissolves the problem: pip installs (hash-locked, unchanged) run right
+#      here, and the zensical venv's symlinks resolve against the same interpreter path.
+#   2. node is copied EXPLICITLY. Stock node lives in /usr/local (so the old tree-copy carried
+#      it); dhi/node keeps the binary in /usr/bin and ships no /usr/local at all — npm creates
+#      /usr/local when the global tools install, so that tree still carries techdocs-cli,
+#      mermaid-cli and pagefind, but the runtime needs the extra one-file COPY for node itself.
+#   3. The plantuml stage is byte-identical on purpose. GitHub's release jar for the same
+#      version is a DIFFERENT artifact than sourceforge's (sha1 mismatch, verified) — moving
+#      the fetch would silently change shipped bytes. Also noted while here: the final image
+#      carries plantuml.jar and its wrapper but NO JRE — `plantuml` cannot currently run in
+#      this image; whether to add openjdk-jre via apk or drop the jar is a deliberate decision
+#      for a separate change, not a side effect of this one.
+#
+# BUILD PREREQUISITE: the `dhi` Harbor proxy project (homelab-cluster ADR-0023) — dhi.io
+# refuses anonymous pulls, so REGISTRY_DHI defaults to the proxy.
+ARG REGISTRY_DHI=harbor.webgrip.dev/dhi
 ARG REGISTRY_DOCKERHUB=docker.io
-# Every stage base pinned AND annotated. These digests were pinned without annotations, which is
-# why the node and python stages sat on alpine3.20 while the final stage moved to 3.23 — nothing
-# was watching them. The digests are unchanged here (annotating is not upgrading); Renovate now
-# proposes the catch-up bumps as reviewable PRs.
-# renovate: datasource=docker depName=docker.io/library/alpine versioning=docker
-ARG FINAL_BASE=${REGISTRY_DOCKERHUB}/library/alpine:3.23.4@sha256:5b10f432ef3da1b8d4c7eb6c487f2f5a8f096bc91145e68878dd4a5019afde11
-# renovate: datasource=docker depName=docker.io/library/node versioning=docker
-ARG NODE_IMAGE=${REGISTRY_DOCKERHUB}/library/node:24.1.0-alpine3.20@sha256:8fe019e0d57dbdce5f5c27c0b63d2775cf34b00e3755a7dea969802d7e0c2b25
-# renovate: datasource=docker depName=docker.io/library/python versioning=docker
-ARG PYTHON_IMAGE=${REGISTRY_DOCKERHUB}/library/python:3.13.3-alpine3.20@sha256:40a4559d3d6b2117b1fbe426f17d55b9100fa40609733a1d0c3f39e2151d4b33
+# renovate: datasource=docker depName=dhi.io/node versioning=docker
+ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.19.0-alpine3.23-dev@sha256:d00350837e082dc254939ffcf53861b3b965ff159e506d6ab1775710f91a82fe
+# renovate: datasource=docker depName=dhi.io/python versioning=docker
+ARG BASE_IMAGE=${REGISTRY_DHI}/python:3.13.15-alpine3.24-dev@sha256:8e51f99fa957d0b2531c4936b178d67d997e76fe48d7150357143295a03b1fd4
+# The jar-fetch stage only runs curl; its base never ships. Kept on the stock JRE image purely
+# to keep the fetched artifact byte-identical (see header note 3).
 # renovate: datasource=docker depName=docker.io/library/eclipse-temurin versioning=docker
 ARG JRE_IMAGE=${REGISTRY_DOCKERHUB}/library/eclipse-temurin:11.0.31_11-jre-jammy@sha256:76ffb747ad3a62a8b81ac3c76e2c3b1c06e475b1e10109d0a4dd604db627c9f5
 
@@ -30,26 +43,6 @@ RUN npm install -g \
     pagefind@1.5.2
 
 
-FROM ${PYTHON_IMAGE} AS python
-
-RUN apk add --no-cache graphviz
-
-# Hash-locked installs. Direct deps live in requirements*.in; the .txt locks are
-# regenerated with `pip-compile --generate-hashes --strip-extras --allow-unsafe`
-# INSIDE python:3.13-alpine (matching this stage) so resolution and hashes are
-# computed for the environment that actually installs them.
-COPY requirements.txt requirements-zensical.txt ./
-RUN pip3 install --no-cache-dir --require-hashes -r requirements.txt
-
-# zensical CANNOT share the mkdocs environment: mkdocs-techdocs-core hard-pins
-# pymdown-extensions==10.x (still true in 1.7.0) while zensical requires >=11 —
-# pip ResolutionImpossible, which is what killed the v1.4.0 release gate (run 334).
-# Own venv, own resolver universe; only the CLI lands on PATH.
-RUN python3 -m venv /opt/zensical \
-    && /opt/zensical/bin/pip install --no-cache-dir --require-hashes -r requirements-zensical.txt \
-    && ln -s /opt/zensical/bin/zensical /usr/local/bin/zensical
-
-
 FROM ${JRE_IMAGE} AS openjdk
 
 RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
@@ -60,9 +53,9 @@ RUN curl -o /opt/plantuml.jar -L http://sourceforge.net/projects/plantuml/files/
     chmod +x /usr/local/bin/plantuml
 
 
-FROM ${FINAL_BASE} AS final
+FROM ${BASE_IMAGE} AS final
 
-ARG FINAL_BASE
+ARG BASE_IMAGE
 ARG IMAGE_CREATED=1970-01-01T00:00:00Z
 ARG IMAGE_VERSION=dev
 ARG IMAGE_REVISION=unknown
@@ -78,11 +71,26 @@ RUN apk add --no-cache \
 
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
+# Hash-locked installs, directly into this (python) base — see header note 1. Locks are
+# regenerated with `pip-compile --generate-hashes --strip-extras --allow-unsafe` inside a
+# python:3.13-alpine-lineage image; hashes are artifact hashes and hold across patch bumps.
+COPY requirements.txt requirements-zensical.txt ./
+RUN pip3 install --no-cache-dir --require-hashes -r requirements.txt && rm requirements.txt
+
+# zensical CANNOT share the mkdocs environment: mkdocs-techdocs-core hard-pins
+# pymdown-extensions==10.x while zensical requires >=11 — pip ResolutionImpossible (run 334).
+# Own venv, own resolver universe; only the CLI lands on PATH.
+RUN python3 -m venv /opt/zensical \
+    && /opt/zensical/bin/pip install --no-cache-dir --require-hashes -r requirements-zensical.txt \
+    && rm requirements-zensical.txt \
+    && install -d /usr/local/bin \
+    && ln -s /opt/zensical/bin/zensical /usr/local/bin/zensical
+
+# The npm-global tree (techdocs-cli, mermaid-cli, pagefind) — npm creates /usr/local on
+# dhi/node, so this carries exactly the tools. node itself stays in /usr/bin there and needs
+# the explicit copy (musl -> musl, same alpine lineage).
 COPY --from=node /usr/local /usr/local
-COPY --from=python /usr/local /usr/local
-# zensical's isolated venv (see the python stage); its bin/python symlinks into
-# /usr/local, which the line above already carried over.
-COPY --from=python /opt/zensical /opt/zensical
+COPY --from=node /usr/bin/node /usr/local/bin/node
 
 # gitleaks: static (CGO_ENABLED=0) binary from the official Alpine-based image,
 # via the Harbor ghcr pull-through. Gates every docs-site publish (`gitleaks dir
@@ -116,7 +124,7 @@ LABEL org.opencontainers.image.title="WebGrip TechDocs Builder" \
     org.opencontainers.image.vendor="WebGrip" \
     org.opencontainers.image.authors="Ryan Grippeling <ryan@webgrip.nl>" \
     org.opencontainers.image.licenses="MIT" \
-    org.opencontainers.image.base.name="${FINAL_BASE}" \
+    org.opencontainers.image.base.name="${BASE_IMAGE}" \
     org.opencontainers.image.created="${IMAGE_CREATED}" \
     org.opencontainers.image.version="${IMAGE_VERSION}" \
     org.opencontainers.image.revision="${IMAGE_REVISION}"
