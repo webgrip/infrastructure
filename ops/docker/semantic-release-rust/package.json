@@ -1,6 +1,6 @@
 {
   "name": "semantic-release-rust",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "private": true,
   "description": "Standard toolchain + semantic-release-cargo",
   "dependencies": {
