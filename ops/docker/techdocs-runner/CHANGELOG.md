@@ -1,3 +1,5 @@
+## [techdocs-runner-v1.1.0](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/techdocs-runner-v1.0.3...techdocs-runner-v1.1.0) (2026-08-12)
+
 ## [techdocs-runner-v1.0.3](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/techdocs-runner-v1.0.2...techdocs-runner-v1.0.3) (2026-08-09)
 
 ## [techdocs-runner-v1.0.2](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/techdocs-runner-v1.0.1...techdocs-runner-v1.0.2) (2026-07-27)
