@@ -12,15 +12,17 @@
 # resolves plugins relative to its own install and the cwd, not via NODE_PATH, so a second
 # node_modules would not be found. One resolution root is the only shape that cannot half-work.
 ###############################################################################
-# ADR-0006 Stage 2: Docker Hardened Images base, cloned from the semantic-release image after
-# its build-check proved the Debian 12 -> 13 lineage step. Locked package-lock; apt surface is
-# the only moving part. -dev variant for apt and the runtime shell (root, as before).
+# ADR-0006 Stage 2, second iteration: DHI node on ALPINE. The debian13-dev variant measured
+# WORSE than stock bookworm-slim (semantic-release v0.2.0: 36/73 -> 62/114 — the -dev image
+# ships perl/curl/libssh2 that slim never carried, and trixie's advisory backlog is young).
+# node-ci-runner on this exact alpine base measures 0/5; this toolchain is pure JS + git +
+# static yq, nothing needs glibc.
 #
 # BUILD PREREQUISITE: the `dhi` Harbor proxy project (homelab-cluster ADR-0023) — dhi.io refuses
 # anonymous pulls, so unlike the other REGISTRY_* ARGs this one DEFAULTS to the proxy.
 ARG REGISTRY_DHI=harbor.webgrip.dev/dhi
 # renovate: datasource=docker depName=dhi.io/node versioning=docker
-ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.19.0-debian13-dev@sha256:dfbe5b95d1fcf228c70dcb17bcbd46b790d87bac938b272bb4df40be37d7867b
+ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.19.0-alpine3.23-dev@sha256:d00350837e082dc254939ffcf53861b3b965ff159e506d6ab1775710f91a82fe
 
 ###############################################################################
 # Locked toolchain, built in a separate stage so npm's cache and metadata never reach the image
@@ -54,14 +56,7 @@ ARG NODE_IMAGE
 # runs on a FROM that could never resolve. Independent images cannot fail that way. The duplication
 # costs text, not bytes: identical instructions on an identical base produce identical layer
 # digests, so Harbor stores them once and a runner pulls them once.
-ENV DEBIAN_FRONTEND=noninteractive
-
-RUN apt-get update -yq && \
-    apt-get install -y --no-install-recommends \
-        git \
-        ca-certificates \
-        curl \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache git ca-certificates curl
 
 # yq — required by @webgrip/semantic-release-config's Chart.yaml version/appVersion bump and by
 # repo prepareCmds. Downloading and checksum-verifying a binary is BUILD work; it used to happen
@@ -72,7 +67,7 @@ RUN set -eux; \
     # DHI's node image ships no /usr/local/bin (the hardened build relocates node) — same
     # finding as dhi/alpine-base, learned on the semantic-release build-check.
     install -d /usr/local/bin; \
-    arch="$(dpkg --print-architecture)"; \
+    case "$(uname -m)" in x86_64) arch=amd64 ;; aarch64) arch=arm64 ;; *) arch="$(uname -m)" ;; esac; \
     # Checksums as published with the version pinned above (the release's own `checksums` asset).
     # A Renovate bump lands here with no recorded hash: that WARNS rather than failing, so an
     # automated bump cannot break the image build — but the warning is the signal to record the
