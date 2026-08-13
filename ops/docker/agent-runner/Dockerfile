@@ -11,18 +11,24 @@ ARG REGISTRY_GHCR=ghcr.io
 # pull per ticket. Baking rust alone cost ~1.4GB and made every publish crawl.
 #
 # All base-image refs are global ARGs (before any FROM) so their composed defaults resolve;
-# the registry is a variable so CI can route through the Harbor pull-through proxy, and the
-# literal tag+digest lets Renovate's dockerfile manager keep both current.
+# the registry is a variable so CI can route through the Harbor pull-through proxy. Annotated
+# for the digest-aware regex manager — the dockerfile manager silently cannot update
+# registry-variable FROMs ('Cannot find replaceString'), which is how these digests sat frozen
+# since July while agent-runner accrued 43 criticals from a stale python base.
 # uv is copied from its official image (reproducible; no `curl | sh`).
+# renovate: datasource=docker depName=ghcr.io/astral-sh/uv versioning=docker
 ARG UV_IMAGE=${REGISTRY_GHCR}/astral-sh/uv:0.9.2@sha256:6dbd7c42a9088083fa79e41431a579196a189bcee3ae68ba904ac2bf77765867
 # node 24 — for the agent's own workflow tooling (openspec, moon), not for running gates.
-ARG NODE_IMAGE=${REGISTRY_DOCKERHUB}/library/node:24-bookworm-slim@sha256:6f7b03f7c2c8e2e784dcf9295400527b9b1270fd37b7e9a7285cf83b6951452d
+# renovate: datasource=docker depName=docker.io/library/node versioning=docker
+ARG NODE_IMAGE=${REGISTRY_DOCKERHUB}/library/node:24-bookworm-slim@sha256:3638d9a6fe4030bd716be989438248074489337ba3275657f93595428be4fc03
 # docker CLI (client only; the daemon is a DinD sidecar) — the agent's sandbox and the way
 # it runs language gates in CI's images. Matches the cluster DinD docker:29.5.3.
+# renovate: datasource=docker depName=docker.io/library/docker versioning=docker
 ARG DOCKER_IMAGE=${REGISTRY_DOCKERHUB}/library/docker:29.5.3-cli@sha256:11e1133c30f3ceb73c6bdc7dfb78b3f9ed8e8e0d1d0400e91c5ec2eb240bf2ff
 # OpenHands is a Python tool; base on the matching CPython slim image. python 3.12 also
 # matches CI's python:3.12 for the domain scripts, so one interpreter serves both.
-ARG BASE_IMAGE=${REGISTRY_DOCKERHUB}/library/python:3.12-slim-bookworm@sha256:d50fb7611f86d04a3b0471b46d7557818d88983fc3136726336b2a4c657aa30b
+# renovate: datasource=docker depName=docker.io/library/python versioning=docker
+ARG BASE_IMAGE=${REGISTRY_DOCKERHUB}/library/python:3.12-slim-bookworm@sha256:4766d8b510c428e595d74b9cc5bbb2fae8e26316fffb4adc89908d79aacd58a2
 
 FROM ${UV_IMAGE} AS uv
 FROM ${NODE_IMAGE} AS node
