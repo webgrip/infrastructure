@@ -1,5 +1,7 @@
 # Release re-entry touch: run 135 dropped this train (npm 404); the matrix is push-diff.
 ARG REGISTRY_DOCKERHUB=docker.io
+# dhi.io refuses anonymous pulls; this one defaults to the Harbor proxy (ADR-0023).
+ARG REGISTRY_DHI=harbor.webgrip.dev/dhi
 ARG REGISTRY_GHCR=ghcr.io
 
 # The dark-factory agent runner: one of these executes a single ticket end to end.
@@ -19,16 +21,31 @@ ARG REGISTRY_GHCR=ghcr.io
 # renovate: datasource=docker depName=ghcr.io/astral-sh/uv versioning=docker
 ARG UV_IMAGE=${REGISTRY_GHCR}/astral-sh/uv:0.9.2@sha256:6dbd7c42a9088083fa79e41431a579196a189bcee3ae68ba904ac2bf77765867
 # node 24 — for the agent's own workflow tooling (openspec, moon), not for running gates.
-# renovate: datasource=docker depName=docker.io/library/node versioning=docker
-ARG NODE_IMAGE=${REGISTRY_DOCKERHUB}/library/node:24-bookworm-slim@sha256:3638d9a6fe4030bd716be989438248074489337ba3275657f93595428be4fc03
+# MUST match the base's libc: the node binary is dynamically linked, so an alpine base needs an
+# alpine node (and alpine 3.24 to match the python base's musl).
+# renovate: datasource=docker depName=dhi.io/node versioning=docker
+ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.19.0-alpine3.24-dev@sha256:4b70bb724239d33250044c831c04746c75c4041e1247fecd9372b5da59d5d972
 # docker CLI (client only; the daemon is a DinD sidecar) — the agent's sandbox and the way
 # it runs language gates in CI's images. Matches the cluster DinD docker:29.5.3.
 # renovate: datasource=docker depName=docker.io/library/docker versioning=docker
 ARG DOCKER_IMAGE=${REGISTRY_DOCKERHUB}/library/docker:29.5.3-cli@sha256:11e1133c30f3ceb73c6bdc7dfb78b3f9ed8e8e0d1d0400e91c5ec2eb240bf2ff
-# OpenHands is a Python tool; base on the matching CPython slim image. python 3.12 also
-# matches CI's python:3.12 for the domain scripts, so one interpreter serves both.
-# renovate: datasource=docker depName=docker.io/library/python versioning=docker
-ARG BASE_IMAGE=${REGISTRY_DOCKERHUB}/library/python:3.12-slim-bookworm@sha256:4766d8b510c428e595d74b9cc5bbb2fae8e26316fffb4adc89908d79aacd58a2
+# ADR-0006 Stage 2. python 3.12 still, matching CI's python:3.12 for the domain scripts.
+#
+# ALPINE, and the reason is measured: the digest refresh (v1.0.4) recovered nothing — 43/101
+# against 43/107 — and the gate's worst-packages list is 44 findings across libperl5.36, perl,
+# perl-base and perl-modules. Those arrive because Debian's `git` DEPENDS on perl. Alpine's git
+# does not, which is exactly why act-runner (40/123 -> 6/25) and helm-deploy (16/63 -> 8/54)
+# collapsed on the same move. The debian13 variant is NOT the alternative here: it measured
+# worse than stock on semantic-release (62/114 vs 36/73) for the same class of reason.
+#
+# THE RISK THIS BUILD TESTS: no compiler lives here on purpose ("nothing compiles here" below),
+# so every wheel in openhands' tree must exist for musllinux — a package that only ships
+# manylinux would try to build from sdist and fail. The build-time `openhands --version`
+# assertions are the arbiter; a green build-check IS the compatibility evidence.
+#
+# BUILD PREREQUISITE: the `dhi` Harbor proxy project (homelab-cluster ADR-0023).
+# renovate: datasource=docker depName=dhi.io/python versioning=docker
+ARG BASE_IMAGE=${REGISTRY_DHI}/python:3.12.13-alpine3.24-dev@sha256:cf1c0e16904b7e831e430a02811cd36381c0e5b8ccf615be9be37fed0953260b
 
 FROM ${UV_IMAGE} AS uv
 FROM ${NODE_IMAGE} AS node
@@ -76,10 +93,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 # System deps only: git+ca-certificates (clone), curl (LiteLLM key mint), bash (entrypoint).
 # No build-essential — nothing compiles here; compilation happens in CI's images.
-RUN apt-get update -qq \
- && apt-get install -y --no-install-recommends \
-      git ca-certificates curl bash \
- && rm -rf /var/lib/apt/lists/*
+RUN apk add --no-cache git ca-certificates curl bash
 
 # --- OpenHands ----------------------------------------------------------------------------
 COPY --from=uv /uv /uvx /usr/local/bin/
@@ -113,7 +127,10 @@ RUN AGENT_STORE="$(find /root/.local/share/uv/tools/openhands -name agent_store.
 ENV LITELLM_LOCAL_MODEL_COST_MAP=True
 
 # --- Node 24 (agent workflow tooling only) ------------------------------------------------
-COPY --from=node /usr/local/bin/node /usr/local/bin/node
+# DHI relocates node to /usr/bin and ships no /usr/local until npm creates it — the same
+# layout finding as the techdocs and semantic-release swaps.
+RUN install -d /usr/local/bin
+COPY --from=node /usr/bin/node /usr/local/bin/node
 COPY --from=node /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/npm
 RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
  && ln -sf /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx \
