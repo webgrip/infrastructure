@@ -127,11 +127,12 @@ RUN AGENT_STORE="$(find /root/.local/share/uv/tools/openhands -name agent_store.
 ENV LITELLM_LOCAL_MODEL_COST_MAP=True
 
 # --- Node 24 (agent workflow tooling only) ------------------------------------------------
-# DHI relocates node to /usr/bin and ships no /usr/local until npm creates it — the same
-# layout finding as the techdocs and semantic-release swaps.
-RUN install -d /usr/local/bin
+# DHI relocates the whole node payload: binary in /usr/bin, npm's modules in
+# /usr/lib/node_modules (stock node uses /usr/local for both), and no /usr/local at all.
+# Build-check 417 found this the honest way.
+RUN install -d /usr/local/bin /usr/local/lib/node_modules
 COPY --from=node /usr/bin/node /usr/local/bin/node
-COPY --from=node /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/npm
+COPY --from=node /usr/lib/node_modules/npm /usr/local/lib/node_modules/npm
 RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
  && ln -sf /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx \
  && node --version && npm --version
