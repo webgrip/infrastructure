@@ -22,6 +22,15 @@ name: 'Measure CVE budgets (diagnostic, read-only)'
 # workflow_dispatch once this lands on main so anyone can re-measure without a branch.
 
 on:
+  # Weekly, so DRIFT becomes data. Every budget in cve-budgets.yaml is currently set at the
+  # exact number one release measured, which is fine in warn mode and unsafe at enforce: with
+  # zero headroom, the first scanner-DB update that adds a single finding blocks the next
+  # release — not a regression, just the world. Nobody can say how much headroom is right
+  # because nobody has measured how much these numbers move on their own. This schedule
+  # measures exactly that: same digests, weekly, so the deltas between runs ARE the drift.
+  # Sunday 04:00 — off the release path and off the nightly DHI rebuild window.
+  schedule:
+    - cron: '0 4 * * 0'
   workflow_dispatch:
     inputs:
       only:

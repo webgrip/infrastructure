@@ -241,8 +241,34 @@ images. Two more are chains where fixing the parent fixes the child for free.
 Start with the small leaves. They are the cheapest place to be wrong, and the point of going first
 is to find out what breaks before it breaks something that matters.
 
-**Then, and only then, `warn` → `enforce`.** An image is promoted when its measured budget has been
-stable across two releases. Flipping earlier converts a monitoring signal into an outage.
+**Then, and only then, `warn` → `enforce`** — and the promotion needs one thing nobody has
+yet: **drift data**.
+
+Every budget in the file is currently set at the exact number one release measured. In `warn`
+that is perfect. At `enforce` it is a trap: with zero headroom, the first scanner-database
+update that adds a single finding to any package blocks the next release — not a regression,
+just the world moving. That is how a gate becomes the thing people route around, which is the
+failure mode this file's own header warns about, arriving from the opposite direction.
+
+The missing number is how much these counts move **on their own**, with the image unchanged.
+Nobody can answer that from the measurements taken so far, because every re-measure to date
+also changed the image's contents. So `measure_cve_budgets.yml` now runs **weekly on a
+schedule** against the same digests: the deltas between runs are the drift, and after a few
+weeks the promotion can be designed on evidence.
+
+The shape the design will almost certainly take, stated now so the data can confirm or refute
+it:
+
+* **`critical` keeps a hard floor, no headroom.** A new critical in a CI image genuinely should
+  stop the line — the honest response is "rebuild on a patched base today", which is exactly
+  what this file already says about `critical: 0`.
+* **`high` gets headroom sized to observed drift.** Highs churn constantly; one new high in a
+  base image is weather, not a regression. Headroom absorbs weather while still catching the
+  thing worth catching — someone adding a package that brings fifty findings.
+
+Promote an image when its numbers have held across two releases **and** the drift data says the
+headroom covers normal weather. Flipping before either converts a monitoring signal into an
+outage.
 
 [ADR-0006](https://forgejo.webgrip.dev/webgrip/infrastructure/src/branch/main/docs/adrs/0006-hardened-base-images.md) — **Docker Hardened Images** as the default
 base. The catalog went Apache 2.0 and free in December 2025, which is what makes this viable:
