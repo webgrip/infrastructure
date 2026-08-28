@@ -1,4 +1,7 @@
-# Release re-entry touch: run 135 dropped this train (npm 404); the matrix is push-diff.
+# Release re-entry touch: run 426 dropped this train — the release plumbing, not this
+# image (composite steps assumed bash / release image lacked semantic-release-config
+# 1.2.3; fixed on main in 299537e + cc9b75a). Run 135 before it (npm 404). The matrix
+# is push-diff, so a dropped train needs this touch or a workflow_dispatch.
 ARG REGISTRY_DOCKERHUB=docker.io
 # dhi.io refuses anonymous pulls; this one defaults to the Harbor proxy (ADR-0023).
 ARG REGISTRY_DHI=harbor.webgrip.dev/dhi
