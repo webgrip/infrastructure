@@ -21,7 +21,7 @@ inputs:
     description: "Package name used for tag prefix, e.g. helm-deploy"
     required: true
   config-version:
-    description: "Pin of @webgrip/semantic-release-config to install (npm dist-tag or semver range)"
+    description: "VESTIGIAL — the toolchain (config included) is pinned by the repo-root package.json + package-lock.json and installed with `npm ci`; this input is ignored. Kept only so existing workflow call sites don't break."
     required: false
     default: "1"
   registry:
@@ -70,14 +70,13 @@ runs:
       with:
         node-version: "24"
 
-    # Cache the npm download cache so the (unpinned-lockfile) semantic-release install resolves
-    # from disk instead of re-fetching ~400 packages every run. Bump the key suffix when the
-    # pinned versions below change.
+    # Cache the npm download cache so `npm ci` resolves from disk instead of re-fetching
+    # every run. Keyed on the committed lockfile: a toolchain bump rolls the key naturally.
     - name: Cache npm downloads
       uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ~/.npm
-        key: ${{ runner.os }}-npm-semrel-24.2.7
+        key: ${{ runner.os }}-npm-semrel-${{ hashFiles('package-lock.json') }}
 
     # Node 24's bundled npm (11.16) intermittently requests scoped-package tarballs with the
     # scope's %2F decoded to a literal slash — Forgejo's npm route 404s that form (the encoded
@@ -235,33 +234,46 @@ runs:
         fi
 
         # Plugin shape lives once in @webgrip/semantic-release-config; each ops/docker/<image>/
-        # .releaserc.cjs is a small makeConfig() that requires it. Its deps (semantic-release + all
-        # plugins, incl. @semantic-release/npm) install with it — replacing the hand-pinned list.
+        # .releaserc.cjs is a small makeConfig() that requires it, resolving UPWARD into the
+        # repo-root node_modules that `npm ci` below produces.
         forge_url="${{ vars.FORGEJO_INSTANCE_URL || 'https://forgejo.webgrip.dev' }}"
         forge_host="${forge_url#http*://}"
         npm config set "@webgrip:registry" "${forge_url}/api/packages/webgrip/npm/"
         npm config set "//${forge_host}/api/packages/webgrip/npm/:_authToken" "${GITEA_TOKEN}"
-        # semantic-release-monorepo is an install-on-demand PEER of the config since its 1.1.0
-        # (npm-audit cleanup demoted it, assuming no org repo used monorepo mode — every image
-        # train here does; run 153 failed on the config's fail-loud guard). ^8.0.2 mirrors the
-        # range the config bundled through 1.0.x and now carries as a devDependency.
-        # The preset is an EXPLICIT install argument, not a manifest constraint, because this
-        # install has no manifest: `--no-save --no-package-lock` means an `overrides` block
-        # cannot apply here BY CONSTRUCTION. That is why baking overrides into the
-        # semantic-release image trees (ce07256) could never fix this path, and why the pin
-        # has to be stated right here where npm can act on it.
+
+        # THE TOOLCHAIN IS A COMMITTED MANIFEST, NOT AN AD-HOC INSTALL. The repo-root
+        # package.json + package-lock.json pin semantic-release, the shared config,
+        # semantic-release-monorepo and the notes preset; `npm ci` reproduces that tree
+        # byte-for-byte, and the root manifest's `overrides` force the notes-toolchain pair
+        # the config's PR #10 chose (generator 15.0.0-beta.2 / analyzer 14.0.0-beta.3).
         #
-        # ^9 and not v10: release-notes-generator 14 (the stable line, and what
-        # semantic-release 25 itself depends on) drives the Handlebars writer v8, which the
-        # v10 preset's function-template architecture silently renders as heading-only, EMPTY
-        # notes — months of org releases shipped that way without a single failure. The
-        # generator that pairs with v10 exists only as 15.0.0-beta.2, and an unattended
-        # release factory does not run on a beta. @webgrip/semantic-release-config asserts
-        # this pairing at load time; keep the two in step if either ever moves.
-        npm install --no-save --no-package-lock \
-          "@webgrip/semantic-release-config@${{ inputs.config-version }}" \
-          "conventional-changelog-conventionalcommits@^9.3.1" \
-          "semantic-release-monorepo@^8.0.2"
+        # Overrides are the ONLY npm mechanism that can do this: both betas sit outside
+        # semantic-release's own ^14/^13 ranges, so ANY manifest-less install (`--no-save
+        # --no-package-lock`, the previous shape here) is REQUIRED by npm to nest stable
+        # copies under semantic-release — and its plugin loader (resolve-from its own dir
+        # before cwd) loads the nested copy. Measured, runs 426-435: explicit install
+        # arguments looked like a fix and fixed nothing. Overrides need a root manifest,
+        # which is also why baking them into the semantic-release IMAGE trees (ce07256)
+        # could never reach this path. semantic-release-monorepo's README documents this
+        # root-install mode for monorepos; Renovate maintains the lockfile.
+        (cd "${GITHUB_WORKSPACE}" && npm ci)
+
+        # Fail LOUD if the resolved tree ever drifts from the sanctioned pair — the failure
+        # mode this guards (generator 14 + preset 10) renders EMPTY notes silently, and
+        # months of org releases shipped that way once already. Second layer on top of the
+        # config's own load-time guard, because silence is the enemy here.
+        node -e '
+          const path = require("path"), fs = require("fs");
+          const root = process.env.GITHUB_WORKSPACE;
+          const v = p => require(path.join(root, "node_modules", p, "package.json")).version;
+          const gen = v("@semantic-release/release-notes-generator");
+          const preset = v("conventional-changelog-conventionalcommits");
+          const nested = fs.existsSync(path.join(root, "node_modules", "semantic-release",
+            "node_modules", "@semantic-release", "release-notes-generator"));
+          if (nested) { console.error("FATAL: nested release-notes-generator under semantic-release — the root overrides did not apply; check package.json overrides vs package-lock.json"); process.exit(1); }
+          if (parseInt(gen) < 15 || parseInt(preset) < 10) { console.error(`FATAL: resolved notes pair generator=${gen} preset=${preset} — expected >=15 with >=10 (the sanctioned pair per semantic-release-config PR #10)`); process.exit(1); }
+          console.log(`notes toolchain OK: generator ${gen} + preset ${preset}, single copy`);
+        '
 
         # cwd is the package dir, so semantic-release discovers ops/docker/<image>/.releaserc.cjs
         # (a makeConfig() from @webgrip/semantic-release-config). GITEA_URL is set above, so it selects
@@ -280,7 +292,10 @@ runs:
         # The rerun's verifyRelease build re-uses the still-warm buildx builder, so it's cheap.
         for attempt in 1 2 3; do
           set +e
-          npx semantic-release 2>&1 | tee /tmp/semrel.log
+          # Explicit bin path, not `npx`: npx falls back to a REGISTRY FETCH when it finds no
+          # local install, which would silently reintroduce the exact unpinned-toolchain
+          # failure the committed manifest exists to end.
+          "${GITHUB_WORKSPACE}/node_modules/.bin/semantic-release" 2>&1 | tee /tmp/semrel.log
           rc=${PIPESTATUS[0]}
           set -e
           if [ "$rc" -eq 0 ] && ! grep -q 'is behind the remote one' /tmp/semrel.log; then
