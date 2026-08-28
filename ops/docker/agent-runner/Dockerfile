@@ -6,11 +6,14 @@ ARG REGISTRY_GHCR=ghcr.io
 
 # The dark-factory agent runner: one of these executes a single ticket end to end.
 #
-# DESIGN — agent tooling is baked; LANGUAGE TOOLCHAINS ARE NOT. The agent drives a docker
-# daemon (a DinD sidecar in-cluster), so language gates run in the very images CI uses —
+# DESIGN — agent tooling is baked; LANGUAGE TOOLCHAINS ARE NOT, and neither is a docker
+# client. The agent plane is daemonless (homelab-cluster ADR-0053): the agent edits code
+# and opens a PR, and language gates run in CI, in the very images CI uses —
 # rust-ci-runner / ci-runner / playwright-runner, php:8.5-cli, node:24-alpine — which makes
 # the gates match CI exactly instead of approximately, and keeps this image small enough to
-# pull per ticket. Baking rust alone cost ~1.4GB and made every publish crawl.
+# pull per ticket. Baking rust alone cost ~1.4GB and made every publish crawl; the docker
+# CLI this image used to carry served a privileged DinD sidecar the cluster no longer
+# admits.
 #
 # All base-image refs are global ARGs (before any FROM) so their composed defaults resolve;
 # the registry is a variable so CI can route through the Harbor pull-through proxy. Annotated
@@ -25,10 +28,6 @@ ARG UV_IMAGE=${REGISTRY_GHCR}/astral-sh/uv:0.9.2@sha256:6dbd7c42a9088083fa79e414
 # alpine node (and alpine 3.24 to match the python base's musl).
 # renovate: datasource=docker depName=dhi.io/node versioning=docker
 ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.19.0-alpine3.24-dev@sha256:4b70bb724239d33250044c831c04746c75c4041e1247fecd9372b5da59d5d972
-# docker CLI (client only; the daemon is a DinD sidecar) — the agent's sandbox and the way
-# it runs language gates in CI's images. Matches the cluster DinD docker:29.5.3.
-# renovate: datasource=docker depName=docker.io/library/docker versioning=docker
-ARG DOCKER_IMAGE=${REGISTRY_DOCKERHUB}/library/docker:29.5.3-cli@sha256:11e1133c30f3ceb73c6bdc7dfb78b3f9ed8e8e0d1d0400e91c5ec2eb240bf2ff
 # ADR-0006 Stage 2. python 3.12 still, matching CI's python:3.12 for the domain scripts.
 #
 # ALPINE, and the reason is measured: the digest refresh (v1.0.4) recovered nothing — 43/101
@@ -49,7 +48,6 @@ ARG BASE_IMAGE=${REGISTRY_DHI}/python:3.12.13-alpine3.24-dev@sha256:cf1c0e16904b
 
 FROM ${UV_IMAGE} AS uv
 FROM ${NODE_IMAGE} AS node
-FROM ${DOCKER_IMAGE} AS docker
 
 FROM ${BASE_IMAGE}
 
@@ -91,9 +89,12 @@ ENV DEBIAN_FRONTEND=noninteractive \
     UV_PYTHON_DOWNLOADS=never \
     UV_NO_CACHE=1
 
-# System deps only: git+ca-certificates (clone), curl (LiteLLM key mint), bash (entrypoint).
+# System deps only: git+ca-certificates (clone), bash (entrypoint). No curl — the LiteLLM
+# key mint/revoke it existed for moved into `litellm-key` (node fetch, inputs via env only,
+# shared with code14's agent-runner): no key or master key in argv where the agent can read
+# /proc, and one fewer CVE-bearing package.
 # No build-essential — nothing compiles here; compilation happens in CI's images.
-RUN apk add --no-cache git ca-certificates curl bash
+RUN apk add --no-cache git ca-certificates bash
 
 # --- OpenHands ----------------------------------------------------------------------------
 COPY --from=uv /uv /uvx /usr/local/bin/
@@ -145,11 +146,6 @@ RUN npm install -g "@moonrepo/cli@${MOON_VERSION}" "@fission-ai/openspec@${OPENS
 RUN pip install --no-cache-dir "pyyaml==${PYYAML_VERSION}" \
  && python3 -c "import yaml; print('pyyaml', yaml.__version__)"
 
-# --- docker CLI: the sandbox + how language gates run in CI's images -----------------------
-COPY --from=docker /usr/local/bin/docker /usr/local/bin/docker
-COPY --from=docker /usr/local/libexec/docker/cli-plugins /usr/local/libexec/docker/cli-plugins
-RUN docker --version
-
 # --- baked core skills ---------------------------------------------------------------------
 # OpenHands discovers skills by DIRECTORY: anything under $HOME/.openhands/skills/installed
 # is self-registered (its metadata file is self-healing — "add entries for extension
@@ -172,13 +168,20 @@ RUN git clone --depth 1 --branch "${SKILLS_REF}" "${SKILLS_REPO}" /tmp/skills-sr
 ENV OPENHANDS_SKILLS_REPO=${SKILLS_REPO} \
     OPENHANDS_SKILLS_REF=${SKILLS_REF}
 
+# litellm-key is kept byte-identical with code14's agent-runner copy (see its header);
+# the entrypoint's mint→run→revoke sections are the shared contract too.
+COPY ./litellm-key.mjs /usr/local/bin/litellm-key
 COPY ./docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+RUN chmod 0755 /usr/local/bin/litellm-key /usr/local/bin/docker-entrypoint.sh \
+ # The helper that replaced curl. `mint` with nothing configured must fail loudly
+ # rather than hang or silently emit an empty key — a helper that exits 0 on a
+ # missing admin URL would hand the agent an empty credential.
+ && if litellm-key mint 2>/dev/null; then echo "FATAL: litellm-key mint succeeded with no configuration" >&2; exit 1; fi
 
 WORKDIR /workspace
 
 LABEL org.opencontainers.image.title="WebGrip Agent Runner" \
-    org.opencontainers.image.description="Dark-factory agent runner: headless OpenHands with a per-run LiteLLM key, a skills loadout, and a docker CLI for its DinD sandbox. Language gates run in CI's own images rather than being baked, so the image stays small and the gates match CI exactly." \
+    org.opencontainers.image.description="Dark-factory agent runner: headless OpenHands with a per-run LiteLLM key and a skills loadout. Daemonless (ADR-0053): the agent edits code and opens a PR; language gates run in CI, in CI's own images, so the image stays small and the gates match CI exactly." \
     org.opencontainers.image.source="https://github.com/webgrip/infrastructure" \
     org.opencontainers.image.url="https://github.com/webgrip/infrastructure" \
     org.opencontainers.image.documentation="https://github.com/webgrip/infrastructure/tree/main/docs/techdocs" \
