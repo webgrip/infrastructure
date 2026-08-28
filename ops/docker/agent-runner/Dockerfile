@@ -1,8 +1,9 @@
-# Release re-entry touch, third boarding: runs 426/430 died on the ai-skills PO rename
-# (fixed here in 2f0ddb8 — see SKILLS_CORE) and run 431 died in the semantic-release
-# image plumbing before any build (bash/config overrides; fixed in 299537e, cc9b75a,
-# ce07256 → semantic-release*-v0.3.3). Run 135 long before them (npm 404). The matrix
-# is push-diff, so a dropped train needs a touch like this or a workflow_dispatch.
+# Release re-entry touch, fourth boarding: runs 426/430 died on the ai-skills PO rename
+# (fixed in 2f0ddb8 — see SKILLS_CORE), run 431 in the semantic-release image plumbing,
+# and run 435 on the notes-toolchain pair the manifest-less composite install could not
+# express. PR #135 ended that class: the toolchain is now the committed root
+# package.json + package-lock.json (`npm ci`), overrides forcing the PR #10 pair. The
+# matrix is push-diff, so a dropped train needs a touch like this or a workflow_dispatch.
 ARG REGISTRY_DOCKERHUB=docker.io
 # dhi.io refuses anonymous pulls; this one defaults to the Harbor proxy (ADR-0023).
 ARG REGISTRY_DHI=harbor.webgrip.dev/dhi
