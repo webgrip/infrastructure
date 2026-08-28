@@ -245,8 +245,22 @@ runs:
         # (npm-audit cleanup demoted it, assuming no org repo used monorepo mode — every image
         # train here does; run 153 failed on the config's fail-loud guard). ^8.0.2 mirrors the
         # range the config bundled through 1.0.x and now carries as a devDependency.
+        # The preset is an EXPLICIT install argument, not a manifest constraint, because this
+        # install has no manifest: `--no-save --no-package-lock` means an `overrides` block
+        # cannot apply here BY CONSTRUCTION. That is why baking overrides into the
+        # semantic-release image trees (ce07256) could never fix this path, and why the pin
+        # has to be stated right here where npm can act on it.
+        #
+        # ^9 and not v10: release-notes-generator 14 (the stable line, and what
+        # semantic-release 25 itself depends on) drives the Handlebars writer v8, which the
+        # v10 preset's function-template architecture silently renders as heading-only, EMPTY
+        # notes — months of org releases shipped that way without a single failure. The
+        # generator that pairs with v10 exists only as 15.0.0-beta.2, and an unattended
+        # release factory does not run on a beta. @webgrip/semantic-release-config asserts
+        # this pairing at load time; keep the two in step if either ever moves.
         npm install --no-save --no-package-lock \
           "@webgrip/semantic-release-config@${{ inputs.config-version }}" \
+          "conventional-changelog-conventionalcommits@^9.3.1" \
           "semantic-release-monorepo@^8.0.2"
 
         # cwd is the package dir, so semantic-release discovers ops/docker/<image>/.releaserc.cjs
