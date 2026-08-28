@@ -1,3 +1,9 @@
+## [semantic-release-v0.3.3](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/semantic-release-v0.3.2...semantic-release-v0.3.3) (2026-08-28)
+
+### Fixed
+
+* bake the shared config's COMPLETE override set into the image trees ([ce07256](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/commit/ce07256dc727997dbc65621d14a9010b96e34d91))
+
 ## [semantic-release-v0.3.2](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/semantic-release-v0.3.1...semantic-release-v0.3.2) (2026-08-28)
 
 ### Fixed
