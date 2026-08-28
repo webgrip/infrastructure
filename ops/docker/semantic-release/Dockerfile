@@ -63,7 +63,11 @@ ARG NODE_IMAGE
 # runs on a FROM that could never resolve. Independent images cannot fail that way. The duplication
 # costs text, not bytes: identical instructions on an identical base produce identical layer
 # digests, so Harbor stores them once and a runner pulls them once.
-RUN apk add --no-cache git ca-certificates curl
+# bash is not optional: every step of the semantic-release composites declares `shell: bash`,
+# and the DHI node alpine base ships only busybox sh. The alpine wave (v0.2.0/v0.3.0) left the
+# builds green while no consumer ran them — ploeg pinned the last debian image (0.1.2) — and the
+# first real job on 0.3.1 died on its first bash step (ploeg runs 226/227, 2026-08-28).
+RUN apk add --no-cache bash git ca-certificates curl
 
 # yq — required by @webgrip/semantic-release-config's Chart.yaml version/appVersion bump and by
 # repo prepareCmds. Downloading and checksum-verifying a binary is BUILD work; it used to happen
