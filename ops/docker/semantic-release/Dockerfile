@@ -114,10 +114,20 @@ COPY --from=deps /opt/semrel /opt/semrel
 # installed, and a bare require() resolves from an arbitrary cwd (i.e. NODE_PATH works). A lockfile
 # bump that breaks either fails the build instead of a release — including a semantic-release MAJOR
 # bump, which must be a deliberate change to these images and their consumers together.
+# The last two lines prove the RUNTIME half of the contract, which node-side resolution cannot:
+# every composite step declares `shell: bash`, and the binary must actually execute on this base.
+# The alpine wave (v0.2.0/v0.3.0) passed the node checks while shipping no bash — no consumer ran
+# those images until ploeg's first job on 0.3.1 died on its first bash step (runs 226/227).
 RUN cd /tmp \
  && node -e "const v=require('semantic-release/package.json').version; if(v.split('.')[0]!=='25') throw new Error('expected semantic-release 25.x, got '+v); console.log('semantic-release '+v)" \
  && node -e "require.resolve('@webgrip/semantic-release-config')" \
- && node -e "require.resolve('semantic-release-helm3')"
+ && node -e "require.resolve('semantic-release-helm3')" \
+ && bash -ec 'semantic-release --version'
+# NB: that --version prints the IMAGE version, not 25.x — yargs walks up from its own location to
+# the first package.json, which is this image's root manifest (deliberately named after the image).
+# The line is an EXECUTION probe, not a version assert (the node check above pins the real major):
+# it proves bash exists (every composite step declares shell: bash), the bin wrapper runs, and its
+# own git preflight passes on this base.
 
 LABEL org.opencontainers.image.title="WebGrip semantic-release Toolchain" \
     org.opencontainers.image.description="Locked semantic-release 25 toolchain + @webgrip/semantic-release-config, node, git, yq" \
