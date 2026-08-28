@@ -1,7 +1,8 @@
-# Release re-entry touch: run 426 dropped this train — the release plumbing, not this
-# image (composite steps assumed bash / release image lacked semantic-release-config
-# 1.2.3; fixed on main in 299537e + cc9b75a). Run 135 before it (npm 404). The matrix
-# is push-diff, so a dropped train needs this touch or a workflow_dispatch.
+# Release re-entry touch, third boarding: runs 426/430 died on the ai-skills PO rename
+# (fixed here in 2f0ddb8 — see SKILLS_CORE) and run 431 died in the semantic-release
+# image plumbing before any build (bash/config overrides; fixed in 299537e, cc9b75a,
+# ce07256 → semantic-release*-v0.3.3). Run 135 long before them (npm 404). The matrix
+# is push-diff, so a dropped train needs a touch like this or a workflow_dispatch.
 ARG REGISTRY_DOCKERHUB=docker.io
 # dhi.io refuses anonymous pulls; this one defaults to the Harbor proxy (ADR-0023).
 ARG REGISTRY_DHI=harbor.webgrip.dev/dhi
