@@ -76,9 +76,12 @@ ARG PYYAML_VERSION=6.0.3
 # time so a run needs no network for its core skills; per-ticket extras are cloned at runtime
 # by the entrypoint when OPENHANDS_SKILLS_PROFILE is set. CI can override SKILLS_REPO with
 # the in-cluster URL (http://forgejo-http.forgejo.svc.cluster.local:3000/...).
+# product-owner, not vikunja-product-owner: ai-skills a2b15b2 consolidated the PO craft
+# into one cross-board skill (breaking rename), which dropped runs 426/430 exactly the
+# way this loud clone guard is meant to — a missing core skill fails the BUILD, not a run.
 ARG SKILLS_REPO=https://forgejo.webgrip.dev/webgrip/ai-skills.git
 ARG SKILLS_REF=main
-ARG SKILLS_CORE="guard-secrets adr-writer vikunja-product-owner skill-usage"
+ARG SKILLS_CORE="guard-secrets adr-writer product-owner skill-usage"
 
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
