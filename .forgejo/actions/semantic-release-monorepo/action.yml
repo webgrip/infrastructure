@@ -243,25 +243,66 @@ runs:
         npm config set "//${forge_host}/api/packages/webgrip/npm/:_authToken" "${GITEA_TOKEN}"
         # semantic-release-monorepo is an install-on-demand PEER of the config since its 1.1.0
         # (npm-audit cleanup demoted it, assuming no org repo used monorepo mode — every image
-        # train here does; run 153 failed on the config's fail-loud guard). ^8.0.2 mirrors the
-        # range the config bundled through 1.0.x and now carries as a devDependency.
-        # The preset is an EXPLICIT install argument, not a manifest constraint, because this
-        # install has no manifest: `--no-save --no-package-lock` means an `overrides` block
-        # cannot apply here BY CONSTRUCTION. That is why baking overrides into the
-        # semantic-release image trees (ce07256) could never fix this path, and why the pin
-        # has to be stated right here where npm can act on it.
+        # train here does; run 153 failed on the config's fail-loud guard).
         #
-        # ^9 and not v10: release-notes-generator 14 (the stable line, and what
-        # semantic-release 25 itself depends on) drives the Handlebars writer v8, which the
-        # v10 preset's function-template architecture silently renders as heading-only, EMPTY
-        # notes — months of org releases shipped that way without a single failure. The
-        # generator that pairs with v10 exists only as 15.0.0-beta.2, and an unattended
-        # release factory does not run on a beta. @webgrip/semantic-release-config asserts
-        # this pairing at load time; keep the two in step if either ever moves.
-        npm install --no-save --no-package-lock \
-          "@webgrip/semantic-release-config@${{ inputs.config-version }}" \
-          "conventional-changelog-conventionalcommits@^9.3.1" \
-          "semantic-release-monorepo@^8.0.2"
+        # THE INSTALL IS MANIFEST-DRIVEN, and it has to be. npm applies an `overrides` block only
+        # from the package.json at the install ROOT. Fifteen of the eighteen ops/docker/<image>/
+        # package.json files are pure release manifests with no dependency block at all, so the
+        # old `npm install --no-save --no-package-lock <pkgs>` form had nothing for an override to
+        # attach to. npm then resolved the notes generator the only way it can: semantic-release
+        # depends on ^14, the config depends on 15.0.0-beta.2, the two ranges do not intersect, so
+        # 14.1.1 was NESTED at node_modules/semantic-release/node_modules/. That nested copy is
+        # precisely the one semantic-release loads — lib/plugins/utils.js resolves
+        # `resolveFrom.silent(__dirname, name) || resolveFrom(cwd, name)`, and __dirname wins.
+        #
+        # Measured, not reasoned (npm 11, semantic-release 25.0.9):
+        #   npm i --no-save --no-package-lock semantic-release @s-r/release-notes-generator@15.0.0-beta.2
+        #     -> root 15.0.0-beta.2, semantic-release/node_modules/ 14.1.1   (still broken)
+        #   same install driven by a manifest carrying `overrides`
+        #     -> exactly one copy, 15.0.0-beta.2                             (correct)
+        #
+        # The generator and the preset are a PAIR and mixing majors is a hard failure in both
+        # directions — also measured, by rendering real commits through generateNotes():
+        #   generator 14.1.1 + preset 10.4.0 -> throws "requires conventional-changelog-writer@9"
+        #   generator 14.1.1 + preset  9.3.1 -> renders
+        #   generator 15.0.0-beta.2 + preset 10.4.0 -> renders   <- the pair this repo ships
+        #   generator 15.0.0-beta.2 + preset  9.3.1 -> throws "headerPartial is not a function"
+        #
+        # The manifest is not written by hand here: it is DERIVED from
+        # ops/docker/semantic-release-monorepo/package.json, which is the image that ships this
+        # exact toolchain and is already the thing Renovate's "semantic-release toolchain" rule
+        # keeps current. One source of truth, so the composite cannot drift from the image.
+        # Only @webgrip/semantic-release-config is overlaid, from this action's input.
+        srtools="${RUNNER_TEMP:-/tmp}/srtools"
+        rm -rf "$srtools"; mkdir -p "$srtools"
+        jq --arg cfg "${{ inputs.config-version }}" \
+          '{name:"srtools", version:"0.0.0", private:true,
+            dependencies: (.dependencies + {"@webgrip/semantic-release-config": $cfg}),
+            overrides: .overrides}' \
+          "${GITHUB_WORKSPACE}/ops/docker/semantic-release-monorepo/package.json" \
+          > "$srtools/package.json"
+        echo "Toolchain manifest:"; cat "$srtools/package.json"
+        npm install --prefix "$srtools" --no-package-lock
+
+        # The tree is linked back rather than installed in place: ops/docker/<image>/.releaserc.cjs
+        # does require('@webgrip/semantic-release-config'), which resolves from the FILE's directory,
+        # so the package dir must have a node_modules. The image's own package.json is never
+        # touched — @semantic-release/git commits it as the release manifest.
+        ln -sfn "$srtools/node_modules" "$pkg_dir/node_modules"
+
+        # Fail loud if the pair ever regresses: the failure mode this replaced was silent for
+        # months, and a heading-only changelog is not something a release job notices.
+        gen="$(jq -r .version "$srtools/node_modules/@semantic-release/release-notes-generator/package.json")"
+        pre="$(jq -r .version "$srtools/node_modules/conventional-changelog-conventionalcommits/package.json")"
+        echo "notes toolchain: release-notes-generator@${gen} + conventionalcommits@${pre}"
+        case "${gen%%.*}:${pre%%.*}" in
+          15:10|14:9) ;;
+          *) echo "::error::incompatible notes toolchain pair: generator ${gen} with preset ${pre}"; exit 1 ;;
+        esac
+        if [ -e "$srtools/node_modules/semantic-release/node_modules/@semantic-release/release-notes-generator" ]; then
+          echo "::error::a nested release-notes-generator survived the overrides — semantic-release would load it"; exit 1
+        fi
+
 
         # cwd is the package dir, so semantic-release discovers ops/docker/<image>/.releaserc.cjs
         # (a makeConfig() from @webgrip/semantic-release-config). GITEA_URL is set above, so it selects
