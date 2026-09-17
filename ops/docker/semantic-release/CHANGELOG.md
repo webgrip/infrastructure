@@ -1,3 +1,9 @@
+## [semantic-release-v0.3.4](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/semantic-release-v0.3.3...semantic-release-v0.3.4) (2026-09-17)
+
+### Fixed
+
+* **deps:** carry semantic-release-config 1.3.0 into the release images ([139fa2a](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/commit/139fa2a09de6abf023cc29e5f16887cefe9848d9))
+
 ## [semantic-release-v0.3.3](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/semantic-release-v0.3.2...semantic-release-v0.3.3) (2026-08-28)
 
 ### Fixed
