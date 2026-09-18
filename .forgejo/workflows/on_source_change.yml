@@ -347,8 +347,9 @@ jobs:
     steps:
       # Local `uses: ./…` actions require the repo on disk first; without this the runner
       # cannot read the action ("failed to read action … no files found … action.yml").
-      # Mirrors the .github job's checkout (adapted: checkout v5, since v6 is broken on
-      # non-GitHub runners, and the CI bot's WEBGRIP_CI_TOKEN instead of a GitHub App token).
+      # Mirrors the .github job's checkout (adapted: the CI bot's WEBGRIP_CI_TOKEN instead of a
+      # GitHub App token). The v5 pin is just a pin now — the "v6 is broken on non-GitHub runners"
+      # reason was disproven on 2026-09-18 (homelab-cluster canary run 1710).
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0 # semantic-release requires all commits/tags

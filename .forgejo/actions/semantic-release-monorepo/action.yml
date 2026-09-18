@@ -2,7 +2,8 @@ name: "[Action] Semantic Release"
 description: "Forgejo: run semantic-release for a single monorepo package path (e.g. ops/docker/<image>), publishing releases via the Gitea/Forgejo API."
 
 # Forgejo mirror of .github/actions/semantic-release-monorepo/action.yml. Adaptations:
-#   - checkout v6 -> v5 (v6 is broken on non-GitHub runners)
+#   - checkout v6 -> v5 (was: v6 broken on non-GitHub runners; disproven 2026-09-18, the pin stays
+#     as a pin rather than a workaround)
 #   - GITHUB_TOKEN auth -> GITEA_URL/GITEA_TOKEN for @saithodev/semantic-release-gitea
 #   - sets GITEA_URL below, which makes the shared .releaserc.js select the Gitea/Forgejo publish
 #     plugin (@saithodev/semantic-release-gitea) instead of @semantic-release/github
@@ -59,7 +60,8 @@ runs:
   using: "composite"
   steps:
     - name: Check out repo
-      # Forgejo: the v6 checkout action is broken on non-GitHub runners — pin v5.
+      # Pinned to v5. Not a workaround: the "v6 is broken on non-GitHub runners" claim was
+      # disproven on 2026-09-18 by a canary on the real runner (homelab-cluster run 1710).
       uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       with:
         fetch-depth: 0 # semantic-release requires all commits/tags

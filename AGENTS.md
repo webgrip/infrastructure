@@ -56,7 +56,10 @@ composite is `.forgejo/actions/cosign-sign-attest`.
 - **`WEBGRIP_CI_TOKEN`, never `secrets.FORGEJO_TOKEN`.** The latter resolves to the built-in
   per-job token, which attributes releases to Ghost and suppresses the native `release` event
   that `on_release_published.yml` waits for.
-- **`actions/checkout@v5`, never `@v6`** — v6 is broken on non-GitHub runners.
+- **`actions/checkout@v5` is the default pin; `@v6`/`@v7` work too.** The old "v6 is broken on
+  non-GitHub runners" rule was disproven on 2026-09-18 by a canary on the real Forgejo runner
+  ([homelab-cluster run 1710](https://forgejo.webgrip.dev/webgrip/homelab-cluster/actions/runs/1710)):
+  checkout v6 and v7 and setup-node v5, v6 and v7 all pass. Bump deliberately, never on automerge.
 - **`uses:` must be the `org/repo/path@sha` shorthand**, never a full `https://` URL: Forgejo
   resolves the called workflow's `runs-on` server-side, and a full URL leaves the job queued
   forever with an empty label list.
