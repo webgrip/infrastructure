@@ -1,3 +1,9 @@
+## [agent-runner-v1.3.0](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/agent-runner-v1.2.0...agent-runner-v1.3.0) (2026-09-27)
+
+### Added
+
+* **agent-runner:** bake the Qwen Code and Goose ACP agents ([42d2a8b](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/commit/42d2a8b05df83c02899a653711a0c4fcd60edff0))
+
 ## [agent-runner-v1.2.0](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/agent-runner-v1.1.0...agent-runner-v1.2.0) (2026-08-28)
 
 ### Added
