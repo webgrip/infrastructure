@@ -51,8 +51,25 @@ ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.19.0-alpine3.24-dev@sha256:4b70bb724239d3
 # renovate: datasource=docker depName=dhi.io/python versioning=docker
 ARG BASE_IMAGE=${REGISTRY_DHI}/python:3.12.13-alpine3.24-dev@sha256:cf1c0e16904b7e831e430a02811cd36381c0e5b8ccf615be9be37fed0953260b
 
+# renovate: datasource=github-releases depName=aaif-goose/goose
+ARG GOOSE_VERSION=1.52.0
+ARG GOOSE_SHA256_AMD64=fdc86653285a89f7dcad6e76736af1688ab2cde44661b089328b2fc40bb79f9f
+ARG GOOSE_SHA256_ARM64=4584ba8840fc77c2f3e48758f45543c18f1c1293d704941a8eeb5220852ce653
+
 FROM ${UV_IMAGE} AS uv
 FROM ${NODE_IMAGE} AS node
+
+FROM scratch AS goose-archive-amd64
+ARG GOOSE_VERSION
+ARG GOOSE_SHA256_AMD64
+ADD --checksum=sha256:${GOOSE_SHA256_AMD64} https://github.com/aaif-goose/goose/releases/download/v${GOOSE_VERSION}/goose-x86_64-unknown-linux-musl.tar.gz /goose.tar.gz
+
+FROM scratch AS goose-archive-arm64
+ARG GOOSE_VERSION
+ARG GOOSE_SHA256_ARM64
+ADD --checksum=sha256:${GOOSE_SHA256_ARM64} https://github.com/aaif-goose/goose/releases/download/v${GOOSE_VERSION}/goose-aarch64-unknown-linux-musl.tar.gz /goose.tar.gz
+
+FROM goose-archive-${TARGETARCH} AS goose-archive
 
 FROM ${BASE_IMAGE}
 
@@ -60,6 +77,7 @@ ARG BASE_IMAGE
 ARG IMAGE_CREATED=1970-01-01T00:00:00Z
 ARG IMAGE_VERSION=dev
 ARG IMAGE_REVISION=unknown
+ARG GOOSE_VERSION
 
 # OpenHands CLI (bundles the Software Agent SDK). Pinned + released — never @next
 # (homelab-cluster ADR-0047: an unattended factory does not run on a self-updating beta).
@@ -72,6 +90,8 @@ ARG OPENHANDS_VERSION=1.16.0
 ARG MOON_VERSION=2.4.4
 # renovate: datasource=npm depName=@fission-ai/openspec
 ARG OPENSPEC_VERSION=1.6.0
+# renovate: datasource=npm depName=@qwen-code/qwen-code
+ARG QWEN_CODE_VERSION=0.24.6
 # renovate: datasource=pypi depName=pyyaml
 ARG PYYAML_VERSION=6.0.3
 # Skills loadout (board #268). The core set is baked from the webgrip marketplace at BUILD
@@ -150,6 +170,24 @@ RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
 RUN npm install -g "@moonrepo/cli@${MOON_VERSION}" "@fission-ai/openspec@${OPENSPEC_VERSION}" \
  && moon --version && openspec --version
 
+ENV OPENSPEC_TELEMETRY=0 \
+    DO_NOT_TRACK=1 \
+    QWEN_USAGE_STATISTICS_ENABLED=false \
+    GOOSE_TELEMETRY_OFF=1
+
+RUN npm install -g "@qwen-code/qwen-code@${QWEN_CODE_VERSION}" \
+ && npm cache clean --force \
+ && rm -rf /usr/local/lib/node_modules/@qwen-code/qwen-code/node_modules/@lydell \
+ && cd /usr/local/lib/node_modules/@qwen-code/qwen-code \
+ && node --input-type=module -e 'for (const m of ["@lydell/node-pty", "node-pty"]) { if (await import(m).then(() => true, () => false)) { console.error(`${m} still resolves: its glibc prebuild segfaults on musl`); process.exit(1); } }' \
+ && test "$(qwen --version)" = "${QWEN_CODE_VERSION}"
+
+RUN --mount=type=bind,from=goose-archive,source=/goose.tar.gz,target=/tmp/goose.tar.gz \
+    tar -xzf /tmp/goose.tar.gz -C /usr/local/bin ./goose \
+ && chown 0:0 /usr/local/bin/goose \
+ && chmod 0755 /usr/local/bin/goose \
+ && goose --version | grep -F "${GOOSE_VERSION}"
+
 # --- pyyaml for the domain scripts ---------------------------------------------------------
 RUN pip install --no-cache-dir "pyyaml==${PYYAML_VERSION}" \
  && python3 -c "import yaml; print('pyyaml', yaml.__version__)"
@@ -189,7 +227,7 @@ RUN chmod 0755 /usr/local/bin/litellm-key /usr/local/bin/docker-entrypoint.sh \
 WORKDIR /workspace
 
 LABEL org.opencontainers.image.title="WebGrip Agent Runner" \
-    org.opencontainers.image.description="Dark-factory agent runner: headless OpenHands with a per-run LiteLLM key and a skills loadout. Daemonless (ADR-0053): the agent edits code and opens a PR; language gates run in CI, in CI's own images, so the image stays small and the gates match CI exactly." \
+    org.opencontainers.image.description="Dark-factory agent runner: headless OpenHands with a per-run LiteLLM key and a skills loadout, plus the Qwen Code and Goose ACP agents and the openspec CLI. Daemonless (ADR-0053): the agent edits code and opens a PR; language gates run in CI, in CI's own images, so the image stays small and the gates match CI exactly." \
     org.opencontainers.image.source="https://github.com/webgrip/infrastructure" \
     org.opencontainers.image.url="https://github.com/webgrip/infrastructure" \
     org.opencontainers.image.documentation="https://github.com/webgrip/infrastructure/tree/main/docs/techdocs" \
