@@ -1,3 +1,13 @@
+## [ci-runner-v1.2.5](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/ci-runner-v1.2.4...ci-runner-v1.2.5) (2026-10-01)
+
+### Fixed
+
+* **ci-runner:** ship zstd so actions/cache stops falling back to gzip ([dc5faa1](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/commit/dc5faa1f76e4457f39cc7a7da857d73e41f6f3e9))
+
+### Internal
+
+* **renovate:** de runner-pin stond als enige zonder annotatie ([b122923](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/commit/b122923ff6de8b4d4a8a0ace1992b9590fe5138e))
+
 ## [ci-runner-v1.2.4](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/ci-runner-v1.2.3...ci-runner-v1.2.4) (2026-08-09)
 
 ## [ci-runner-v1.2.3](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/ci-runner-v1.2.2...ci-runner-v1.2.3) (2026-08-07)
