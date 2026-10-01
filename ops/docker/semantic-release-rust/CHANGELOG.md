@@ -1,3 +1,15 @@
+## [semantic-release-rust-v0.1.6](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/semantic-release-rust-v0.1.5...semantic-release-rust-v0.1.6) (2026-10-01)
+
+### Fixed
+
+* bake the shared config's COMPLETE override set into the image trees ([ce07256](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/commit/ce07256dc727997dbc65621d14a9010b96e34d91))
+* **deps:** carry semantic-release-config 1.2.3 into the release images ([cc9b75a](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/commit/cc9b75a8b7b97a6097919bf3fe050fac6b49696e))
+* **deps:** carry semantic-release-config 1.3.3 into the release images ([837a43c](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/commit/837a43c8d26855686d01f3c8d522f5c3e88ab60a))
+
+### Tests
+
+* **images:** prove the runtime contract at build time — bash, bin, git preflight ([22731a9](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/commit/22731a944d39b4cf668ea3e4b72ef13c2a31def8))
+
 ## [semantic-release-rust-v0.1.5](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/semantic-release-rust-v0.1.4...semantic-release-rust-v0.1.5) (2026-08-28)
 
 ### Fixed
