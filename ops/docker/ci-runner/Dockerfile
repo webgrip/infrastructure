@@ -55,6 +55,11 @@ USER root
 # to expand the `$HOME` in its default install-dir, so without it every signing job dies
 # "envsubst: command not found" (exit 127) before cosign is even installed. Host-mode Forgejo jobs
 # execute in THIS image, so the tool has to be here — a workflow can't apt-get it (non-root runner).
+#
+# zstd: actions/cache compresses with zstd only when the binary is on PATH, and falls back to
+# single-threaded gzip otherwise. Without it, saving a ~170 MB cache took ~37 s per entry on a
+# loaded runner (glide run 467: pnpm store 38 s, mise installs 37 s), and every restore paid the
+# same codec on the way back in.
 RUN apt-get update && \
     apt-get install -y \
     ca-certificates \
@@ -66,6 +71,7 @@ RUN apt-get update && \
     unzip \
     rsync \
     gettext-base \
+    zstd \
     software-properties-common && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
@@ -75,6 +81,8 @@ RUN apt-get update && \
 # not every future release's Sign & Attest job at runtime (which is exactly what happened
 # before gettext-base was added).
 RUN command -v envsubst
+# Same guard for the cache codec: a missing zstd makes every actions/cache step silently slower.
+RUN zstd --version
 
 # The GitHub CLI is deliberately NOT installed. The org runs on Forgejo; every CI path that used
 # gh was rewritten to curl against the Forgejo/GitHub REST APIs (see webgrip/workflows
