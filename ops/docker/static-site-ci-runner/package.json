@@ -1,0 +1,9 @@
+{
+  "name": "static-site-ci-runner",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Static-site CI job image (Chrome + lhci + lychee + dnsutils) baked into harbor.webgrip.dev/webgrip/static-site-ci-runner",
+  "dependencies": {
+    "@lhci/cli": "0.15.1"
+  }
+}

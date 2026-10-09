@@ -1,5 +1,10 @@
 # syntax=docker/dockerfile:1
 #
+# Release re-entry: v1.0.1 shipped UNSIGNED — its Sign & Attest died on the security
+# namespace's ingress default-deny dropping runner->openbao:8200 (run 294; fixed in
+# homelab-cluster#550). Harbor's immutable tags make re-signing-by-rebuild impossible,
+# so this cuts a signed successor; delete the unsigned 1.0.1 tag after it lands.
+#
 # Node CI job image for Forgejo Actions.
 #
 # node:24-alpine ships without git, and the moon task graph needs a vcs client to detect
@@ -7,8 +12,16 @@
 # restricted egress and cannot reach dl-cdn.alpinelinux.org ("unable to select packages").
 # So git — and the handful of tools the web/preview jobs shell out to — are baked here, at
 # BUILD time (which has egress), not fetched per run.
-ARG REGISTRY_DOCKERHUB=docker.io
-ARG NODE_IMAGE=${REGISTRY_DOCKERHUB}/library/node:24-alpine
+# ADR-0006 Stage 2: Docker Hardened Images base, same node-24-on-alpine lineage. The -dev
+# variant on purpose (apk installs below; moon jobs shell out at runtime) — the documented
+# CI-image tradeoff. Runs as root like the stock image did (-dev variants are root; the
+# shell-less runtime variants are the nonroot ones).
+#
+# BUILD PREREQUISITE: the `dhi` Harbor proxy project (homelab-cluster ADR-0023) — dhi.io refuses
+# anonymous pulls, so unlike the other REGISTRY_* ARGs this one DEFAULTS to the proxy.
+ARG REGISTRY_DHI=harbor.webgrip.dev/dhi
+# renovate: datasource=docker depName=dhi.io/node versioning=docker
+ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.19.0-alpine3.23-dev@sha256:d00350837e082dc254939ffcf53861b3b965ff159e506d6ab1775710f91a82fe
 
 FROM ${NODE_IMAGE}
 

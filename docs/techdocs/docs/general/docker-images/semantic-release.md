@@ -45,7 +45,7 @@ costs Dockerfile text, not registry or pull bytes.
 | **Size** | ~600MB base; the rust variant adds a minimal cargo toolchain |
 | **Architecture** | AMD64 (the in-cluster build is amd64-only; see homelab-cluster ADR-0036) |
 | **Registry** | `harbor.webgrip.dev/webgrip/semantic-release*` |
-| **Dockerfile** | [`ops/docker/semantic-release/Dockerfile`](../../../../../ops/docker/semantic-release/Dockerfile) |
+| **Dockerfile** | [`ops/docker/semantic-release/Dockerfile`](https://forgejo.webgrip.dev/webgrip/infrastructure/src/branch/main/ops/docker/semantic-release/Dockerfile) |
 
 ### Release automation stack
 
@@ -113,7 +113,7 @@ Each image dir's `package.json` is both the release manifest for that image's tr
 the tag prefix, its `version` is bumped by semantic-release) and the toolchain manifest whose
 `dependencies` are baked in. npm tolerates both collisions that creates — a root version ahead of
 the lockfile's, and a package depending on its own name. See
-[`ops/docker/semantic-release/README.md`](../../../../../ops/docker/semantic-release/README.md) for
+[`ops/docker/semantic-release/README.md`](https://forgejo.webgrip.dev/webgrip/infrastructure/src/branch/main/ops/docker/semantic-release/README.md) for
 how to regenerate a lockfile.
 
 Renovate groups all three toolchains into one PR and they must stay on the same semantic-release

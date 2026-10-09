@@ -5,17 +5,17 @@
 # Base image: Node 22 on Debian 12 (bookworm-slim)
 ###############################################################################
 ARG REGISTRY_DOCKERHUB=docker.io
+# One ARG carrying tag AND digest (house pattern): Renovate moves them together via the
+# digest-aware annotated-ARG manager.
 # renovate: datasource=docker depName=docker.io/library/node versioning=docker
-ARG NODE_VERSION=24
-ARG DEBIAN_CODENAME=bookworm
-FROM ${REGISTRY_DOCKERHUB}/library/node:${NODE_VERSION}-${DEBIAN_CODENAME}-slim
+ARG NODE_IMAGE=${REGISTRY_DOCKERHUB}/library/node:24-bookworm-slim@sha256:3638d9a6fe4030bd716be989438248074489337ba3275657f93595428be4fc03
+FROM ${NODE_IMAGE}
 
 ARG IMAGE_CREATED=1970-01-01T00:00:00Z
 ARG IMAGE_VERSION=dev
 ARG IMAGE_REVISION=unknown
 ARG REGISTRY_DOCKERHUB
-ARG NODE_VERSION
-ARG DEBIAN_CODENAME
+ARG NODE_IMAGE
 ENV DEBIAN_FRONTEND=noninteractive
 
 ###############################################################################
@@ -41,52 +41,53 @@ ENV RUSTUP_HOME=/usr/local/rustup
 ENV CARGO_HOME=/usr/local/cargo
 ENV PATH=/usr/local/cargo/bin:$PATH
 
-ARG RUST_TOOLCHAIN=stable
+# 'stable' resolves to whatever rust-lang shipped most recently — the toolchain that compiles
+# release artifacts was unversioned. Pinned to the same version rust-ci-runner builds with.
+# renovate: datasource=docker depName=docker.io/library/rust versioning=docker
+ARG RUST_TOOLCHAIN=1.97.0
 RUN curl -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain ${RUST_TOOLCHAIN}
 
 ###############################################################################
 # Rust helpers
 ###############################################################################
-ARG CARGO_RELEASE_VERSION=latest
-ARG GIT_CLIFF_VERSION=latest
-ARG CROSS_VERSION=latest
-ARG WASM_BINDGEN_CLI_VERSION=latest
+# All four were 'latest': the image contents were decided by whenever the build ran, not by this
+# file, and the latest/else branching meant the pinned path was never actually exercised. Pinned
+# at what 'latest' resolved to on 2026-08-08; Renovate moves each independently.
+# renovate: datasource=crate depName=cargo-release
+ARG CARGO_RELEASE_VERSION=1.1.4
+# renovate: datasource=crate depName=git-cliff
+ARG GIT_CLIFF_VERSION=2.13.1
+# renovate: datasource=crate depName=cross
+ARG CROSS_VERSION=0.2.5
+# renovate: datasource=crate depName=wasm-bindgen-cli
+ARG WASM_BINDGEN_CLI_VERSION=0.2.127
 RUN cargo install --locked cargo-binstall && \
-    ( [ "${CARGO_RELEASE_VERSION}" = "latest" ] && cargo binstall --no-confirm cargo-release || cargo binstall --no-confirm cargo-release@${CARGO_RELEASE_VERSION} ) && \
-    ( [ "${GIT_CLIFF_VERSION}" = "latest" ] && cargo binstall --no-confirm git-cliff || cargo binstall --no-confirm git-cliff@${GIT_CLIFF_VERSION} ) && \
-    ( [ "${CROSS_VERSION}" = "latest" ] && cargo install --locked cross || cargo install --locked cross@${CROSS_VERSION} ) && \
-    ( [ "${WASM_BINDGEN_CLI_VERSION}" = "latest" ] && cargo install --locked wasm-bindgen-cli || cargo install --locked wasm-bindgen-cli@${WASM_BINDGEN_CLI_VERSION} ) && \
+    cargo binstall --no-confirm cargo-release@${CARGO_RELEASE_VERSION} && \
+    cargo binstall --no-confirm git-cliff@${GIT_CLIFF_VERSION} && \
+    cargo install --locked cross@${CROSS_VERSION} && \
+    cargo install --locked wasm-bindgen-cli@${WASM_BINDGEN_CLI_VERSION} && \
     rustup target add wasm32-unknown-unknown
 
 ###############################################################################
 # semantic-release core + plugins
 ###############################################################################
-ARG SEMREL_VERSION=latest
-RUN if [ "${SEMREL_VERSION}" = "latest" ]; then \
-            npm install -g \
-                semantic-release \
-                @semantic-release/changelog \
-                @semantic-release/commit-analyzer \
-                @semantic-release/exec \
-                @semantic-release/git \
-                @semantic-release/github \
-                @semantic-release/release-notes-generator \
-                semantic-release-cargo \
-                semantic-release-github-actions-tags \
-                semantic-release-helm3; \
-        else \
-            npm install -g \
-                semantic-release@${SEMREL_VERSION} \
-                @semantic-release/changelog \
-                @semantic-release/commit-analyzer \
-                @semantic-release/exec \
-                @semantic-release/git \
-                @semantic-release/github \
-                @semantic-release/release-notes-generator \
-                semantic-release-cargo \
-                semantic-release-github-actions-tags \
-                semantic-release-helm3; \
-        fi
+# Core pinned; the plugins still float at install time. The honest fix for the whole set is a
+# committed package-lock.json like the semantic-release images carry (webgrip/workflows ADR-0005)
+# — this image predates that pattern and should eventually adopt it. Until then, pinning the core
+# at least fixes the resolver every plugin's peer range is evaluated against.
+# renovate: datasource=npm depName=semantic-release
+ARG SEMREL_VERSION=25.0.9
+RUN npm install -g \
+        semantic-release@${SEMREL_VERSION} \
+        @semantic-release/changelog \
+        @semantic-release/commit-analyzer \
+        @semantic-release/exec \
+        @semantic-release/git \
+        @semantic-release/github \
+        @semantic-release/release-notes-generator \
+        semantic-release-cargo \
+        semantic-release-github-actions-tags \
+        semantic-release-helm3
 
 ###############################################################################
 # Default entry
@@ -103,7 +104,7 @@ LABEL org.opencontainers.image.title="WebGrip Rust Releaser" \
     org.opencontainers.image.vendor="WebGrip" \
     org.opencontainers.image.authors="Ryan Grippeling <ryan@webgrip.nl>" \
     org.opencontainers.image.licenses="MIT" \
-    org.opencontainers.image.base.name="${REGISTRY_DOCKERHUB}/library/node:${NODE_VERSION}-${DEBIAN_CODENAME}-slim" \
+    org.opencontainers.image.base.name="${NODE_IMAGE}" \
     org.opencontainers.image.created="${IMAGE_CREATED}" \
     org.opencontainers.image.version="${IMAGE_VERSION}" \
     org.opencontainers.image.revision="${IMAGE_REVISION}"

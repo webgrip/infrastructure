@@ -1,6 +1,6 @@
 site_name: "WebGrip Infrastructure"
 site_description: "CI/CD Infrastructure and Docker Images for WebGrip"
-site_url: "https://webgrip.github.io/infrastructure"
+site_url: "https://docs.webgrip.dev/infrastructure/"
 
 nav:
   - Home: index.md
@@ -9,6 +9,7 @@ nav:
       - Architecture: general/overview/architecture.md
       - Quick Start: general/overview/quick-start.md
   - Docker Images:
+      - Agent Runner: general/docker-images/agent-runner.md
       - CVE Gate (hardened reference): general/docker-images/cve-gate.md
       - Rust CI Runner: general/docker-images/rust-ci-runner.md
       - PHP CI Runner: general/docker-images/php-ci-runner.md
@@ -29,6 +30,7 @@ nav:
       - Image Signing: general/security/image-signing.md
       - SBOM & Attestations: general/security/sbom-attestations.md
       - Vulnerability Scanning: general/security/vulnerability-scanning.md
+      - "Handoff: VEX in Harbor": general/security/upstream-vex-in-harbor.md
       - Kyverno Enforcement: general/security/kyverno-enforcement.md
   - Testing:
       - Playwright Setup: general/testing/playwright-setup.md
@@ -41,6 +43,9 @@ nav:
   - ADRs: adr/index.md
 
 plugins:
+  # Agent affordances (homelab rfc-docs-platform-2026): /llms.txt + /llms-full.txt
+  # + per-page raw .md, grafted into the Zensical site by the deploy leg.
+  - llms-source
   - redirects:
       redirect_maps:
         'adrs/index.md': 'adr/index.md'

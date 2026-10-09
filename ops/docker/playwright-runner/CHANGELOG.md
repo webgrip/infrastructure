@@ -1,3 +1,5 @@
+## [playwright-runner-v1.1.2](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/playwright-runner-v1.1.1...playwright-runner-v1.1.2) (2026-08-08)
+
 ## [playwright-runner-v1.1.1](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/playwright-runner-v1.1.0...playwright-runner-v1.1.1) (2026-07-25)
 
 ### Changed

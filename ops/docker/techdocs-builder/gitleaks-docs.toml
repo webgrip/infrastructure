@@ -1,0 +1,25 @@
+# Estate-shared gitleaks config for the docs-publish gate (homelab-cluster
+# plan-docs-estate-rollout Phase 0). Scans BUILT site trees (`gitleaks dir site/`)
+# before every rclone sync — a finding fails the deploy leg and nothing publishes.
+#
+# Allowlists are deliberately narrow: mutation testing (2026-08-11) showed broad
+# line-regexes (e.g. letter-runs) can mask REAL keys. Only explicit markers and
+# runbook paths are excused; everything else fires. Inline `gitleaks:allow`
+# comments also work in dir scans when they survive into the rendered HTML line.
+title = "webgrip docs-site gate"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Runbooks intentionally show example credentials"
+paths = [
+  '''.*/runbooks/.*''',
+]
+
+[[allowlists]]
+description = "Lines explicitly marked as examples/placeholders"
+regexTarget = "line"
+regexes = [
+  '''(?i)(example|placeholder|dummy|sample|redacted)''',
+]

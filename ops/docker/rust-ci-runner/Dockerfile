@@ -1,6 +1,12 @@
 ARG REGISTRY_DOCKERHUB=docker.io
 # renovate: datasource=docker depName=docker.io/library/rust versioning=docker
 ARG RUST_VERSION=1.97.0
+# Same image as ${RUST_VERSION}-slim-bookworm, pinned by digest. Two ARGs because RUST_VERSION is
+# also a rustup toolchain name (`rustup default ${RUST_VERSION}`), where a digest suffix would
+# corrupt it. Both carry the same Renovate depName, so they move in the same PR — the digest ARG's
+# tag must track RUST_VERSION.
+# renovate: datasource=docker depName=docker.io/library/rust versioning=docker
+ARG RUST_IMAGE=${REGISTRY_DOCKERHUB}/library/rust:1.97.0-slim-bookworm@sha256:6d220bf85c74e842a79da63997af8d2e74455c0b8847d8bb3a5888572334991d
 # Node is not a Rust tool, but every Forgejo Actions JS action (checkout@v4, the artifact
 # actions) is exec'd INSIDE the job container — act_runner's own externals are host-mode
 # only. A Rust CI image without node cannot run a single JS action, which is why glibc
@@ -12,7 +18,12 @@ ARG DEBIAN_BASE=${REGISTRY_DOCKERHUB}/library/debian:bookworm-slim@sha256:0104b3
 # ────────────────────────────────────────────────────────────────
 # 1️⃣ Build stage – Rust toolchains & CLI helpers
 # ────────────────────────────────────────────────────────────────
-FROM --platform=$BUILDPLATFORM ${REGISTRY_DOCKERHUB}/library/rust:${RUST_VERSION}-slim-bookworm AS build
+FROM --platform=$BUILDPLATFORM ${RUST_IMAGE} AS build
+
+# Without this redeclaration, step 1.6's `rustup default ${RUST_VERSION}` expanded to a bare
+# `rustup default` — which PRINTS the default rather than setting it. It looked green because the
+# base image's default toolchain happens to be the same version; the pin itself never operated.
+ARG RUST_VERSION
 
 # 1.1 System packages needed to *build* helper crates
 RUN apt-get update -qq \

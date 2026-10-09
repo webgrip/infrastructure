@@ -1,7 +1,33 @@
 # Release re-entry touch: run 135 dropped this train (npm 404); the matrix is push-diff.
 
+# renovate: datasource=docker depName=ghcr.io/actions/actions-runner versioning=docker
 ARG RUNNER_VERSION=2.335.1@sha256:08c30b0a7105f64bddfc485d2487a22aa03932a791402393352fdf674bda2c29
 ARG REGISTRY_GHCR=ghcr.io
+
+# The CVE gate's two binaries, taken from the hardened image that already ships them.
+#
+# They used to run INSIDE that image, one `docker run` per release. Everything that made that hard
+# came from the container, not from the scan: `docker cp` refused by a read-only rootfs, a 2g tmpfs
+# too small for grype's DB plus an extracted multi-GB image, volumes created root-owned and
+# unwritable by uid 65532, a seccomp rule that denied what its own comment said it allowed. Five
+# releases, five failures, none of them about finding CVEs.
+#
+# Copying the binaries out turns the gate into an ordinary step. cve-gate stays the ADR-0006 worked
+# example of a hardened image — it is simply no longer in the hot path of every release.
+#
+# Pinned by tag AND digest, same as every other base here. (An earlier note warned this pinned an
+# UNSIGNED artifact, to be resolved "the first time cve-gate releases through a working gate" —
+# that release was 0.3.4, and this pin is it.)
+ARG REGISTRY_WEBGRIP=harbor.webgrip.dev/webgrip
+# 0.3.4 is the first cve-gate that signed: gate verdict pass at 0/0 enforce, cosign signature plus
+# SBOM, OpenVEX and cve-budget attestations on the digest. The previous pin, 0.3.2, shipped
+# unsigned (its release died in the container-era gate) — meaning the binaries that decide whether
+# every other image is fit to sign were themselves taken from an artifact that never passed. This
+# pin closes that loop: gate binaries now come only from a release the gate itself admitted.
+# renovate: datasource=docker depName=harbor.webgrip.dev/webgrip/cve-gate versioning=docker
+ARG CVE_GATE_VERSION=0.3.4@sha256:6afd2c3aea931364810835b4c2f0121ad57f0b5c20f0b2ce44c336124e683bf2
+FROM ${REGISTRY_WEBGRIP}/cve-gate:${CVE_GATE_VERSION} AS cve-gate-src
+
 FROM ${REGISTRY_GHCR}/actions/actions-runner:${RUNNER_VERSION} AS runner
 
 ARG IMAGE_CREATED=1970-01-01T00:00:00Z
@@ -29,6 +55,11 @@ USER root
 # to expand the `$HOME` in its default install-dir, so without it every signing job dies
 # "envsubst: command not found" (exit 127) before cosign is even installed. Host-mode Forgejo jobs
 # execute in THIS image, so the tool has to be here — a workflow can't apt-get it (non-root runner).
+#
+# zstd: actions/cache compresses with zstd only when the binary is on PATH, and falls back to
+# single-threaded gzip otherwise. Without it, saving a ~170 MB cache took ~37 s per entry on a
+# loaded runner (glide run 467: pnpm store 38 s, mise installs 37 s), and every restore paid the
+# same codec on the way back in.
 RUN apt-get update && \
     apt-get install -y \
     ca-certificates \
@@ -40,6 +71,7 @@ RUN apt-get update && \
     unzip \
     rsync \
     gettext-base \
+    zstd \
     software-properties-common && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
@@ -49,37 +81,49 @@ RUN apt-get update && \
 # not every future release's Sign & Attest job at runtime (which is exactly what happened
 # before gettext-base was added).
 RUN command -v envsubst
+# Same guard for the cache codec: a missing zstd makes every actions/cache step silently slower.
+RUN zstd --version
 
-RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
-    | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg && \
-    chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg && \
-    echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
-    | tee /etc/apt/sources.list.d/github-cli.list > /dev/null && \
-    apt-get update && \
-    apt-get install -y gh && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+# The GitHub CLI is deliberately NOT installed. The org runs on Forgejo; every CI path that used
+# gh was rewritten to curl against the Forgejo/GitHub REST APIs (see webgrip/workflows
+# sync-template-files.yml and the semantic-release composite's mirror step — both curl). What gh
+# bought was a third-party apt source (cli.github.com) trusted into the image that runs every job
+# in the org, kept fresh forever for a tool nothing execs. ADR-0006 names removing it as
+# ci-runner's remediation path. If an agent session genuinely needs gh, that belongs in
+# agent-runner, argued in its own PR.
 
 # Helm, baked in: CI jobs currently run azure/setup-helm per job — a WAN download plus an
 # action clone on every run. With helm on PATH the shared reusables' setup-helm fallback
 # becomes a no-op.
+# Checksum-verified, like cosign and syft below. It was a bare `curl | tar -xz` — an unverified
+# binary, piped straight into tar, landing on PATH in the image that runs every CI job in the org.
+# Whatever integrity TLS gives you ends at the CDN; this pins the artifact itself.
 # renovate: datasource=github-releases depName=helm/helm
 ARG HELM_VERSION=3.21.3
-RUN curl -fsSL "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz" \
-      | tar -xz -C /tmp linux-amd64/helm && \
-    install -m 0755 /tmp/linux-amd64/helm /usr/local/bin/helm && \
-    rm -rf /tmp/linux-amd64 && \
+ARG HELM_SHA256=15e041a93a590dce8100f39385cd98c84a765c9e36aeeb9e2dc6ff9e4769e2e0
+RUN set -eux; \
+    curl -fsSL "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz" -o /tmp/helm.tgz; \
+    echo "${HELM_SHA256}  /tmp/helm.tgz" | sha256sum -c -; \
+    tar -xzf /tmp/helm.tgz -C /tmp linux-amd64/helm; \
+    install -m 0755 /tmp/linux-amd64/helm /usr/local/bin/helm; \
+    rm -rf /tmp/helm.tgz /tmp/linux-amd64; \
     helm version --short
 
 # yq: the shared semantic-release config (manifest:'helm') bumps Chart.yaml version/appVersion
 # with it — without yq on the runner, helm-repo releases die in prepare with "yq: not found"
 # (common-charts run 3, exit 127). The composites carry a download fallback; baking it here
 # makes that a no-op.
+# 4.44.3 -> 4.53.3: nine minor versions stale despite the Renovate annotation. Checksum-verified
+# for the same reason as helm above — this was a bare curl of a binary straight onto PATH.
 # renovate: datasource=github-releases depName=mikefarah/yq
-ARG YQ_VERSION=4.44.3
-RUN curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64" \
-      -o /usr/local/bin/yq && \
-    chmod 0755 /usr/local/bin/yq && \
+ARG YQ_VERSION=4.53.3
+ARG YQ_SHA256=fa52a4e758c63d38299163fbdd1edfb4c4963247918bf9c1c5d31d84789eded4
+RUN set -eux; \
+    curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64" \
+      -o /tmp/yq; \
+    echo "${YQ_SHA256}  /tmp/yq" | sha256sum -c -; \
+    install -m 0755 /tmp/yq /usr/local/bin/yq; \
+    rm -f /tmp/yq; \
     yq --version
 
 # cosign + syft, baked for the same reason Helm above is: every signing job currently installs both
@@ -125,9 +169,23 @@ RUN set -eux; \
     rm -f /tmp/syft.tgz /tmp/syft; \
     syft version
 
+# grype + cve-gate, lifted from the hardened image (see the stage at the top of this file). Both are
+# static Go binaries, so they run here unchanged. This is what lets .forgejo/actions/cve-gate stop
+# being a `docker run` against a remote daemon and become a step that calls a binary on PATH.
+COPY --from=cve-gate-src /usr/local/bin/grype    /usr/local/bin/grype
+COPY --from=cve-gate-src /usr/local/bin/cve-gate /usr/local/bin/cve-gate
+
 # Regression guard, same shape as the envsubst one above: if a refactor or base-image change drops
-# either tool, fail HERE rather than in some future release's Sign & Attest job.
-RUN command -v cosign && command -v syft
+# any of these, fail HERE rather than in some future release's Sign & Attest job. `cve-gate` with no
+# IMAGE_REF must reach its own argument validation — that proves the binary actually executes on
+# this base, which a `command -v` alone would not.
+RUN set -eux; \
+    command -v cosign; \
+    command -v syft; \
+    command -v grype; \
+    grype version; \
+    IMAGE_REF= cve-gate 2>&1 | grep -q 'IMAGE_REF is required' \
+      || { echo "FATAL: cve-gate did not reach its own argument validation" >&2; exit 1; }
 
 # https://github.com/orgs/community/discussions/177903
 # This "fixes" a "bug" that causes errors on self-hosted runners when runner ghcp agents workloads
@@ -213,9 +271,15 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 # Anthropic's Claude Code CLI — `claude plugin validate` is the official manifest/frontmatter
-# validator used by the skills/plugin repos. Pinned so validation is reproducible and moves
-# only on a deliberate image rebuild (Renovate bumps this ARG).
-ARG CLAUDE_CODE_VERSION=2.1.214
+# validator used by the skills/plugin repos. Pinned so validation is reproducible and moves only on
+# a deliberate image rebuild.
+#
+# The old comment here claimed "Renovate bumps this ARG". It did not, and could not: renovate.json's
+# custom manager matches a `# renovate:` annotation immediately followed by the ARG line, and this
+# ARG had no annotation. So it sat on 2.1.214 while upstream reached 2.1.223 — nine patch releases,
+# silently, on a pin everyone assumed was automated. Annotated now, so the claim is true.
+# renovate: datasource=npm depName=@anthropic-ai/claude-code
+ARG CLAUDE_CODE_VERSION=2.1.223
 RUN npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" && \
     npm cache clean --force
 

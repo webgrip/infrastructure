@@ -1,10 +1,11 @@
 name: '[Workflow] On Documentation Change'
 
-# Forgejo mirror of .github/workflows/on_docs_change.yml. GitHub deploys to GitHub Pages; the
-# Forgejo path has no native Pages, so it publishes the built site to Codeberg Pages — the interim,
-# off-site host (ADR-0038; ADR-0039 = the later in-cluster Backstage target). The deploy reusable force-pushes the site to a Codeberg repo's `pages`
-# branch using a scoped CODEBERG_TOKEN (provisioned as an org Actions secret from OpenBao). The
-# in-cluster Backstage TechDocs surface is the later target (ADR-0039).
+# Publishes this repo's docs to docs.<domain>/infrastructure/ — the homelab
+# ADR-0052 estate rollout (path-per-repo on the shared Garage docs-site bucket):
+# Zensical build + llms/redirect graft + gitleaks secret gate, prefix-scoped
+# rclone sync (repos cannot clobber each other). Replaces the Codeberg Pages
+# leg, which never served a page (ADR-0038 superseded by ADR-0052; the Codeberg
+# repo handoff was never done).
 
 on:
   push:
@@ -24,19 +25,21 @@ on:
 jobs:
   generate-documentation:
     name: 'Generate'
-    uses: webgrip/workflows/.forgejo/workflows/techdocs-generate.yml@990a6fa4cb2a0ad16089a0c4b8cbf42d325e28e6 # main
+    uses: webgrip/workflows/.forgejo/workflows/techdocs-generate.yml@abf3c951d8243ef030421ab2acff0af9edce3215 # main
     with:
       source-dir: ${{ github.event.inputs.source-dir || 'docs/techdocs' }}
 
-  deploy-documentation:
-    name: 'Deploy (Codeberg Pages)'
-    uses: webgrip/workflows/.forgejo/workflows/techdocs-deploy-codeberg.yml@990a6fa4cb2a0ad16089a0c4b8cbf42d325e28e6 # main
+  deploy-docs-site:
+    name: 'Deploy (docs site / Garage web)'
+    uses: webgrip/workflows/.forgejo/workflows/techdocs-deploy-docs-site.yml@abf3c951d8243ef030421ab2acff0af9edce3215 # main
     needs: generate-documentation
     if: github.ref == 'refs/heads/main'
     with:
-      # Handoff: create this NON-mirror Codeberg repo (a pull-mirror's pages branch can't be pushed),
-      # set DNS `docs.webgrip.dev CNAME webgrip.codeberg.page`, and seed the token (see ADR-0038 §Ops).
-      codeberg-repo: infrastructure-techdocs
-      domain: docs.webgrip.dev
+      # Own bucket (estate #2): this repo's key can touch nothing but
+      # docs-infrastructure(-trash), so a bad sync can never clobber the estate.
+      bucket: docs-infrastructure
+      # strict:false until this repo's links are cleaned; flip like homelab did.
+      strict: 'true'
     secrets:
-      CODEBERG_TOKEN: ${{ secrets.CODEBERG_TOKEN }}
+      TECHDOCS_S3_ACCESS_KEY_ID: ${{ secrets.TECHDOCS_S3_ACCESS_KEY_ID }}
+      TECHDOCS_S3_SECRET_ACCESS_KEY: ${{ secrets.TECHDOCS_S3_SECRET_ACCESS_KEY }}

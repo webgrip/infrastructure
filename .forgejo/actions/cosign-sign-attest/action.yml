@@ -72,17 +72,46 @@ inputs:
 runs:
   using: composite
   steps:
-    # Absolute github.com URLs: Forgejo's default action host (data.forgejo.org) is an incomplete
-    # mirror and 404s on these (as it does on actions/github-script). Pin to the canonical source.
-    - name: Install cosign
-      uses: https://github.com/sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
-      with:
-        cosign-release: ${{ inputs.cosign-version }}
+    # cosign and syft are BAKED INTO ci-runner (1.2.2+), checksum-verified at image build time.
+    #
+    # This used to install both at release time from two `uses:` on absolute github.com URLs. act
+    # git-clones an action repository in full to run it, and those actions then downloaded the
+    # binaries from GitHub releases — cosign-installer additionally fetching a *bootstrap* cosign to
+    # verify the real one. Four WAN round-trips on the critical path of the job that decides whether
+    # an image is fit to sign, and a hard dependency on github.com being reachable at release time.
+    #
+    # Checking rather than assuming: a miss means the runner pool is pinned to a ci-runner digest
+    # older than the one that bakes them, so the message names that fix instead of leaving a bare
+    # "cosign: command not found".
+    - name: Verify signing toolchain
+      shell: bash
+      env:
+        WANT_COSIGN: ${{ inputs.cosign-version }}
+        WANT_SYFT: ${{ inputs.syft-version }}
+      run: |
+        set -euo pipefail
+        for bin in cosign syft; do
+          command -v "$bin" >/dev/null || {
+            echo "::error::${bin} is not on PATH. It is baked into the ci-runner image; the runner pool is probably pinned to a ci-runner digest older than the one that added it. Bump the image in homelab-cluster's forgejo-runner ScaledJob."
+            exit 1
+          }
+        done
 
-    - name: Install Syft (SBOM generator)
-      uses: https://github.com/anchore/sbom-action/download-syft@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
-      with:
-        syft-version: ${{ inputs.syft-version }}
+        # Version drift is a warning, not a failure. The inputs exist so the intended versions are
+        # reviewable in one place and stay in lockstep with ops/docker/ci-runner/Dockerfile; the
+        # image is the source of truth for what actually runs. A mismatch means someone bumped one
+        # side only — worth saying out loud, not worth blocking a release over.
+        # cosign's GitVersion carries a leading "v" in some releases and not others; strip any
+        # before re-adding ours so both styles normalize to a single "vX.Y.Z".
+        have_cosign="$(cosign version 2>/dev/null | awk -F: '/GitVersion/{gsub(/ /,"",$2); print $2}')"
+        have_cosign="v${have_cosign#v}"
+        have_syft="$(syft version 2>/dev/null | awk '/^Version:/{print $2}')"
+        have_syft="v${have_syft#v}"
+        [ "$have_cosign" = "${WANT_COSIGN}" ] \
+          || echo "::warning::cosign in the runner image is ${have_cosign}, this action expects ${WANT_COSIGN}. Keep ops/docker/ci-runner/Dockerfile and this input in lockstep."
+        [ "$have_syft" = "${WANT_SYFT}" ] \
+          || echo "::warning::syft in the runner image is ${have_syft}, this action expects ${WANT_SYFT}. Keep ops/docker/ci-runner/Dockerfile and this input in lockstep."
+        echo "signing toolchain: cosign ${have_cosign}, syft ${have_syft}"
 
     - name: Log in to the target registry
       shell: bash
@@ -226,10 +255,11 @@ runs:
     # means "built by CI AND within its CVE budget", not merely "built by CI". An over-budget image
     # stays in Harbor but unsigned — and unsigned is what admission refuses.
     #
-    # Deferred until cve-gate 0.2.0 existed in Harbor, because wiring it in the same change that
-    # first built that image would have made cve-gate's own release depend on an image that did not
-    # exist yet. It exists now, so the bootstrap reason is gone and ALLOW_MISSING_GATE should never
-    # be needed again.
+    # This no longer pulls or runs a container. grype and cve-gate are baked into ci-runner, so the
+    # gate is a binary on PATH scanning a workspace already on disk. The bootstrap hatch that used
+    # to cover "the gate image does not exist yet" is gone with it — there is no image to be
+    # missing. What replaces it is a plain PATH check that names the fix: the runner pool is pinned
+    # to a ci-runner digest older than the one that bakes them.
     - name: CVE budget gate
       id: cve
       uses: ./.forgejo/actions/cve-gate
@@ -347,7 +377,18 @@ runs:
           -X POST "$url" -H 'Content-Type: application/json' \
           --data '{"scan_type":"sbom"}' || echo 000)"
         case "$code" in
-          200|202) echo "Harbor SBOM generation queued for ${project}/${repository}@${digest}" ;;
+          200|202)
+            # Harbor ACCEPTED the request. That is not the same as Harbor being able to honour it,
+            # and printing "queued" for both is how the SBOM tab stayed empty after a green release
+            # with nobody the wiser. Harbor only produces an SBOM if the registered scanner
+            # advertises the capability; without it the job is accepted and quietly does nothing.
+            caps="$(curl -sS -K "$cfg" -m 20 "https://${REGISTRY}/api/v2.0/scanners" 2>/dev/null || echo '[]')"
+            if printf '%s' "$caps" | grep -qi 'sbom'; then
+              echo "Harbor SBOM generation queued for ${project}/${repository}@${digest}"
+            else
+              echo "::warning::Harbor accepted the SBOM request (HTTP ${code}) but no registered scanner advertises SBOM generation, so Harbor's SBOM tab will stay empty. This does NOT affect the supply chain: the CycloneDX SBOM is cosign-attested as an OCI referrer and was uploaded to Dependency-Track. Fix by registering an SBOM-capable scanner in Harbor, or accept it and stop requesting."
+            fi
+            ;;
           *) echo "::warning::Harbor SBOM generation request returned HTTP ${code} (non-fatal): $(cat /tmp/sbom-gen.json 2>/dev/null)" ;;
         esac
 

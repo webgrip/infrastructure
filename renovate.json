@@ -1,17 +1,18 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
-    "github>webgrip/renovate-config#v1.5.3"
+    "local>webgrip/renovate-config#v1.13.0"
   ],
   "customManagers": [
     {
       "customType": "regex",
-      "description": "Update ARGs annotated with '# renovate: datasource=… depName=…'. Needed because the base images compose multiple ARGs in FROM (e.g. ${REGISTRY_DOCKERHUB}/library/rust:${RUST_VERSION}-slim-bookworm), which the dockerfile manager cannot auto-replace.",
+      "description": "Update ARGs annotated with '# renovate: datasource=… depName=…'. Needed because the base images compose multiple ARGs in FROM (e.g. ${REGISTRY_DOCKERHUB}/library/rust:${RUST_VERSION}-slim-bookworm), which the dockerfile manager cannot auto-replace. Two matchStrings because ARGs come in two shapes, and the digest has to be captured SEPARATELY: the original single pattern captured '0.3.2@sha256:…' as one currentValue, which no versioning scheme can parse — so every digest-pinned ARG in the repo (cve-gate's three bases, ci-runner's CVE_GATE_VERSION and RUNNER_VERSION) was silently unmanaged. First pattern: ARGs whose value ends ':<tag>@<digest>' or is '<version>@<digest>'. Second: bare versions with no digest, digest-containing values excluded so the two patterns never both match.",
       "managerFilePatterns": [
         "/(^|/)Dockerfile$/"
       ],
       "matchStrings": [
-        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?\\s*\\nARG \\S+=(?<currentValue>\\S+)"
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?\\s*\\nARG \\S+=\"?(?:\\S*?[:/])?(?<currentValue>[^@:/\\s\"]+)@(?<currentDigest>sha256:[a-f0-9]{64})",
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?\\s*\\nARG \\S+=\"?(?<currentValue>[^@\\s\"]+)\"?\\s"
       ],
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
     },
@@ -58,6 +59,27 @@
         "custom.regex"
       ],
       "pinDigests": false
+    },
+    {
+      "description": "techdocs-builder's python env is pip-compile hash-locked (requirements*.in -> .txt, compiled for python:3.13-alpine). Renovate re-runs the header command to refresh locks+hashes. mkdocs-techdocs-core pins most of the mkdocs universe with == constraints, so most transitive 'updates' are impossible until techdocs-core itself bumps — expect small PRs. zensical lives in a SEPARATE lock (requirements-zensical) because it cannot coexist with techdocs-core (pymdown-extensions conflict).",
+      "matchManagers": [
+        "pip-compile"
+      ],
+      "groupName": "techdocs-builder python locks",
+      "semanticCommitType": "fix",
+      "semanticCommitScope": "techdocs-builder"
+    },
+    {
+      "description": "webgrip/workflows is pinned by commit SHA with a '# main' branch annotation — the repo cuts no tags, so Renovate's tag lookup 404s (GET /repos/webgrip/workflows/tags/main) and the FATAL aborts the ENTIRE repo run, taking every other update (including all annotated-ARG bumps) down with it. The pin is moved deliberately by hand when the reusables change; Renovate has nothing to version here.",
+      "matchPackageNames": [
+        "webgrip/workflows"
+      ],
+      "enabled": false
     }
-  ]
+  ],
+  "pip-compile": {
+    "managerFilePatterns": [
+      "/^ops/docker/techdocs-builder/requirements.*\\.txt$/"
+    ]
+  }
 }

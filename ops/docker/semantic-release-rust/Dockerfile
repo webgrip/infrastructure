@@ -1,4 +1,10 @@
 ###############################################################################
+# Release re-entry: v0.1.1 shipped UNSIGNED — its Sign & Attest died on the security
+# namespace's ingress default-deny dropping runner->openbao:8200 (run 301; fixed in
+# homelab-cluster#550). Harbor's immutable tags make re-signing-by-rebuild impossible
+# (proven on run 301 attempt 2), so this cuts a signed successor; delete the unsigned
+# 0.1.1 tag after it lands.
+###############################################################################
 # semantic-release toolchain + cargo, for Rust crate release trains
 #
 # (webgrip/workflows' rust-semantic-release composite.)
@@ -18,14 +24,16 @@
 # from-source cargo compile. Add them here, not to a job, if a consumer actually needs them.
 ###############################################################################
 ARG REGISTRY_DOCKERHUB=docker.io
+# One ARG carrying tag AND digest (house pattern, see cve-gate): Renovate moves them together
+# via the digest-aware annotated-ARG manager, and a budget measured against this base stays a
+# statement about THIS base until Renovate says otherwise.
 # renovate: datasource=docker depName=docker.io/library/node versioning=docker
-ARG NODE_VERSION=24
-ARG DEBIAN_CODENAME=bookworm
+ARG NODE_IMAGE=${REGISTRY_DOCKERHUB}/library/node:24-bookworm-slim@sha256:3638d9a6fe4030bd716be989438248074489337ba3275657f93595428be4fc03
 
 ###############################################################################
 # Locked toolchain, built in a separate stage so npm's cache and metadata never reach the image
 ###############################################################################
-FROM ${REGISTRY_DOCKERHUB}/library/node:${NODE_VERSION}-${DEBIAN_CODENAME}-slim AS deps
+FROM ${NODE_IMAGE} AS deps
 WORKDIR /opt/semrel
 # @webgrip packages come from the Forgejo registry (anonymous read; no credential in .npmrc).
 # NB: this dir's package.json is BOTH the release manifest (its name is the tag prefix, its version
@@ -40,14 +48,13 @@ RUN NPM_CONFIG_USERCONFIG=/tmp/npmrc npm ci --omit=dev --no-audit --no-fund
 ###############################################################################
 # Runtime: node (which also runs the JS actions in a container job), git, yq
 ###############################################################################
-FROM ${REGISTRY_DOCKERHUB}/library/node:${NODE_VERSION}-${DEBIAN_CODENAME}-slim
+FROM ${NODE_IMAGE}
 
 ARG IMAGE_CREATED=1970-01-01T00:00:00Z
 ARG IMAGE_VERSION=dev
 ARG IMAGE_REVISION=unknown
 ARG REGISTRY_DOCKERHUB
-ARG NODE_VERSION
-ARG DEBIAN_CODENAME
+ARG NODE_IMAGE
 
 # Shared runtime — keep this block the same in all three semantic-release* images.
 # Duplicated on purpose. These images used to build FROM one another, which made a sibling's
@@ -108,7 +115,13 @@ ENV RUSTUP_HOME=/usr/local/rustup
 ENV CARGO_HOME=/usr/local/cargo
 ENV PATH=/usr/local/cargo/bin:$PATH
 
-ARG RUST_TOOLCHAIN=stable
+# Release re-entry: v0.1.3 promoted by digest but its sign scan was killed by node pressure
+# (run 401; runner request raised to 3Gi in homelab-cluster 97361c7b). This cuts the signed
+# successor.
+# Pinned: 'stable' resolves to whatever rust-lang shipped most recently — the float the
+# 2026-08-08 pin train fixed in rust-releaser and missed here. Same version as the rust images.
+# renovate: datasource=docker depName=docker.io/library/rust versioning=docker
+ARG RUST_TOOLCHAIN=1.97.0
 RUN apt-get update -yq && \
     apt-get install -y --no-install-recommends \
         build-essential \
@@ -125,10 +138,20 @@ COPY --from=deps /opt/semrel /opt/semrel
 # installed, and a bare require() resolves from an arbitrary cwd (i.e. NODE_PATH works). A lockfile
 # bump that breaks either fails the build instead of a release — including a semantic-release MAJOR
 # bump, which must be a deliberate change to these images and their consumers together.
+# The last two lines prove the RUNTIME half of the contract, which node-side resolution cannot:
+# every composite step declares `shell: bash`, and the binary must actually execute on this base.
+# The alpine wave (v0.2.0/v0.3.0) passed the node checks while shipping no bash — no consumer ran
+# those images until ploeg's first job on 0.3.1 died on its first bash step (runs 226/227).
 RUN cd /tmp \
  && node -e "const v=require('semantic-release/package.json').version; if(v.split('.')[0]!=='25') throw new Error('expected semantic-release 25.x, got '+v); console.log('semantic-release '+v)" \
  && node -e "require.resolve('@webgrip/semantic-release-config')" \
- && node -e "require.resolve('semantic-release-cargo')"
+ && node -e "require.resolve('semantic-release-cargo')" \
+ && bash -ec 'semantic-release --version'
+# NB: that --version prints the IMAGE version, not 25.x — yargs walks up from its own location to
+# the first package.json, which is this image's root manifest (deliberately named after the image).
+# The line is an EXECUTION probe, not a version assert (the node check above pins the real major):
+# it proves bash exists (every composite step declares shell: bash), the bin wrapper runs, and its
+# own git preflight passes on this base.
 
 LABEL org.opencontainers.image.title="WebGrip semantic-release Toolchain (Rust)" \
     org.opencontainers.image.description="Locked semantic-release 25 toolchain + cargo and semantic-release-cargo" \
@@ -138,7 +161,7 @@ LABEL org.opencontainers.image.title="WebGrip semantic-release Toolchain (Rust)"
     org.opencontainers.image.vendor="WebGrip" \
     org.opencontainers.image.authors="Ryan Grippeling <ryan@webgrip.nl>" \
     org.opencontainers.image.licenses="MIT" \
-    org.opencontainers.image.base.name="${REGISTRY_DOCKERHUB}/library/node:${NODE_VERSION}-${DEBIAN_CODENAME}-slim" \
+    org.opencontainers.image.base.name="${NODE_IMAGE}" \
     org.opencontainers.image.created="${IMAGE_CREATED}" \
     org.opencontainers.image.version="${IMAGE_VERSION}" \
     org.opencontainers.image.revision="${IMAGE_REVISION}"

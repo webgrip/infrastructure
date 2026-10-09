@@ -362,3 +362,5 @@ the files.
 | 0004 | Signing, SBOM and attestation on self-hosted Forgejo, Harbor and OpenBao | accepted | 2026-07-31 |
 | 0005 | OpenVEX statements and per-image CVE budgets instead of a zero-CVE target | accepted | 2026-07-31 |
 | 0006 | Docker Hardened Images as the default base, with named structural exceptions | proposed | 2026-07-31 |
+| 0007 | A shared per-node BuildKit daemon instead of a builder per job | accepted | 2026-08-05 |
+| 0008 | The CVE budget gate runs as a step, not inside a hardened container | accepted | 2026-08-05 |

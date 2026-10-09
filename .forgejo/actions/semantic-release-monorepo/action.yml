@@ -2,7 +2,8 @@ name: "[Action] Semantic Release"
 description: "Forgejo: run semantic-release for a single monorepo package path (e.g. ops/docker/<image>), publishing releases via the Gitea/Forgejo API."
 
 # Forgejo mirror of .github/actions/semantic-release-monorepo/action.yml. Adaptations:
-#   - checkout v6 -> v5 (v6 is broken on non-GitHub runners)
+#   - checkout v6 -> v5 (was: v6 broken on non-GitHub runners; disproven 2026-09-18, the pin stays
+#     as a pin rather than a workaround)
 #   - GITHUB_TOKEN auth -> GITEA_URL/GITEA_TOKEN for @saithodev/semantic-release-gitea
 #   - sets GITEA_URL below, which makes the shared .releaserc.js select the Gitea/Forgejo publish
 #     plugin (@saithodev/semantic-release-gitea) instead of @semantic-release/github
@@ -21,7 +22,7 @@ inputs:
     description: "Package name used for tag prefix, e.g. helm-deploy"
     required: true
   config-version:
-    description: "Pin of @webgrip/semantic-release-config to install (npm dist-tag or semver range)"
+    description: "VESTIGIAL — the toolchain (config included) is pinned by the repo-root package.json + package-lock.json and installed with `npm ci`; this input is ignored. Kept only so existing workflow call sites don't break."
     required: false
     default: "1"
   registry:
@@ -37,6 +38,15 @@ inputs:
   github-release-token:
     description: "GitHub PAT (classic: repo, or fine-grained: contents+read/write) used to mirror the Release object onto the github.com mirror so its Releases tab stays populated. When unset, the mirror step is skipped."
     required: false
+  sbom-generator:
+    description: >-
+      Image BuildKit uses to generate the candidate build's SBOM attestation (ADR-0009). Mirrors
+      the pin in webgrip/workflows' docker-build-push-registry-fast so the candidate carries the
+      same attestations the publish path would have produced — that equivalence is the whole
+      point of promoting by digest.
+    required: false
+    # renovate: datasource=docker depName=docker/buildkit-syft-scanner versioning=docker
+    default: "harbor.webgrip.dev/dockerhub/docker/buildkit-syft-scanner:stable-1@sha256:79e7b013cbec16bbb436f312819a49a4a57752b2270c1a9332ae1a10fcc82a68"
 
 outputs:
   version:
@@ -50,7 +60,8 @@ runs:
   using: "composite"
   steps:
     - name: Check out repo
-      # Forgejo: the v6 checkout action is broken on non-GitHub runners — pin v5.
+      # Pinned to v5. Not a workaround: the "v6 is broken on non-GitHub runners" claim was
+      # disproven on 2026-09-18 by a canary on the real runner (homelab-cluster run 1710).
       uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       with:
         fetch-depth: 0 # semantic-release requires all commits/tags
@@ -61,14 +72,13 @@ runs:
       with:
         node-version: "24"
 
-    # Cache the npm download cache so the (unpinned-lockfile) semantic-release install resolves
-    # from disk instead of re-fetching ~400 packages every run. Bump the key suffix when the
-    # pinned versions below change.
+    # Cache the npm download cache so `npm ci` resolves from disk instead of re-fetching
+    # every run. Keyed on the committed lockfile: a toolchain bump rolls the key naturally.
     - name: Cache npm downloads
       uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ~/.npm
-        key: ${{ runner.os }}-npm-semrel-24.2.7
+        key: ${{ runner.os }}-npm-semrel-${{ hashFiles('package-lock.json') }}
 
     # Node 24's bundled npm (11.16) intermittently requests scoped-package tarballs with the
     # scope's %2F decoded to a literal slash — Forgejo's npm route 404s that form (the encoded
@@ -79,29 +89,69 @@ runs:
       shell: bash
       run: npm install -g npm@11.4.2
 
-    # When Harbor creds are provided, set up buildx (docker-container driver — supports
-    # `cache-from type=registry`) + log in (the Harbor :cache repo needs auth to pull), then
-    # export BUILD_CACHE_REF. .releaserc.js keys on BUILD_CACHE_REF to run the cached buildx
-    # verifyRelease build; without these the build falls back to a plain (cold) `docker build`.
-    # Login BEFORE buildx setup: the buildkit bootstrap image below pulls through Harbor and
-    # must be authenticated in case the proxy project isn't anonymous-pull.
+    # When Harbor creds are provided, log in and put a builder in front of semantic-release, then
+    # export BUILD_CACHE_REF. .releaserc.cjs keys on BUILD_CACHE_REF to run the cached buildx
+    # verifyRelease build; without these it falls back to a plain (cold) `docker build`.
+    #
+    # THE VERIFY BUILD WAS THE LAST COLD BUILD IN THE PIPELINE. Everything else moved to the
+    # shared per-node buildkitd; this job did not, so `dockerVerifyGate()` kept creating a
+    # throwaway docker-container builder with an empty local cache — a full rebuild of the image
+    # on every release, seconds before on_release_published builds the very same thing again.
+    # Run 240 shows what that costs: 7m8s, and enough Harbor traffic to take 502s on the base
+    # image manifest and fail the release outright.
+    #
+    # BUILDX_BUILDER is how it reaches semantic-release: buildx honours that env var, and
+    # dockerVerifyGate() lives in @webgrip/semantic-release-config where no `--builder` flag can
+    # be passed from here.
     - name: Log in to Harbor (verifyRelease build cache)
       if: ${{ inputs.harbor-robot-token != '' }}
-      uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
-      with:
-        registry: ${{ inputs.registry }}
-        username: ${{ inputs.harbor-robot-user }}
-        password: ${{ inputs.harbor-robot-token }}
+      shell: bash
+      env:
+        REGISTRY: ${{ inputs.registry }}
+        ROBOT_USER: ${{ inputs.harbor-robot-user }}
+        ROBOT_TOKEN: ${{ inputs.harbor-robot-token }}
+      run: |
+        set -euo pipefail
+        # --password-stdin: an argv password is visible in the daemon's process table.
+        printf '%s' "$ROBOT_TOKEN" | docker login "$REGISTRY" --username "$ROBOT_USER" --password-stdin
 
-    - name: Set up Docker Buildx
+    - name: Select a builder for the verifyRelease build
       if: ${{ inputs.harbor-robot-token != '' }}
-      uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
-      with:
-        # Pull the buildkit bootstrap image through the Harbor dockerhub proxy instead of
-        # straight from docker.io — that direct pull was the one external fetch left in the
-        # release hot path and it flakes (run 125: TLS handshake timeout to registry-1.docker.io
-        # killed both release jobs) besides burning Docker Hub's anonymous rate limit.
-        driver-opts: image=${{ inputs.registry }}/dockerhub/moby/buildkit:buildx-stable-1
+      shell: bash
+      env:
+        REGISTRY: ${{ inputs.registry }}
+        BUILDKITD_ENDPOINT: tcp://forgejo-buildkitd.forgejo.svc.cluster.local:1234
+      run: |
+        set -euo pipefail
+        name="semrel-${GITHUB_RUN_ID:-0}-$RANDOM"
+
+        host="${BUILDKITD_ENDPOINT#tcp://}"; host="${host%%:*}"
+        port="${BUILDKITD_ENDPOINT##*:}"
+        # bash /dev/tcp probes name resolution and reachability in one go, matching how the build
+        # composite and the runner entrypoint pick their endpoints.
+        if (exec 3<>"/dev/tcp/${host}/${port}") 2>/dev/null; then
+          exec 3>&- || true
+          if docker buildx create --name "$name" --driver remote --use "${BUILDKITD_ENDPOINT}" >/dev/null 2>&1 \
+             && docker buildx inspect --bootstrap --builder "$name" >/dev/null 2>&1; then
+            echo "BUILDX_BUILDER=$name" >> "$GITHUB_ENV"
+            echo "verifyRelease will build on the shared node buildkitd (warm cache)"
+            exit 0
+          fi
+          docker buildx rm --force "$name" >/dev/null 2>&1 || true
+        fi
+
+        # Fallback: the throwaway builder this used to always create. Buildkit image pinned to the
+        # Harbor proxy rather than docker.io — that direct pull was the one external fetch left in
+        # the release hot path and it flaked (run 125: TLS handshake timeout killed both release
+        # jobs) besides burning Docker Hub's anonymous rate limit.
+        echo "::warning::${BUILDKITD_ENDPOINT} unreachable; verifyRelease builds on a throwaway builder with a cold local cache."
+        docker buildx create \
+          --name "$name" \
+          --driver docker-container \
+          --driver-opt "image=${REGISTRY}/dockerhub/moby/buildkit:buildx-stable-1@sha256:2f5adac4ecd194d9f8c10b7b5d7bceb5186853db1b26e5abd3a657af0b7e26ec" \
+          --use >/dev/null
+        docker buildx inspect --bootstrap --builder "$name" >/dev/null
+        echo "BUILDX_BUILDER=$name" >> "$GITHUB_ENV"
 
     - name: Export build cache ref
       if: ${{ inputs.harbor-robot-token != '' }}
@@ -113,6 +163,22 @@ runs:
       # `<registry>//<image>:cache` (double slash) — an invalid ref that never matches the cache.
       run: |
         echo "BUILD_CACHE_REF=${{ inputs.registry }}/webgrip/${{ inputs.package-name }}:cache" >> "$GITHUB_ENV"
+        # ADR-0009: with these two set, dockerVerifyGate() (config >= 1.2) upgrades the verify
+        # build from --output=type=cacheonly to a full release-grade build — provenance, SBOM,
+        # version labels — pushed as a candidate tag. on_release_published then promotes that
+        # digest instead of rebuilding. A config without candidate support ignores both, and a
+        # release pipeline that finds no candidate builds as before: either side can lag the
+        # other.
+        #
+        # This is a tag PREFIX: the gate appends -<version> (which only it knows — the version
+        # exists after commit analysis, inside semantic-release). Keying by version, not by
+        # GITHUB_SHA, is load-bearing: @semantic-release/git creates the version-bump commit
+        # AFTER verify and the release tag points at THAT commit, so a sha-keyed candidate
+        # (cand-<push sha>) can never be found from the tag — measured on node-ci-runner-v1.0.2,
+        # whose tag targets the [skip ci] bump commit, parent of the push that built the
+        # candidate. The version is the one name both sides derive independently.
+        echo "BUILD_CANDIDATE_REF=${{ inputs.registry }}/webgrip/${{ inputs.package-name }}:cand" >> "$GITHUB_ENV"
+        echo "BUILD_SBOM_GENERATOR=${{ inputs.sbom-generator }}" >> "$GITHUB_ENV"
 
     - name: Run semantic-release
       shell: bash
@@ -170,19 +236,46 @@ runs:
         fi
 
         # Plugin shape lives once in @webgrip/semantic-release-config; each ops/docker/<image>/
-        # .releaserc.cjs is a small makeConfig() that requires it. Its deps (semantic-release + all
-        # plugins, incl. @semantic-release/npm) install with it — replacing the hand-pinned list.
+        # .releaserc.cjs is a small makeConfig() that requires it, resolving UPWARD into the
+        # repo-root node_modules that `npm ci` below produces.
         forge_url="${{ vars.FORGEJO_INSTANCE_URL || 'https://forgejo.webgrip.dev' }}"
         forge_host="${forge_url#http*://}"
         npm config set "@webgrip:registry" "${forge_url}/api/packages/webgrip/npm/"
         npm config set "//${forge_host}/api/packages/webgrip/npm/:_authToken" "${GITEA_TOKEN}"
-        # semantic-release-monorepo is an install-on-demand PEER of the config since its 1.1.0
-        # (npm-audit cleanup demoted it, assuming no org repo used monorepo mode — every image
-        # train here does; run 153 failed on the config's fail-loud guard). ^8.0.2 mirrors the
-        # range the config bundled through 1.0.x and now carries as a devDependency.
-        npm install --no-save --no-package-lock \
-          "@webgrip/semantic-release-config@${{ inputs.config-version }}" \
-          "semantic-release-monorepo@^8.0.2"
+
+        # THE TOOLCHAIN IS A COMMITTED MANIFEST, NOT AN AD-HOC INSTALL. The repo-root
+        # package.json + package-lock.json pin semantic-release, the shared config,
+        # semantic-release-monorepo and the notes preset; `npm ci` reproduces that tree
+        # byte-for-byte, and the root manifest's `overrides` force the notes-toolchain pair
+        # the config's PR #10 chose (generator 15.0.0-beta.2 / analyzer 14.0.0-beta.3).
+        #
+        # Overrides are the ONLY npm mechanism that can do this: both betas sit outside
+        # semantic-release's own ^14/^13 ranges, so ANY manifest-less install (`--no-save
+        # --no-package-lock`, the previous shape here) is REQUIRED by npm to nest stable
+        # copies under semantic-release — and its plugin loader (resolve-from its own dir
+        # before cwd) loads the nested copy. Measured, runs 426-435: explicit install
+        # arguments looked like a fix and fixed nothing. Overrides need a root manifest,
+        # which is also why baking them into the semantic-release IMAGE trees (ce07256)
+        # could never reach this path. semantic-release-monorepo's README documents this
+        # root-install mode for monorepos; Renovate maintains the lockfile.
+        (cd "${GITHUB_WORKSPACE}" && npm ci)
+
+        # Fail LOUD if the resolved tree ever drifts from the sanctioned pair — the failure
+        # mode this guards (generator 14 + preset 10) renders EMPTY notes silently, and
+        # months of org releases shipped that way once already. Second layer on top of the
+        # config's own load-time guard, because silence is the enemy here.
+        node -e '
+          const path = require("path"), fs = require("fs");
+          const root = process.env.GITHUB_WORKSPACE;
+          const v = p => require(path.join(root, "node_modules", p, "package.json")).version;
+          const gen = v("@semantic-release/release-notes-generator");
+          const preset = v("conventional-changelog-conventionalcommits");
+          const nested = fs.existsSync(path.join(root, "node_modules", "semantic-release",
+            "node_modules", "@semantic-release", "release-notes-generator"));
+          if (nested) { console.error("FATAL: nested release-notes-generator under semantic-release — the root overrides did not apply; check package.json overrides vs package-lock.json"); process.exit(1); }
+          if (parseInt(gen) < 15 || parseInt(preset) < 10) { console.error(`FATAL: resolved notes pair generator=${gen} preset=${preset} — expected >=15 with >=10 (the sanctioned pair per semantic-release-config PR #10)`); process.exit(1); }
+          console.log(`notes toolchain OK: generator ${gen} + preset ${preset}, single copy`);
+        '
 
         # cwd is the package dir, so semantic-release discovers ops/docker/<image>/.releaserc.cjs
         # (a makeConfig() from @webgrip/semantic-release-config). GITEA_URL is set above, so it selects
@@ -201,7 +294,10 @@ runs:
         # The rerun's verifyRelease build re-uses the still-warm buildx builder, so it's cheap.
         for attempt in 1 2 3; do
           set +e
-          npx semantic-release 2>&1 | tee /tmp/semrel.log
+          # Explicit bin path, not `npx`: npx falls back to a REGISTRY FETCH when it finds no
+          # local install, which would silently reintroduce the exact unpinned-toolchain
+          # failure the committed manifest exists to end.
+          "${GITHUB_WORKSPACE}/node_modules/.bin/semantic-release" 2>&1 | tee /tmp/semrel.log
           rc=${PIPESTATUS[0]}
           set -e
           if [ "$rc" -eq 0 ] && ! grep -q 'is behind the remote one' /tmp/semrel.log; then

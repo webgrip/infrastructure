@@ -1,0 +1,15 @@
+# Direct deps of the mkdocs/TechDocs build environment. Renovate bumps these;
+# `pip-compile --generate-hashes` (run in python:3.13-alpine, matching the image)
+# produces the hash-locked requirements.txt the Dockerfile installs with
+# --require-hashes. NB: mkdocs-techdocs-core hard-pins most of the mkdocs
+# universe (mkdocs-material, pymdown-extensions==10.x, ...) — "latest" for
+# everything below means latest COMPATIBLE with those pins. zensical cannot live
+# here at all (needs pymdown-extensions>=11): see requirements-zensical.in.
+mkdocs-techdocs-core==1.7.0
+markdown-inline-mermaid==1.0.4
+mkdocs-mermaid2-plugin==1.2.3
+mkdocs-macros-plugin==1.5.0
+mkdocs-redirects==1.2.3
+mkdocs-dracula-theme==1.0.9
+mkdocs-llms-source==1.2.0
+mkdocs-git-revision-date-localized-plugin==1.5.3

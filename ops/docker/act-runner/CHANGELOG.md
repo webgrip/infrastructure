@@ -1,3 +1,7 @@
+## [act-runner-v1.3.0](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/act-runner-v1.2.3...act-runner-v1.3.0) (2026-08-11)
+
+## [act-runner-v1.2.3](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/act-runner-v1.2.2...act-runner-v1.2.3) (2026-08-08)
+
 ## [act-runner-v1.2.2](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/act-runner-v1.2.1...act-runner-v1.2.2) (2026-07-25)
 
 ### Changed
