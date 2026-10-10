@@ -32,7 +32,7 @@ ARG UV_IMAGE=${REGISTRY_GHCR}/astral-sh/uv:0.9.2@sha256:6dbd7c42a9088083fa79e414
 # MUST match the base's libc: the node binary is dynamically linked, so an alpine base needs an
 # alpine node (and alpine 3.24 to match the python base's musl).
 # renovate: datasource=docker depName=dhi.io/node versioning=docker
-ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.19.0-alpine3.24-dev@sha256:4b70bb724239d33250044c831c04746c75c4041e1247fecd9372b5da59d5d972
+ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.19.0-alpine3.24-dev@sha256:dc2989ad23938772abaf549ed7bde5d61d70377005229bb55bef94bff40f8bbd
 # ADR-0006 Stage 2. python 3.12 still, matching CI's python:3.12 for the domain scripts.
 #
 # ALPINE, and the reason is measured: the digest refresh (v1.0.4) recovered nothing — 43/101
