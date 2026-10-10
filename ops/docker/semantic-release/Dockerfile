@@ -29,7 +29,7 @@
 # anonymous pulls, so unlike the other REGISTRY_* ARGs this one DEFAULTS to the proxy.
 ARG REGISTRY_DHI=harbor.webgrip.dev/dhi
 # renovate: datasource=docker depName=dhi.io/node versioning=docker
-ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.19.0-alpine3.23-dev@sha256:d00350837e082dc254939ffcf53861b3b965ff159e506d6ab1775710f91a82fe
+ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.19.0-alpine3.23-dev@sha256:ae1719f70383dcb697ee8a5f1101c39927d42f746e3cfba72bba7529d2d96de7
 
 ###############################################################################
 # Locked toolchain, built in a separate stage so npm's cache and metadata never reach the image
