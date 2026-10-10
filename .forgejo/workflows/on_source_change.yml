@@ -77,7 +77,7 @@ jobs:
     steps:
       # fetch-depth 0: the push diff needs github.event.before, which an ordinary shallow
       # checkout does not fetch. The in-cluster mirror makes the full clone cheap.
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
@@ -181,7 +181,7 @@ jobs:
       HARBOR_ROBOT_USER: ${{ secrets.HARBOR_ROBOT_USER }}
       HARBOR_ROBOT_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # Login BEFORE buildx setup: the buildkit bootstrap image pulls through Harbor and must be
       # authenticated in case that proxy project isn't anonymous-pull. Mirrors the release path.
@@ -350,7 +350,7 @@ jobs:
       # Mirrors the .github job's checkout (adapted: the CI bot's WEBGRIP_CI_TOKEN instead of a
       # GitHub App token). The v5 pin is just a pin now — the "v6 is broken on non-GitHub runners"
       # reason was disproven on 2026-09-18 (homelab-cluster canary run 1710).
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0 # semantic-release requires all commits/tags
           token: ${{ secrets.WEBGRIP_CI_TOKEN }}
