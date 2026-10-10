@@ -29,7 +29,7 @@ ARG BASE_IMAGE=${REGISTRY_DHI}/python:3.13.15-alpine3.24-dev@sha256:8e51f99fa957
 # The jar-fetch stage only runs curl; its base never ships. Kept on the stock JRE image purely
 # to keep the fetched artifact byte-identical (see header note 3).
 # renovate: datasource=docker depName=docker.io/library/eclipse-temurin versioning=docker
-ARG JRE_IMAGE=${REGISTRY_DOCKERHUB}/library/eclipse-temurin:11.0.31_11-jre-jammy@sha256:76ffb747ad3a62a8b81ac3c76e2c3b1c06e475b1e10109d0a4dd604db627c9f5
+ARG JRE_IMAGE=${REGISTRY_DOCKERHUB}/library/eclipse-temurin:11.0.31_11-jre-jammy@sha256:eca8fa395077325c4065446e99e79af91c7283f10600d7f8c11530493e38a07c
 
 FROM ${NODE_IMAGE} AS node
 
