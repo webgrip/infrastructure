@@ -30,6 +30,17 @@
   ],
   "packageRules": [
     {
+      "description": "Patch and minor updates do not need a dashboard tick in this repo. The org preset (webgrip/renovate-config) puts dependencyDashboardApproval on EVERY update type, which is right where a bump ships straight to production. Here it does not: build-check builds every changed image on the PR, and the release path runs the image against its cve-budgets.yaml entry before it can publish. The tick therefore adds a human step without adding a check — and 31 of them had accumulated, which is worse than no gate, because a queue nobody works is indistinguishable from a queue with nothing important in it. Majors, rollbacks and replacements KEEP the gate: helm v4, cosign v3 and Node 22/24 are migrations, not bumps, and the preset's prConcurrentLimit of 5 still caps how many land at once.",
+      "matchUpdateTypes": [
+        "patch",
+        "minor",
+        "pin",
+        "digest",
+        "bump"
+      ],
+      "dependencyDashboardApproval": false
+    },
+    {
       "description": "These Dockerfiles compose their FROM refs from multiple ARGs; the dockerfile manager resolves the ARGs at extraction but then cannot find the resolved string in the raw file ('Cannot find replaceString' → the whole branch silently produces no commit). The annotated-ARG custom manager above owns these deps instead.",
       "matchManagers": [
         "dockerfile"
