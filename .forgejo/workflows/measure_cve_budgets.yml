@@ -44,7 +44,7 @@ on:
 jobs:
   measure:
     name: 'Scan every Harbor image against its budget'
-    runs-on: docker
+    runs-on: docker-large
     # Run 272 was killed by the runner's default job deadline ("context deadline exceeded")
     # 25 minutes in, four images short. 18 registry scans, several multi-GB, is legitimately a
     # long job.

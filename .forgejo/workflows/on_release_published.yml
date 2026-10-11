@@ -208,7 +208,7 @@ jobs:
   release-sign-harbor:
     name: 'Sign & Attest (Harbor)'
     needs: [parse-release-tag, release-distribute-harbor]
-    runs-on: docker
+    runs-on: docker-large
     # Forgejo: mint a per-job OIDC token (claims: repository/event_name/ref) so the action can
     # authenticate to OpenBao's JWT auth for signing. (permissions: is ignored by Forgejo.)
     enable-openid-connect: true
