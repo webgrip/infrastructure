@@ -52,7 +52,9 @@ composite is `.forgejo/actions/cosign-sign-attest`.
 ## Traps
 
 - **Harbor is LAN-only.** Anything that pushes to `harbor.webgrip.dev` must be
-  `runs-on: docker` — the in-cluster ephemeral runner pool is the only thing that reaches it.
+  `runs-on: docker` or `docker-large` — the in-cluster ephemeral runner pools are the only thing
+  that reaches it. `docker-large` reserves more memory for the jobs whose syft and grype scans spike
+  to 4–6 GiB (the release sign job and the CVE-budget measure); everything else stays on `docker`.
 - **`WEBGRIP_CI_TOKEN`, never `secrets.FORGEJO_TOKEN`.** The latter resolves to the built-in
   per-job token, which attributes releases to Ghost and suppresses the native `release` event
   that `on_release_published.yml` waits for.
