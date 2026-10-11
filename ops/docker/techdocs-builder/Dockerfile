@@ -23,7 +23,7 @@
 ARG REGISTRY_DHI=harbor.webgrip.dev/dhi
 ARG REGISTRY_DOCKERHUB=docker.io
 # renovate: datasource=docker depName=dhi.io/node versioning=docker
-ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.19.0-alpine3.23-dev@sha256:d00350837e082dc254939ffcf53861b3b965ff159e506d6ab1775710f91a82fe
+ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.19.0-alpine3.23-dev@sha256:ae1719f70383dcb697ee8a5f1101c39927d42f746e3cfba72bba7529d2d96de7
 # renovate: datasource=docker depName=dhi.io/python versioning=docker
 ARG BASE_IMAGE=${REGISTRY_DHI}/python:3.13.15-alpine3.24-dev@sha256:8e51f99fa957d0b2531c4936b178d67d997e76fe48d7150357143295a03b1fd4
 # The jar-fetch stage only runs curl; its base never ships. Kept on the stock JRE image purely
