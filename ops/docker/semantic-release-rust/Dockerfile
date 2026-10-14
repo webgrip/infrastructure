@@ -28,7 +28,7 @@ ARG REGISTRY_DOCKERHUB=docker.io
 # via the digest-aware annotated-ARG manager, and a budget measured against this base stays a
 # statement about THIS base until Renovate says otherwise.
 # renovate: datasource=docker depName=docker.io/library/node versioning=docker
-ARG NODE_IMAGE=${REGISTRY_DOCKERHUB}/library/node:24-bookworm-slim@sha256:3638d9a6fe4030bd716be989438248074489337ba3275657f93595428be4fc03
+ARG NODE_IMAGE=${REGISTRY_DOCKERHUB}/library/node:24-bookworm-slim@sha256:a5f4366e834695d5f363b920c104953a535d3a9864d1bdf74566a0ebe01daee5
 
 ###############################################################################
 # Locked toolchain, built in a separate stage so npm's cache and metadata never reach the image
