@@ -92,6 +92,8 @@ ARG MOON_VERSION=2.4.4
 ARG OPENSPEC_VERSION=1.6.0
 # renovate: datasource=npm depName=@qwen-code/qwen-code
 ARG QWEN_CODE_VERSION=0.24.6
+# renovate: datasource=npm depName=opencode-ai
+ARG OPENCODE_VERSION=1.19.3
 # renovate: datasource=pypi depName=pyyaml
 ARG PYYAML_VERSION=6.0.3
 # Skills loadout (board #268). The core set is baked from the webgrip marketplace at BUILD
@@ -183,6 +185,11 @@ RUN npm install -g "@qwen-code/qwen-code@${QWEN_CODE_VERSION}" \
  && cd /usr/local/lib/node_modules/@qwen-code/qwen-code \
  && node --input-type=module -e 'for (const m of ["@lydell/node-pty", "node-pty"]) { if (await import(m).then(() => true, () => false)) { console.error(`${m} still resolves: its glibc prebuild segfaults on musl`); process.exit(1); } }' \
  && test "$(qwen --version)" = "${QWEN_CODE_VERSION}"
+
+RUN npm install -g --no-audit --no-fund "opencode-ai@${OPENCODE_VERSION}" \
+ && npm cache clean --force \
+ && test "$(opencode --version)" = "${OPENCODE_VERSION}" \
+ && opencode acp --help >/dev/null
 
 RUN --mount=type=bind,from=goose-archive,source=/goose.tar.gz,target=/tmp/goose.tar.gz \
     tar -xzf /tmp/goose.tar.gz -C /usr/local/bin ./goose \
