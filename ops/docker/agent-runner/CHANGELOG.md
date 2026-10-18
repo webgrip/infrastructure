@@ -1,3 +1,9 @@
+## [agent-runner-v1.4.1](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/agent-runner-v1.4.0...agent-runner-v1.4.1) (2026-10-18)
+
+### Fixed
+
+* **agent-runner:** install OpenHands where a non-root harness can run it ([3a2e0b0](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/commit/3a2e0b0080d2aec52d1400417f621225fd44a302))
+
 ## [agent-runner-v1.4.0](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/agent-runner-v1.3.1...agent-runner-v1.4.0) (2026-10-18)
 
 ### Added
