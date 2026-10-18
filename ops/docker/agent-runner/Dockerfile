@@ -85,6 +85,7 @@ ARG GOOSE_VERSION
 # change, not a rename of every manifest and pull-ref.
 # renovate: datasource=pypi depName=openhands
 ARG OPENHANDS_VERSION=1.16.0
+ARG OPENHANDS_LMNR_VERSION=0.7.52
 # Agent workflow tooling (mise.toml / .forgejo CI in the erfbeeld repo).
 # renovate: datasource=npm depName=@moonrepo/cli
 ARG MOON_VERSION=2.4.4
@@ -126,8 +127,9 @@ RUN apk add --no-cache git ca-certificates bash
 
 # --- OpenHands ----------------------------------------------------------------------------
 COPY --from=uv /uv /uvx /usr/local/bin/
-RUN uv tool install "openhands==${OPENHANDS_VERSION}" \
- && openhands --version
+RUN uv tool install "openhands==${OPENHANDS_VERSION}" --with "lmnr==${OPENHANDS_LMNR_VERSION}" \
+ && openhands --version \
+ && /root/.local/share/uv/tools/openhands/bin/python -c "import inspect, lmnr; assert 'rollout_entrypoint' in str(inspect.signature(lmnr.observe)), 'lmnr.observe lacks rollout_entrypoint, which openhands-sdk tracing passes'"
 
 # The CLI hardcodes load_public_skills=True — a startup git-sync of
 # github.com/OpenHands/extensions with NO opt-out (their #483 died stale; the
