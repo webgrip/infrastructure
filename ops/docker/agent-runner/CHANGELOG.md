@@ -1,3 +1,10 @@
+## [agent-runner-v1.3.1](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/agent-runner-v1.3.0...agent-runner-v1.3.1) (2026-10-18)
+
+### Fixed
+
+* **agent-runner:** install OpenHands with the dependencies its release locked ([1c35222](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/commit/1c35222f63dee3ccdac0965be0e3cfd84e339855)), references [#147](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/issues/147)
+* **agent-runner:** pin lmnr so OpenHands tracing starts ([babb9e1](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/commit/babb9e118f7dd20c84133ca56d7dbbd62fb4a99e))
+
 ## [agent-runner-v1.3.0](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/agent-runner-v1.2.0...agent-runner-v1.3.0) (2026-09-27)
 
 ### Added
