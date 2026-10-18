@@ -1,3 +1,9 @@
+## [agent-runner-v1.4.0](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/agent-runner-v1.3.1...agent-runner-v1.4.0) (2026-10-18)
+
+### Added
+
+* **agent-runner:** bake OpenCode for Ploeg's default ACP profile ([5218114](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/commit/521811401fcd2bf07c5040ab1282f90943e3a08c))
+
 ## [agent-runner-v1.3.1](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/agent-runner-v1.3.0...agent-runner-v1.3.1) (2026-10-18)
 
 ### Fixed
