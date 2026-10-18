@@ -116,6 +116,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
     # uv: link tool executables into a PATH dir, use the base image's CPython, no network
     # Python fetches, no build cache layer.
     UV_TOOL_BIN_DIR=/usr/local/bin \
+    UV_TOOL_DIR=/opt/uv/tools \
     UV_PYTHON_DOWNLOADS=never \
     UV_NO_CACHE=1
 
@@ -131,7 +132,8 @@ COPY --from=uv /uv /uvx /usr/local/bin/
 COPY ./openhands-${OPENHANDS_VERSION}.constraints.txt /tmp/openhands.constraints.txt
 RUN uv tool install "openhands==${OPENHANDS_VERSION}" --constraints /tmp/openhands.constraints.txt \
  && openhands --version \
- && /root/.local/share/uv/tools/openhands/bin/python -c "import inspect, lmnr; assert 'rollout_entrypoint' in str(inspect.signature(lmnr.observe)), 'lmnr.observe lacks rollout_entrypoint, which openhands-sdk tracing passes'"
+ && /opt/uv/tools/openhands/bin/python -c "import os, shutil; os.setgid(1000); os.setuid(1000); assert shutil.which('openhands'), 'openhands is not executable as uid 1000, the restricted Pod Security Standard user Ploeg runs harnesses as'" \
+ && /opt/uv/tools/openhands/bin/python -c "import inspect, lmnr; assert 'rollout_entrypoint' in str(inspect.signature(lmnr.observe)), 'lmnr.observe lacks rollout_entrypoint, which openhands-sdk tracing passes'"
 
 # The CLI hardcodes load_public_skills=True — a startup git-sync of
 # github.com/OpenHands/extensions with NO opt-out (their #483 died stale; the
@@ -141,7 +143,7 @@ RUN uv tool install "openhands==${OPENHANDS_VERSION}" --constraints /tmp/openhan
 # the SDK default; the greps fail THIS BUILD loudly if an upstream release
 # moves or rewords the line, so behavior can never silently revert. Drop this
 # when a CLI release ships a real knob.
-RUN AGENT_STORE="$(find /root/.local/share/uv/tools/openhands -name agent_store.py -path '*/openhands_cli/*')" \
+RUN AGENT_STORE="$(find /opt/uv/tools/openhands -name agent_store.py -path '*/openhands_cli/*')" \
  && test -n "${AGENT_STORE}" \
  && grep -q 'load_public_skills=True' "${AGENT_STORE}" \
  && sed -i 's/load_public_skills=True/load_public_skills=False/' "${AGENT_STORE}" \
