@@ -25,7 +25,7 @@ ARG REGISTRY_DOCKERHUB=docker.io
 # renovate: datasource=docker depName=dhi.io/node versioning=docker
 ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.19.0-alpine3.23-dev@sha256:d00350837e082dc254939ffcf53861b3b965ff159e506d6ab1775710f91a82fe
 # renovate: datasource=docker depName=dhi.io/python versioning=docker
-ARG BASE_IMAGE=${REGISTRY_DHI}/python:3.13.15-alpine3.24-dev@sha256:8e51f99fa957d0b2531c4936b178d67d997e76fe48d7150357143295a03b1fd4
+ARG BASE_IMAGE=${REGISTRY_DHI}/python:3.13.15-alpine3.24-dev@sha256:78bb600276589f46c7bf4fa959f8d27ee755d6358c380b6babe29d437d5a4914
 # The jar-fetch stage only runs curl; its base never ships. Kept on the stock JRE image purely
 # to keep the fetched artifact byte-identical (see header note 3).
 # renovate: datasource=docker depName=docker.io/library/eclipse-temurin versioning=docker
