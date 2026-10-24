@@ -146,6 +146,34 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 ```
 
+#### Locked installs
+
+Pinning a package by name pins only that package. Its dependencies resolve on build day, so two
+builds of the same Dockerfile can ship different code. That is how the 2026-10-18 OpenHands
+outage happened: OpenHands was pinned, `lmnr` underneath it was not, and a new `lmnr` broke every
+Run. Every install line in an image therefore names a lockfile, or installs exactly one package
+that has no dependencies (VIK-2308).
+
+| What is installed | How |
+| --- | --- |
+| npm CLI tools | `ops/docker/<image>/tools/<tool>/package.json` plus `package-lock.json`, installed with `npm ci --prefix /opt/<tool>`; the binary is symlinked from `/opt/<tool>/node_modules/.bin` onto `PATH` |
+| Python packages | a `requirements*.in` compiled with `pip-compile --generate-hashes`, installed with `pip install --require-hashes -r` |
+| Rust crates | `cargo install --locked <crate>@<version>` |
+| Toolchains (Node, Rust) | copied from a digest-pinned image stage (`COPY --from=`), never a `curl … \| sh` installer |
+| Single binaries | a pinned version with a recorded checksum (`ADD --checksum` or `sha256sum -c`) |
+
+Each tool gets its own directory under `tools/`, so each keeps the dependency tree a global
+install would have given it. Many CLIs ship their native binary as an optional dependency, one
+per platform, and npm skips an optional dependency that fails to download without failing the
+install. Every install step therefore ends by running the tool (`moon --version`, `claude
+--version`): a build that lost the binary to a network error fails there instead of shipping.
+
+Renovate's npm and pip-compile managers bump the direct versions in these files and refresh the
+locks; monthly lock file maintenance refreshes the transitive dependencies. Both commit as
+`fix`, so the image it changes is released. Generate a new lock inside the image's own base, for
+example
+`docker run --rm -v "$PWD:/w" -w /w <node image> npm install --package-lock-only --ignore-scripts`.
+
 #### Build Arguments and Environment
 
 ```dockerfile
