@@ -8,7 +8,7 @@ ARG REGISTRY_DOCKERHUB=docker.io
 # One ARG carrying tag AND digest (house pattern): Renovate moves them together via the
 # digest-aware annotated-ARG manager.
 # renovate: datasource=docker depName=docker.io/library/node versioning=docker
-ARG NODE_IMAGE=${REGISTRY_DOCKERHUB}/library/node:24-bookworm-slim@sha256:3638d9a6fe4030bd716be989438248074489337ba3275657f93595428be4fc03
+ARG NODE_IMAGE=${REGISTRY_DOCKERHUB}/library/node:24-bookworm-slim@sha256:55fb5f5a527ea2c5c4a95f963e48ef90aa38c7b346054fdc8ee9957a2b55d205
 # renovate: datasource=docker depName=docker.io/library/rust versioning=docker
 ARG RUST_IMAGE=${REGISTRY_DOCKERHUB}/library/rust:1.97.0-slim-bookworm@sha256:6d220bf85c74e842a79da63997af8d2e74455c0b8847d8bb3a5888572334991d
 FROM ${RUST_IMAGE} AS rust
