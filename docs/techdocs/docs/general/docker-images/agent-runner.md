@@ -29,14 +29,20 @@ command lines and environment each profile sets are in Glide's
 `apps/ploeg/docs/contracts/acp-profiles.md`. Ploeg does not install agents, so a profile only
 works in an image that has its binary on `PATH`.
 
-Every tool gets its own version check during the build: `qwen --version` has to print exactly
-`QWEN_CODE_VERSION`, and `goose --version` has to contain `GOOSE_VERSION`. A release that
+Every tool gets its own version check during the build: `qwen --version` and `opencode --version`
+have to print exactly the version pinned in their `tools/<tool>/package.json`, and
+`goose --version` has to contain `GOOSE_VERSION`. A release that
 renames or breaks a binary therefore fails the build, and a Run never sees it.
 
 ### Pinning and bumping
 
-- The npm tools are pinned with an exact version in an `ARG`, each with a `# renovate:`
-  annotation.
+- Each npm tool has its own `tools/<tool>/package.json` with an exact version and a committed
+  `package-lock.json`. A stage built from the Node image installs them with `npm ci` into
+  `/opt/<tool>`, and the final image symlinks each binary onto `PATH`. The lock fixes the whole
+  dependency tree, not just the tool (VIK-2308). Renovate's npm manager bumps the tool and its
+  lock together, and monthly lock file maintenance refreshes the transitive dependencies.
+- `pyyaml` has no dependencies and installs with `--no-deps`, so the pinned version is all that
+  goes in.
 - Goose is a downloaded archive, so it has a SHA-256 per architecture as well as the version.
   BuildKit's `ADD --checksum` verifies the archive before any later stage can read it. Renovate
   bumps `GOOSE_VERSION` but not the checksums. A Renovate PR for Goose therefore fails its build
@@ -48,8 +54,7 @@ renames or breaks a binary therefore fails the build, and a Run never sees it.
 
 ### What the Qwen Code install contains, and what the build removes
 
-`npm install -g` ignores `--omit=optional` for this package, so the global install brings its
-optional native modules: `sharp` with the musl build of libvips, `@lydell/node-pty`, a clipboard
+The install brings Qwen Code's optional native modules: `sharp` with the musl build of libvips, `@lydell/node-pty`, a clipboard
 module and `@qwen-code/audio-capture`. npm 11 does not run the audio-capture install script,
 because the package is not on its allow-list.
 
