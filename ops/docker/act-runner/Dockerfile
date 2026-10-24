@@ -9,7 +9,7 @@
 # anonymous pulls, so unlike the other REGISTRY_* ARGs this one DEFAULTS to the proxy.
 ARG REGISTRY_DHI=harbor.webgrip.dev/dhi
 # renovate: datasource=docker depName=dhi.io/alpine-base versioning=docker
-ARG BASE_IMAGE=${REGISTRY_DHI}/alpine-base:3.23-dev@sha256:a5d8ac99e233c9141bbefb2afa1809923f420aeeeb11e9dbb463d0bddb943327
+ARG BASE_IMAGE=${REGISTRY_DHI}/alpine-base:3.23-dev@sha256:e2cf726c25b2aa2af2dee225fd856368fab5597f0f58da752f2a353d366e43d8
 FROM ${BASE_IMAGE}
 
 ARG BASE_IMAGE
