@@ -1,3 +1,9 @@
+## [semantic-release-rust-v0.1.9](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/semantic-release-rust-v0.1.8...semantic-release-rust-v0.1.9) (2026-10-24)
+
+### Fixed
+
+* **semantic-release-rust:** copy the Rust toolchain from a pinned image ([015002e](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/commit/015002e08faca31fdaf40058f7f6062e9d6ddccc))
+
 ## [semantic-release-rust-v0.1.8](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/semantic-release-rust-v0.1.7...semantic-release-rust-v0.1.8) (2026-10-24)
 
 ### Fixed
