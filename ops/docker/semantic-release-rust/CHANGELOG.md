@@ -1,3 +1,9 @@
+## [semantic-release-rust-v0.1.8](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/semantic-release-rust-v0.1.7...semantic-release-rust-v0.1.8) (2026-10-24)
+
+### Fixed
+
+* **toolchain:** update semantic-release toolchain ([076c128](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/commit/076c1280d91f7dc8e22d1b4eaea537c3d0561f4e))
+
 ## [semantic-release-rust-v0.1.7](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/semantic-release-rust-v0.1.6...semantic-release-rust-v0.1.7) (2026-10-24)
 
 ### Fixed
