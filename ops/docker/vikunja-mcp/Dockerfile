@@ -15,13 +15,10 @@ ARG IMAGE_CREATED=1970-01-01T00:00:00Z
 ARG IMAGE_VERSION=dev
 ARG IMAGE_REVISION=unknown
 
-# renovate: datasource=npm depName=@aimbitgmbh/vikunja-mcp
-ARG VIKUNJA_MCP_VERSION=0.1.0
-
-# Install the pinned MCP globally; its `vikunja-mcp` bin lands on PATH for supergateway to
-# spawn. Verify it resolves at build time. (npm runs as root in the base; the k8s
-# Deployment runs the container as uid 1000 — the -g install is world-readable/executable.)
-RUN npm install -g "@aimbitgmbh/vikunja-mcp@${VIKUNJA_MCP_VERSION}" \
+COPY tools/vikunja-mcp/package.json tools/vikunja-mcp/package-lock.json /opt/vikunja-mcp/
+RUN npm ci --prefix /opt/vikunja-mcp --omit=dev --no-audit --no-fund \
+ && npm cache clean --force \
+ && ln -s /opt/vikunja-mcp/node_modules/.bin/vikunja-mcp /usr/local/bin/vikunja-mcp \
  && command -v vikunja-mcp
 
 LABEL org.opencontainers.image.title="WebGrip Vikunja MCP" \
