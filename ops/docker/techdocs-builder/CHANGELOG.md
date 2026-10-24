@@ -1,3 +1,9 @@
+## [techdocs-builder-v1.8.1](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/techdocs-builder-v1.8.0...techdocs-builder-v1.8.1) (2026-10-24)
+
+### Fixed
+
+* **techdocs-builder:** install techdocs-cli, mermaid-cli and pagefind from lockfiles ([a423347](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/commit/a423347f601356a6cf5222b3e78cc90fa407adf5))
+
 ## [techdocs-builder-v1.8.0](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/techdocs-builder-v1.7.0...techdocs-builder-v1.8.0) (2026-08-12)
 
 ## [techdocs-builder-v1.7.0](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/techdocs-builder-v1.6.0...techdocs-builder-v1.7.0) (2026-08-11)
