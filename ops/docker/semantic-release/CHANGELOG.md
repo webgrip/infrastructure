@@ -1,3 +1,9 @@
+## [semantic-release-v0.3.7](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/semantic-release-v0.3.6...semantic-release-v0.3.7) (2026-10-24)
+
+### Fixed
+
+* **toolchain:** update semantic-release toolchain ([076c128](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/commit/076c1280d91f7dc8e22d1b4eaea537c3d0561f4e))
+
 ## [semantic-release-v0.3.6](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/semantic-release-v0.3.5...semantic-release-v0.3.6) (2026-10-24)
 
 ### Fixed
