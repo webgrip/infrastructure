@@ -1,3 +1,9 @@
+## [semantic-release-monorepo-v0.3.5](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/semantic-release-monorepo-v0.3.4...semantic-release-monorepo-v0.3.5) (2026-10-24)
+
+### Fixed
+
+* **toolchain:** update semantic-release toolchain ([6be4a58](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/commit/6be4a58358793158adf96e47aa4b1c993ec71d3c))
+
 ## [semantic-release-monorepo-v0.3.4](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/semantic-release-monorepo-v0.3.3...semantic-release-monorepo-v0.3.4) (2026-10-01)
 
 ### Fixed
