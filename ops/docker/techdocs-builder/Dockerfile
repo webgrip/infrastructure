@@ -33,14 +33,20 @@ ARG JRE_IMAGE=${REGISTRY_DOCKERHUB}/library/eclipse-temurin:11.0.31_11-jre-jammy
 
 FROM ${NODE_IMAGE} AS node
 
-RUN corepack enable && corepack prepare npm@latest --activate
-
 RUN apk add --no-cache python3 make g++
 
-RUN npm install -g \
-    @techdocs/cli@1.9.0 \
-    @mermaid-js/mermaid-cli@11.4.2 \
-    pagefind@1.5.2
+COPY tools/techdocs-cli/package.json tools/techdocs-cli/package-lock.json /usr/local/lib/techdocs-cli/
+COPY tools/mermaid-cli/package.json tools/mermaid-cli/package-lock.json /usr/local/lib/mermaid-cli/
+COPY tools/pagefind/package.json tools/pagefind/package-lock.json /usr/local/lib/pagefind/
+RUN install -d /usr/local/bin \
+ && for tool in techdocs-cli mermaid-cli pagefind; do \
+      npm ci --prefix "/usr/local/lib/${tool}" --omit=dev --no-audit --no-fund || exit 1; \
+    done \
+ && npm cache clean --force \
+ && ln -s ../lib/techdocs-cli/node_modules/.bin/techdocs-cli /usr/local/bin/techdocs-cli \
+ && ln -s ../lib/mermaid-cli/node_modules/.bin/mmdc /usr/local/bin/mmdc \
+ && ln -s ../lib/pagefind/node_modules/.bin/pagefind /usr/local/bin/pagefind \
+ && techdocs-cli --version && mmdc --version && pagefind --version
 
 
 FROM ${JRE_IMAGE} AS openjdk

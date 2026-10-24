@@ -9,6 +9,10 @@ ARG REGISTRY_DOCKERHUB=docker.io
 # digest-aware annotated-ARG manager.
 # renovate: datasource=docker depName=docker.io/library/node versioning=docker
 ARG NODE_IMAGE=${REGISTRY_DOCKERHUB}/library/node:24-bookworm-slim@sha256:3638d9a6fe4030bd716be989438248074489337ba3275657f93595428be4fc03
+# renovate: datasource=docker depName=docker.io/library/rust versioning=docker
+ARG RUST_IMAGE=${REGISTRY_DOCKERHUB}/library/rust:1.97.0-slim-bookworm@sha256:6d220bf85c74e842a79da63997af8d2e74455c0b8847d8bb3a5888572334991d
+FROM ${RUST_IMAGE} AS rust
+
 FROM ${NODE_IMAGE}
 
 ARG IMAGE_CREATED=1970-01-01T00:00:00Z
@@ -41,11 +45,9 @@ ENV RUSTUP_HOME=/usr/local/rustup
 ENV CARGO_HOME=/usr/local/cargo
 ENV PATH=/usr/local/cargo/bin:$PATH
 
-# 'stable' resolves to whatever rust-lang shipped most recently — the toolchain that compiles
-# release artifacts was unversioned. Pinned to the same version rust-ci-runner builds with.
-# renovate: datasource=docker depName=docker.io/library/rust versioning=docker
-ARG RUST_TOOLCHAIN=1.97.0
-RUN curl -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain ${RUST_TOOLCHAIN}
+COPY --from=rust /usr/local/rustup /usr/local/rustup
+COPY --from=rust /usr/local/cargo /usr/local/cargo
+RUN rustup --version && rustc --version && cargo --version
 
 ###############################################################################
 # Rust helpers
@@ -61,7 +63,9 @@ ARG GIT_CLIFF_VERSION=2.13.1
 ARG CROSS_VERSION=0.2.5
 # renovate: datasource=crate depName=wasm-bindgen-cli
 ARG WASM_BINDGEN_CLI_VERSION=0.2.127
-RUN cargo install --locked cargo-binstall && \
+# renovate: datasource=crate depName=cargo-binstall
+ARG CARGO_BINSTALL_VERSION=1.26.0
+RUN cargo install --locked cargo-binstall@${CARGO_BINSTALL_VERSION} && \
     cargo binstall --no-confirm cargo-release@${CARGO_RELEASE_VERSION} && \
     cargo binstall --no-confirm git-cliff@${GIT_CLIFF_VERSION} && \
     cargo install --locked cross@${CROSS_VERSION} && \
@@ -71,23 +75,11 @@ RUN cargo install --locked cargo-binstall && \
 ###############################################################################
 # semantic-release core + plugins
 ###############################################################################
-# Core pinned; the plugins still float at install time. The honest fix for the whole set is a
-# committed package-lock.json like the semantic-release images carry (webgrip/workflows ADR-0005)
-# — this image predates that pattern and should eventually adopt it. Until then, pinning the core
-# at least fixes the resolver every plugin's peer range is evaluated against.
-# renovate: datasource=npm depName=semantic-release
-ARG SEMREL_VERSION=25.0.9
-RUN npm install -g \
-        semantic-release@${SEMREL_VERSION} \
-        @semantic-release/changelog \
-        @semantic-release/commit-analyzer \
-        @semantic-release/exec \
-        @semantic-release/git \
-        @semantic-release/github \
-        @semantic-release/release-notes-generator \
-        semantic-release-cargo \
-        semantic-release-github-actions-tags \
-        semantic-release-helm3
+COPY tools/semantic-release/package.json tools/semantic-release/package-lock.json /opt/semantic-release/
+RUN npm ci --prefix /opt/semantic-release --omit=dev --no-audit --no-fund \
+ && npm cache clean --force \
+ && ln -s /opt/semantic-release/node_modules/.bin/semantic-release /usr/local/bin/semantic-release \
+ && semantic-release --version
 
 ###############################################################################
 # Default entry

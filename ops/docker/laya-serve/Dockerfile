@@ -5,8 +5,6 @@ ARG BASE_IMAGE=${REGISTRY_DHI}/python:3.12-debian13@sha256:1bab11a972258285639be
 
 FROM ${BUILD_IMAGE} AS build
 
-ARG TORCH_VERSION=2.14.0
-ARG LAYA_VERSION=0.3.22
 ARG LAYA_MODEL_REVISION=55cf4c4ebb4ebe31b2550e8bdf3bd21b99753851
 
 ENV PIP_NO_CACHE_DIR=1 \
@@ -14,9 +12,9 @@ ENV PIP_NO_CACHE_DIR=1 \
     HF_HOME=/opt/hf \
     HF_HUB_DISABLE_TELEMETRY=1
 
+COPY requirements.txt /tmp/requirements.txt
 RUN python -m venv /opt/venv \
- && /opt/venv/bin/pip install "torch==${TORCH_VERSION}" --index-url https://download.pytorch.org/whl/cpu \
- && /opt/venv/bin/pip install "laya[serve]==${LAYA_VERSION}"
+ && /opt/venv/bin/pip install --require-hashes -r /tmp/requirements.txt
 
 RUN /opt/venv/bin/python -c "import laya; laya.load('convaiinnovations/laya', subfolder='typed-decisions', device='cpu', revision='${LAYA_MODEL_REVISION}')" \
  && chmod -R a+rX /opt/hf

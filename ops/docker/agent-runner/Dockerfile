@@ -59,6 +59,16 @@ ARG GOOSE_SHA256_ARM64=4584ba8840fc77c2f3e48758f45543c18f1c1293d704941a8eeb52208
 FROM ${UV_IMAGE} AS uv
 FROM ${NODE_IMAGE} AS node
 
+FROM node AS agent-tools
+COPY tools/moon/package.json tools/moon/package-lock.json /opt/moon/
+COPY tools/openspec/package.json tools/openspec/package-lock.json /opt/openspec/
+COPY tools/qwen-code/package.json tools/qwen-code/package-lock.json /opt/qwen-code/
+COPY tools/opencode/package.json tools/opencode/package-lock.json /opt/opencode/
+RUN for tool in moon openspec qwen-code opencode; do \
+      npm ci --prefix "/opt/${tool}" --omit=dev --no-audit --no-fund || exit 1; \
+    done \
+ && rm -rf /opt/qwen-code/node_modules/@lydell /opt/qwen-code/node_modules/@qwen-code/qwen-code/node_modules/@lydell
+
 FROM scratch AS goose-archive-amd64
 ARG GOOSE_VERSION
 ARG GOOSE_SHA256_AMD64
@@ -85,15 +95,6 @@ ARG GOOSE_VERSION
 # change, not a rename of every manifest and pull-ref.
 # renovate: datasource=pypi depName=openhands
 ARG OPENHANDS_VERSION=1.16.0
-# Agent workflow tooling (mise.toml / .forgejo CI in the erfbeeld repo).
-# renovate: datasource=npm depName=@moonrepo/cli
-ARG MOON_VERSION=2.4.4
-# renovate: datasource=npm depName=@fission-ai/openspec
-ARG OPENSPEC_VERSION=1.6.0
-# renovate: datasource=npm depName=@qwen-code/qwen-code
-ARG QWEN_CODE_VERSION=0.24.6
-# renovate: datasource=npm depName=opencode-ai
-ARG OPENCODE_VERSION=1.19.3
 # renovate: datasource=pypi depName=pyyaml
 ARG PYYAML_VERSION=6.0.3
 # Skills loadout (board #268). The core set is baked from the webgrip marketplace at BUILD
@@ -172,25 +173,27 @@ RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
  && ln -sf /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx \
  && node --version && npm --version
 
-# --- moon + openspec: the agent's own change-workflow tools --------------------------------
-RUN npm install -g "@moonrepo/cli@${MOON_VERSION}" "@fission-ai/openspec@${OPENSPEC_VERSION}" \
- && moon --version && openspec --version
+COPY --from=agent-tools /opt/moon /opt/moon
+COPY --from=agent-tools /opt/openspec /opt/openspec
+RUN ln -s /opt/moon/node_modules/.bin/moon /usr/local/bin/moon \
+ && ln -s /opt/moon/node_modules/.bin/moonx /usr/local/bin/moonx \
+ && ln -s /opt/openspec/node_modules/.bin/openspec /usr/local/bin/openspec \
+ && moon --version && moonx --help >/dev/null && openspec --version
 
 ENV OPENSPEC_TELEMETRY=0 \
     DO_NOT_TRACK=1 \
     QWEN_USAGE_STATISTICS_ENABLED=false \
     GOOSE_TELEMETRY_OFF=1
 
-RUN npm install -g "@qwen-code/qwen-code@${QWEN_CODE_VERSION}" \
- && npm cache clean --force \
- && rm -rf /usr/local/lib/node_modules/@qwen-code/qwen-code/node_modules/@lydell \
- && cd /usr/local/lib/node_modules/@qwen-code/qwen-code \
+COPY --from=agent-tools /opt/qwen-code /opt/qwen-code
+RUN ln -s /opt/qwen-code/node_modules/.bin/qwen /usr/local/bin/qwen \
+ && cd /opt/qwen-code/node_modules/@qwen-code/qwen-code \
  && node --input-type=module -e 'for (const m of ["@lydell/node-pty", "node-pty"]) { if (await import(m).then(() => true, () => false)) { console.error(`${m} still resolves: its glibc prebuild segfaults on musl`); process.exit(1); } }' \
- && test "$(qwen --version)" = "${QWEN_CODE_VERSION}"
+ && test "$(qwen --version)" = "$(node -p 'require("/opt/qwen-code/package.json").dependencies["@qwen-code/qwen-code"]')"
 
-RUN npm install -g --no-audit --no-fund "opencode-ai@${OPENCODE_VERSION}" \
- && npm cache clean --force \
- && test "$(opencode --version)" = "${OPENCODE_VERSION}" \
+COPY --from=agent-tools /opt/opencode /opt/opencode
+RUN ln -s /opt/opencode/node_modules/.bin/opencode /usr/local/bin/opencode \
+ && test "$(opencode --version)" = "$(node -p 'require("/opt/opencode/package.json").dependencies["opencode-ai"]')" \
  && opencode acp --help >/dev/null
 
 RUN --mount=type=bind,from=goose-archive,source=/goose.tar.gz,target=/tmp/goose.tar.gz \
@@ -200,7 +203,7 @@ RUN --mount=type=bind,from=goose-archive,source=/goose.tar.gz,target=/tmp/goose.
  && goose --version | grep -F "${GOOSE_VERSION}"
 
 # --- pyyaml for the domain scripts ---------------------------------------------------------
-RUN pip install --no-cache-dir "pyyaml==${PYYAML_VERSION}" \
+RUN pip install --no-cache-dir --no-deps "pyyaml==${PYYAML_VERSION}" \
  && python3 -c "import yaml; print('pyyaml', yaml.__version__)"
 
 # --- baked core skills ---------------------------------------------------------------------

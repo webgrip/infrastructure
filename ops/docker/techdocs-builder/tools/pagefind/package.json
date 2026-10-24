@@ -1,0 +1,7 @@
+{
+  "name": "techdocs-builder-pagefind",
+  "private": true,
+  "dependencies": {
+    "pagefind": "1.5.2"
+  }
+}

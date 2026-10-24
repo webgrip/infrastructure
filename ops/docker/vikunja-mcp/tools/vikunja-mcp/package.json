@@ -1,0 +1,7 @@
+{
+  "name": "vikunja-mcp-server",
+  "private": true,
+  "dependencies": {
+    "@aimbitgmbh/vikunja-mcp": "0.1.0"
+  }
+}

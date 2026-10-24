@@ -79,9 +79,31 @@
       "matchManagers": [
         "pip-compile"
       ],
+      "matchFileNames": [
+        "ops/docker/techdocs-builder/**"
+      ],
       "groupName": "techdocs-builder python locks",
       "semanticCommitType": "fix",
       "semanticCommitScope": "techdocs-builder"
+    },
+    {
+      "description": "laya-serve's python env is pip-compile hash-locked in two steps, mirroring the two installs it replaced (VIK-2308): requirements-torch.in resolves torch and its dependencies from the PyTorch CPU index alone, and requirements.in resolves laya[serve] against that lock as a constraint file. Compiled inside the image's python:3.12-debian13 build base.",
+      "matchManagers": [
+        "pip-compile"
+      ],
+      "matchFileNames": [
+        "ops/docker/laya-serve/**"
+      ],
+      "groupName": "laya-serve python locks",
+      "semanticCommitType": "fix",
+      "semanticCommitScope": "laya-serve"
+    },
+    {
+      "description": "Lock file maintenance changes what an image installs, so it must cut that image's release. The org preset commits it as chore(deps), which semantic-release ignores: the refreshed lock would sit on main and no image would ever carry it. Every ops/docker/<image>/tools/*/package-lock.json and pip-compile lock is installed into its image at build time (VIK-2308).",
+      "matchUpdateTypes": [
+        "lockFileMaintenance"
+      ],
+      "semanticCommitType": "fix"
     },
     {
       "description": "webgrip/workflows is pinned by commit SHA with a '# main' branch annotation — the repo cuts no tags, so Renovate's tag lookup 404s (GET /repos/webgrip/workflows/tags/main) and the FATAL aborts the ENTIRE repo run, taking every other update (including all annotated-ARG bumps) down with it. The pin is moved deliberately by hand when the reusables change; Renovate has nothing to version here.",
@@ -93,7 +115,8 @@
   ],
   "pip-compile": {
     "managerFilePatterns": [
-      "/^ops/docker/techdocs-builder/requirements.*\\.txt$/"
+      "/^ops/docker/techdocs-builder/requirements.*\\.txt$/",
+      "/^ops/docker/laya-serve/requirements.*\\.txt$/"
     ]
   }
 }

@@ -1,0 +1,5 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+-c requirements-torch.txt
+
+torch==2.14.0
+laya[serve]==0.3.22

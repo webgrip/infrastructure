@@ -3,6 +3,9 @@
 # renovate: datasource=docker depName=ghcr.io/actions/actions-runner versioning=docker
 ARG RUNNER_VERSION=2.335.1@sha256:08c30b0a7105f64bddfc485d2487a22aa03932a791402393352fdf674bda2c29
 ARG REGISTRY_GHCR=ghcr.io
+ARG REGISTRY_DOCKERHUB=docker.io
+# renovate: datasource=docker depName=docker.io/library/node versioning=docker
+ARG NODE_IMAGE=${REGISTRY_DOCKERHUB}/library/node:24.22.1-bookworm@sha256:6449e19d8184d84062525b6a7524def03146c2cb04a7f08b076680d0e8e4240a
 
 # The CVE gate's two binaries, taken from the hardened image that already ships them.
 #
@@ -27,6 +30,16 @@ ARG REGISTRY_WEBGRIP=harbor.webgrip.dev/webgrip
 # renovate: datasource=docker depName=harbor.webgrip.dev/webgrip/cve-gate versioning=docker
 ARG CVE_GATE_VERSION=0.3.4@sha256:6afd2c3aea931364810835b4c2f0121ad57f0b5c20f0b2ce44c336124e683bf2
 FROM ${REGISTRY_WEBGRIP}/cve-gate:${CVE_GATE_VERSION} AS cve-gate-src
+
+FROM ${NODE_IMAGE} AS node
+
+FROM node AS claude-code
+COPY tools/claude-code/package.json tools/claude-code/package-lock.json /opt/claude-code/
+RUN npm ci --prefix /opt/claude-code --omit=dev --no-audit --no-fund
+
+FROM node AS semrel
+COPY tools/semrel/package.json tools/semrel/package-lock.json /opt/semrel/
+RUN npm ci --prefix /opt/semrel --omit=dev --no-audit --no-fund
 
 FROM ${REGISTRY_GHCR}/actions/actions-runner:${RUNNER_VERSION} AS runner
 
@@ -241,12 +254,14 @@ RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" &&
 # install Node properly: host-mode steps need `node`/`npm`/`npx` on PATH, and a stable
 # global npm prefix for the CLI below. Size is not a per-job cost — the kubelet pulls this
 # image once per node and containerd caches it (that is the point of host mode).
-ARG NODE_MAJOR=24
-RUN curl -fsSL "https://deb.nodesource.com/setup_${NODE_MAJOR}.x" | bash - && \
-    apt-get install -y nodejs && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* && \
-    node --version && npm --version
+COPY --from=node /usr/local/bin/node /usr/bin/node
+COPY --from=node /usr/local/lib/node_modules/npm /usr/lib/node_modules/npm
+COPY --from=node /usr/local/lib/node_modules/corepack /usr/lib/node_modules/corepack
+COPY --from=node /usr/local/include/node /usr/include/node
+RUN ln -s ../lib/node_modules/npm/bin/npm-cli.js /usr/bin/npm && \
+    ln -s ../lib/node_modules/npm/bin/npx-cli.js /usr/bin/npx && \
+    ln -s ../lib/node_modules/corepack/dist/corepack.js /usr/bin/corepack && \
+    node --version && npm --version && npx --version && corepack --version
 
 # Restore the GLIBC node20 external the actions-runner base dropped. Base 2.335.x ships
 # ONLY externals/node24_alpine (musl): container-mode JS actions (checkout@v4 declares
@@ -270,39 +285,15 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Anthropic's Claude Code CLI — `claude plugin validate` is the official manifest/frontmatter
-# validator used by the skills/plugin repos. Pinned so validation is reproducible and moves only on
-# a deliberate image rebuild.
-#
-# The old comment here claimed "Renovate bumps this ARG". It did not, and could not: renovate.json's
-# custom manager matches a `# renovate:` annotation immediately followed by the ARG line, and this
-# ARG had no annotation. So it sat on 2.1.214 while upstream reached 2.1.223 — nine patch releases,
-# silently, on a pin everyone assumed was automated. Annotated now, so the claim is true.
-# renovate: datasource=npm depName=@anthropic-ai/claude-code
-ARG CLAUDE_CODE_VERSION=2.1.223
-RUN npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" && \
-    npm cache clean --force
+COPY --from=claude-code /opt/claude-code /opt/claude-code
+RUN ln -s /opt/claude-code/node_modules/.bin/claude /usr/bin/claude && \
+    claude --version
 
 # Prebaked semantic-release toolchain. The webgrip/workflows semantic-release composites
 # npm-install exactly this set on every release job (~4 min measured per run); when
 # SEMREL_PREBAKED is set and the directory exists they skip the install and put
-# $SEMREL_PREBAKED/.bin on PATH instead. Versions pinned exactly (--save-exact) so the
-# baked tree mirrors what the composites would have installed.
-RUN mkdir -p /opt/semrel && \
-    cd /opt/semrel && \
-    npm init -y > /dev/null && \
-    npm install --save-exact --no-audit --no-fund \
-      semantic-release@24.2.7 \
-      semantic-release-monorepo@8.0.2 \
-      @semantic-release/commit-analyzer@13.0.0 \
-      @semantic-release/exec@7.0.3 \
-      @semantic-release/git@10.0.1 \
-      @semantic-release/changelog@6.0.3 \
-      @saithodev/semantic-release-gitea@2.1.0 \
-      @semantic-release/release-notes-generator@14.0.0 \
-      conventional-changelog-conventionalcommits@7.0.2 \
-      semantic-release-helm3@2.10.0 && \
-    npm cache clean --force
+# $SEMREL_PREBAKED/.bin on PATH instead.
+COPY --from=semrel /opt/semrel /opt/semrel
 ENV SEMREL_PREBAKED=/opt/semrel/node_modules
 
 USER runner

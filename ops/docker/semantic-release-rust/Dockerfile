@@ -29,6 +29,10 @@ ARG REGISTRY_DOCKERHUB=docker.io
 # statement about THIS base until Renovate says otherwise.
 # renovate: datasource=docker depName=docker.io/library/node versioning=docker
 ARG NODE_IMAGE=${REGISTRY_DOCKERHUB}/library/node:24-bookworm-slim@sha256:3638d9a6fe4030bd716be989438248074489337ba3275657f93595428be4fc03
+# renovate: datasource=docker depName=docker.io/library/rust versioning=docker
+ARG RUST_IMAGE=${REGISTRY_DOCKERHUB}/library/rust:1.97.0-slim-bookworm@sha256:6d220bf85c74e842a79da63997af8d2e74455c0b8847d8bb3a5888572334991d
+
+FROM ${RUST_IMAGE} AS rust
 
 ###############################################################################
 # Locked toolchain, built in a separate stage so npm's cache and metadata never reach the image
@@ -118,19 +122,16 @@ ENV PATH=/usr/local/cargo/bin:$PATH
 # Release re-entry: v0.1.3 promoted by digest but its sign scan was killed by node pressure
 # (run 401; runner request raised to 3Gi in homelab-cluster 97361c7b). This cuts the signed
 # successor.
-# Pinned: 'stable' resolves to whatever rust-lang shipped most recently — the float the
-# 2026-08-08 pin train fixed in rust-releaser and missed here. Same version as the rust images.
-# renovate: datasource=docker depName=docker.io/library/rust versioning=docker
-ARG RUST_TOOLCHAIN=1.97.0
 RUN apt-get update -yq && \
     apt-get install -y --no-install-recommends \
         build-essential \
         pkg-config \
         libssl-dev \
-    && apt-get clean && rm -rf /var/lib/apt/lists/* && \
-    curl -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path --profile minimal --default-toolchain ${RUST_TOOLCHAIN} && \
-    chmod -R a+w "${CARGO_HOME}" "${RUSTUP_HOME}" && \
-    cargo --version
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+COPY --from=rust /usr/local/rustup /usr/local/rustup
+COPY --from=rust /usr/local/cargo /usr/local/cargo
+RUN chmod -R a+w "${CARGO_HOME}" "${RUSTUP_HOME}" && \
+    rustup --version && rustc --version && cargo --version
 
 COPY --from=deps /opt/semrel /opt/semrel
 
