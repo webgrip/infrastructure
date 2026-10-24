@@ -1,3 +1,9 @@
+## [agent-runner-v1.4.2](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/agent-runner-v1.4.1...agent-runner-v1.4.2) (2026-10-24)
+
+### Fixed
+
+* **agent-runner:** install moon, OpenSpec, Qwen Code and OpenCode from lockfiles ([b795cc4](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/commit/b795cc4df7e6b9dae1240a6d9f2bea5067ce4a1d))
+
 ## [agent-runner-v1.4.1](http://forgejo-http.forgejo.svc.cluster.local:3000/webgrip/infrastructure/compare/agent-runner-v1.4.0...agent-runner-v1.4.1) (2026-10-18)
 
 ### Fixed
