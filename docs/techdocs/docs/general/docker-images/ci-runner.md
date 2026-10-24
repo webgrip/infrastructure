@@ -331,10 +331,6 @@ FROM webgrip/ci-runner:latest
 
 USER root
 
-# Add Node.js for frontend builds
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
-    apt-get install -y nodejs
-
 # Add database clients
 RUN apt-get install -y postgresql-client mysql-client
 
