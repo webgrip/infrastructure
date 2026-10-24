@@ -1,0 +1,7 @@
+{
+  "name": "techdocs-builder-mermaid-cli",
+  "private": true,
+  "dependencies": {
+    "@mermaid-js/mermaid-cli": "11.4.2"
+  }
+}

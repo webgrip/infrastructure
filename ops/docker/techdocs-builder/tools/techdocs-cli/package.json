@@ -1,0 +1,7 @@
+{
+  "name": "techdocs-builder-techdocs-cli",
+  "private": true,
+  "dependencies": {
+    "@techdocs/cli": "1.9.0"
+  }
+}
