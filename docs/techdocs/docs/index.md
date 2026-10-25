@@ -26,6 +26,7 @@ Our specialized container images for different purposes:
 | [Rust CI Runner](general/docker-images/rust-ci-runner.md) | Rust development and CI environment | Complete Rust toolchain + utilities |
 | [CI Runner](general/docker-images/ci-runner.md) | Shared CI toolchain (GitHub ARC + Forgejo host-mode) | PHP, .NET, Node, Python, Claude Code CLI |
 | [Helm Deploy](general/docker-images/helm-deploy.md) | Kubernetes deployment via Helm | Alpine-based deployment image |
+| [Infra Runner](general/docker-images/infra-runner.md) | Infra CI jobs that hold production credentials | OpenTofu, age, etcd on a hardened non-root base |
 | [Playwright Runner](general/docker-images/playwright-runner.md) | End-to-end testing environment | Browser testing infrastructure |
 | [ACT Runner](general/docker-images/act-runner.md) | Local GitHub Actions testing | Run workflows locally with ACT |
 | [Rust Releaser](general/docker-images/rust-releaser.md) | Release automation for Rust projects | Node.js + Rust release tooling |

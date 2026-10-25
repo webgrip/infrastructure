@@ -194,6 +194,7 @@ The pipeline automatically builds and publishes these images:
 | `ops/docker/rust-ci-runner` | `webgrip/rust-ci-runner` | [Rust development environment](../docker-images/rust-ci-runner.md) |
 | `ops/docker/ci-runner` | `webgrip/ci-runner` | [Self-hosted GitHub Actions runner](../docker-images/ci-runner.md) |
 | `ops/docker/helm-deploy` | `webgrip/helm-deploy` | [Kubernetes deployment tools](../docker-images/helm-deploy.md) |
+| `ops/docker/infra-runner` | `webgrip/infra-runner` | [OpenTofu, age and etcd for credential-holding infra jobs](../docker-images/infra-runner.md) |
 | `ops/docker/playwright-runner` | `webgrip/playwright-runner` | [E2E testing environment](../docker-images/playwright-runner.md) |
 | `ops/docker/act-runner` | `webgrip/act-runner` | [Local GitHub Actions testing](../docker-images/act-runner.md) |
 | `ops/docker/rust-releaser` | `webgrip/rust-releaser` | [Release automation](../docker-images/rust-releaser.md) |
