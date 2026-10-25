@@ -198,8 +198,7 @@ two portability gotchas (`/usr/local/bin` absent on all DHI bases; `-dev` varian
 ones) live in ADR-0006's history.
 
 **Held back, with reasons**: `vikunja-mcp` (upstream app-image base — nothing to swap);
-`semantic-release-rust` (cargo verification compiles make musl-vs-glibc a behavioral change —
-needs a consumer-crate check); `playwright-runner` and `ci-runner` (the standing ADR-0006
+`playwright-runner` and `ci-runner` (the standing ADR-0006
 structural exceptions). Remaining migratable: the techdocs chain (the 141/502 prize — DHI
 node+python stages plus the Java 11 question), `agent-runner` (dhi/python), `php-ci-runner`
 (dhi/php availability to confirm), `rust-ci-runner`/`rust-releaser` (dhi/rust).

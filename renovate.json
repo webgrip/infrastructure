@@ -38,13 +38,12 @@
         "ops/docker/rust-ci-runner/Dockerfile",
         "ops/docker/rust-releaser/Dockerfile",
         "ops/docker/semantic-release/Dockerfile",
-        "ops/docker/semantic-release-monorepo/Dockerfile",
-        "ops/docker/semantic-release-rust/Dockerfile"
+        "ops/docker/semantic-release-monorepo/Dockerfile"
       ],
       "enabled": false
     },
     {
-      "description": "The release toolchain (webgrip/workflows ADR-0005) is the one npm dependency set in this repo that is LOCKED, because it decides every repo's version numbers. These package.json files are also their image's release manifest — Renovate owns the dependencies; semantic-release owns the version. It upgrades as ONE reviewed PR across all three images — they must stay on the same semantic-release version, since the derived images replace the base's tree wholesale. A MAJOR bump is expected to FAIL the image build: each Dockerfile asserts the major that webgrip/workflows' composites target. The group bypasses the repository's PR and branch concurrency limits: on 2026-10-23 @webgrip/semantic-release-config 1.4.0 (the forge adapter homelab ADR-0069 requires) sat behind the preset's prConcurrentLimit of 5, so no toolchain image shipped it and only Ploeg released with it.",
+      "description": "The release toolchain (webgrip/workflows ADR-0005) is the one npm dependency set in this repo that is LOCKED, because it decides every repo's version numbers. These package.json files are also their image's release manifest — Renovate owns the dependencies; semantic-release owns the version. It upgrades as ONE reviewed PR across both images — they must stay on the same semantic-release version, since the derived images replace the base's tree wholesale. A MAJOR bump is expected to FAIL the image build: each Dockerfile asserts the major that webgrip/workflows' composites target. The group bypasses the repository's PR and branch concurrency limits: on 2026-10-23 @webgrip/semantic-release-config 1.4.0 (the forge adapter homelab ADR-0069 requires) sat behind the preset's prConcurrentLimit of 5, so no toolchain image shipped it and only Ploeg released with it.",
       "matchFileNames": [
         "ops/docker/semantic-release*/package.json"
       ],
