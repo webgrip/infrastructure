@@ -19,6 +19,7 @@ RUN apk add --no-cache \
       curl \
       git \
       jq \
+      openssh-client \
       tar \
  && apk del --no-cache npm yarn corepack \
  && deluser --remove-home node \
@@ -86,6 +87,7 @@ RUN node --version \
  && bash --version | head -n 1 \
  && curl --version | head -n 1 \
  && jq --version \
+ && ssh -V \
  && git --version \
  && date --version | head -n 1 \
  && tar --version | head -n 1 \

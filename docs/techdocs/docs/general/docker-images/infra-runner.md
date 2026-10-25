@@ -42,10 +42,14 @@ Both need `node` on `PATH`, because JavaScript actions such as `actions/checkout
 | `etcd`, `etcdctl`, `etcdutl` | 3.7.3 | `etcd-io/etcd` release archive | `SHA256SUMS` from the same release |
 | `node` | 24 | the base image | the base image digest |
 
-From apk: `bash`, `ca-certificates`, `coreutils`, `curl`, `git`, `jq` and `tar`. GNU coreutils is
+From apk: `bash`, `ca-certificates`, `coreutils`, `curl`, `git`, `jq`, `openssh-client` and `tar`. GNU coreutils is
 there because the workflows rely on it: `date -u -d` on an RFC 3339 timestamp, which busybox
 `date` rejects, and `od`, `base64`, `stat -c`, `dd`, `mktemp`, `seq` and `sha256sum` behaving the
 way the scripts expect.
+
+`openssh-client` is there for unfold-cluster's apply, which reads the tailnet keys from its Headscale
+server over SSH with `StrictHostKeyChecking=yes` against a host key OpenTofu pinned; the image
+holds no SSH key of its own.
 
 The base image's `npm`, `yarn` and `corepack` are removed, and so is its `node` user, whose uid
 `1000` the `runner` user takes over.
