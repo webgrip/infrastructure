@@ -79,8 +79,10 @@ That is the entire interface. The composite actions in `webgrip/workflows` look 
 consumer's `.releaserc.cjs` does a bare `require('@webgrip/semantic-release-config')` from its own
 checkout, which resolves against that workspace only unless `NODE_PATH` says otherwise.
 
-A job run **outside** these images still releases — the composites fall back to an unlocked install
-and emit a `::warning::` saying so. Visible, not fatal.
+A job run **outside** these images does not release: the composites install nothing, so they fail
+with `No usable prebaked release toolchain` and name the image to add as the job's `container:`.
+The [ci-runner](ci-runner.md) host image carries no release toolchain; its semantic-release 24
+bake predated this contract, could never pass the probe, and was removed.
 
 ## Usage
 

@@ -37,10 +37,6 @@ FROM node AS claude-code
 COPY tools/claude-code/package.json tools/claude-code/package-lock.json /opt/claude-code/
 RUN npm ci --prefix /opt/claude-code --omit=dev --no-audit --no-fund
 
-FROM node AS semrel
-COPY tools/semrel/package.json tools/semrel/package-lock.json /opt/semrel/
-RUN npm ci --prefix /opt/semrel --omit=dev --no-audit --no-fund
-
 FROM ${REGISTRY_GHCR}/actions/actions-runner:${RUNNER_VERSION} AS runner
 
 ARG IMAGE_CREATED=1970-01-01T00:00:00Z
@@ -288,12 +284,5 @@ RUN apt-get update && \
 COPY --from=claude-code /opt/claude-code /opt/claude-code
 RUN ln -s /opt/claude-code/node_modules/.bin/claude /usr/bin/claude && \
     claude --version
-
-# Prebaked semantic-release toolchain. The webgrip/workflows semantic-release composites
-# npm-install exactly this set on every release job (~4 min measured per run); when
-# SEMREL_PREBAKED is set and the directory exists they skip the install and put
-# $SEMREL_PREBAKED/.bin on PATH instead.
-COPY --from=semrel /opt/semrel /opt/semrel
-ENV SEMREL_PREBAKED=/opt/semrel/node_modules
 
 USER runner
