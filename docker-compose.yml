@@ -7,6 +7,10 @@ services:
     build:
       context: ops/docker/helm-deploy
       dockerfile: Dockerfile
+  infra-runner:
+    build:
+      context: ops/docker/infra-runner
+      dockerfile: Dockerfile
   playwright-runner:
     build:
       context: ops/docker/playwright-runner

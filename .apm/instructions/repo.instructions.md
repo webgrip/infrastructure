@@ -10,7 +10,7 @@ release mechanics and the traps that a single workflow file does not reveal.
 
 `ops/docker/<image>/` is the unit of release — around twenty runner, releaser and tooling
 images (`agent-runner`, `ci-runner`, `semantic-release*`, `techdocs-*`, the language `*-ci-runner`
-family, `static-site-ci-runner`, `helm-deploy`, `cve-gate`, `vikunja-mcp`). Alongside them:
+family, `static-site-ci-runner`, `helm-deploy`, `infra-runner`, `cve-gate`, `vikunja-mcp`). Alongside them:
 `ops/scripts/`, `ops/security/`, `ops/vex/`.
 
 **`.forgejo/` is the only workflow tree.** There is no `.github/` any more — the README's ACT
