@@ -11,8 +11,8 @@
 # install nothing. See webgrip/workflows ADR-0005.
 #
 # The dependency set is LOCKED — npm ci against toolchain/package-lock.json. That is the whole
-# point of the image, so the lockfile is committed and Renovate owns it. The two variants
-# (semantic-release-monorepo, semantic-release-rust) are INDEPENDENT images that repeat the runtime
+# point of the image, so the lockfile is committed and Renovate owns it. The variant
+# (semantic-release-monorepo) is an INDEPENDENT image that repeats the runtime
 # block below verbatim rather than building FROM this one; see that block for why.
 ###############################################################################
 # Release re-entry: the alpine commit's wave was cancelled by the monorepo push that followed
@@ -40,8 +40,8 @@ WORKDIR /opt/semrel
 # NB: this dir's package.json is BOTH the release manifest (its name is the tag prefix, its version
 # is bumped by @semantic-release/git) and the toolchain manifest. npm does not mind: it tolerates a
 # root version ahead of the lock's, which is the state every release leaves behind, and it accepts a
-# package that depends on its own name — which semantic-release-monorepo and semantic-release-rust
-# both do, since the image name is also a package name.
+# package that depends on its own name — which semantic-release-monorepo
+# does, since the image name is also a package name.
 COPY .npmrc /tmp/npmrc
 COPY package.json package-lock.json ./
 RUN NPM_CONFIG_USERCONFIG=/tmp/npmrc npm ci --omit=dev --no-audit --no-fund
@@ -56,7 +56,7 @@ ARG IMAGE_VERSION=dev
 ARG IMAGE_REVISION=unknown
 ARG NODE_IMAGE
 
-# Shared runtime — keep this block the same in all three semantic-release* images.
+# Shared runtime — keep this block the same in both semantic-release* images.
 # Duplicated on purpose. These images used to build FROM one another, which made a sibling's
 # PUBLISHED artifact a build dependency: run 167's base image build was killed on the shared runner
 # pool, so 0.1.0 existed as a release with no image and both derived builds failed for two more

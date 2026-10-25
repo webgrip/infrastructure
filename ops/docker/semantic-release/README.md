@@ -1,19 +1,18 @@
 # semantic-release toolchain images
 
-The toolchain every webgrip release job runs in. Three INDEPENDENT images — none builds `FROM`
-another:
+The toolchain every webgrip release job runs in. Two INDEPENDENT images — neither builds `FROM`
+the other:
 
 | Image | Adds | Consumed by |
 | ----- | ---- | ----------- |
 | `harbor.webgrip.dev/webgrip/semantic-release` | semantic-release 25, `@webgrip/semantic-release-config`, the plugin set, `semantic-release-helm3`, node, git, yq | `webgrip/workflows` → `semantic-release.yml` |
 | `…/semantic-release-monorepo` | `semantic-release-monorepo` | `semantic-release-monorepo.yml` |
-| `…/semantic-release-rust` | cargo (rustup), `semantic-release-cargo` | the `rust-semantic-release` composite |
 
-They were briefly chained (`monorepo`/`rust` building `FROM` `semantic-release`), and that made a
+They were briefly chained (`monorepo` and a since-retired `rust` variant building `FROM` `semantic-release`), and that made a
 sibling's *published* artifact a build dependency: run 167's base image build was killed on the
 shared runner pool, so `0.1.0` existed as a release with no image and both variants failed for two
 more runs on a `FROM` that could never resolve. Independent images cannot fail that way. The price
-is a runtime block repeated in all three Dockerfiles — change it in one, change it in all three. It
+is a runtime block repeated in both Dockerfiles — change it in one, change it in both. It
 costs text, not bytes:
 identical instructions on an identical base produce identical layer digests, so Harbor stores them
 once and a runner pulls them once.
@@ -42,7 +41,7 @@ Each directory's `package.json` is **both** things at once, which is unusual eno
 npm does not mind either collision this creates. It tolerates a root `version` ahead of the
 lockfile's, which is the state every release leaves behind (verified: build with `package.json` at
 9.9.9 against a 0.0.0 lock succeeds). And it accepts a package that depends on its own name, which
-`semantic-release-monorepo` and `semantic-release-rust` both do, since each image's name is also a
+`semantic-release-monorepo` does, since each image's name is also a
 package name. Renovate owns the dependencies; semantic-release owns the version.
 
 ## Changing the toolchain
@@ -55,12 +54,12 @@ docker run --rm -v "$PWD:/w" -w /w docker.io/library/node:24-bookworm-slim \
   bash -c 'npm install --package-lock-only --omit=dev --no-audit --no-fund'
 ```
 
-Renovate does this for you and groups all three directories into one PR. A **major** bump of
+Renovate does this for you and groups both directories into one PR. A **major** bump of
 semantic-release is *expected to fail the build*: each Dockerfile asserts the major that
 `webgrip/workflows`' composites target, so moving to 26 has to be a deliberate change to these
 images, their consumers and their tags — not something that arrives while nobody is looking.
 
-Keep the three lockfiles on the same semantic-release version: each image installs its tree whole
+Keep the two lockfiles on the same semantic-release version: each image installs its tree whole
 (one resolution root — semantic-release resolves plugins relative to its own install and the cwd,
 not via `NODE_PATH`), so a mismatch would mean a repo's toolchain silently depends on which
 reusable workflow it calls. Renovate groups them into one PR for exactly this reason.
@@ -78,5 +77,5 @@ docker run --rm sr-monorepo -c 'cd /tmp && node -p "require(\"semantic-release/p
 ## Releasing
 
 Standard for this repo: a conventional commit under `ops/docker/<image>/` cuts
-`<image>-v<version>`, and the release event builds and pushes to Harbor. The three images version
+`<image>-v<version>`, and the release event builds and pushes to Harbor. The two images version
 independently — nothing to sequence, and a killed distribute run affects only its own image.

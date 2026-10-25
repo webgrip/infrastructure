@@ -1,6 +1,6 @@
 # semantic-release Toolchain
 
-The release toolchain every webgrip release job runs in: three independent images, each with a
+The release toolchain every webgrip release job runs in: two independent images, each with a
 **locked** semantic-release dependency set baked in.
 
 ## Purpose
@@ -28,12 +28,11 @@ Full rationale, and why these are built here rather than in the repo whose workf
 |-------|----------|-------------|
 | `webgrip/semantic-release` | semantic-release 25, `@webgrip/semantic-release-config`, plugin set, `semantic-release-helm3`, node, git, yq | `webgrip/workflows` → `semantic-release.yml` |
 | `webgrip/semantic-release-monorepo` | the same, plus `semantic-release-monorepo` | `semantic-release-monorepo.yml` |
-| `webgrip/semantic-release-rust` | the same, plus cargo (rustup) and `semantic-release-cargo` | the `rust-semantic-release` composite |
 
 **None of them builds `FROM` another.** They were chained once, and it made a sibling's *published*
 artifact a build dependency: a killed distribute run left `semantic-release:0.1.0` as a release with
 no image, and both variants then failed for two runs on a `FROM` that could never resolve. The
-runtime block is instead repeated in all three Dockerfiles, and must be kept in step by hand.
+runtime block is instead repeated in both Dockerfiles, and must be kept in step by hand.
 Identical instructions on an identical base produce identical layer digests, so the duplication
 costs Dockerfile text, not registry or pull bytes.
 
@@ -41,8 +40,8 @@ costs Dockerfile text, not registry or pull bytes.
 
 | Property | Value |
 |----------|-------|
-| **Base image** | `node:24-bookworm-slim` (all three) |
-| **Size** | ~600MB base; the rust variant adds a minimal cargo toolchain |
+| **Base image** | `node:24-bookworm-slim` (both) |
+| **Size** | ~600MB |
 | **Architecture** | AMD64 (the in-cluster build is amd64-only; see homelab-cluster ADR-0036) |
 | **Registry** | `harbor.webgrip.dev/webgrip/semantic-release*` |
 | **Dockerfile** | [`ops/docker/semantic-release/Dockerfile`](https://forgejo.webgrip.dev/webgrip/infrastructure/src/branch/main/ops/docker/semantic-release/Dockerfile) |
@@ -55,14 +54,13 @@ costs Dockerfile text, not registry or pull bytes.
 | **@webgrip/semantic-release-config** | 1.1.0 | The shared config, so no consumer resolves it at release time |
 | **semantic-release-helm3** | 2.10.0 | Inline configs still reference it; the shared config does not depend on it |
 | **semantic-release-monorepo** | 8.0.2 | *monorepo image only* — un-bundled from the shared config on purpose |
-| **semantic-release-cargo** | 2.4.2 | *rust image only* |
 | **yq** | v4.44.3 | Chart.yaml version/appVersion bumps; checksum-verified at build |
 | **node** | 24 | semantic-release 25 requires `^22.14 \|\| >=24.10` |
 
 Contrast with [Rust Releaser](rust-releaser.md), which installs `semantic-release … latest`
 globally and unpinned. That image is a cross-compilation build farm that happens to release; these
 are release toolchains. A repo needing both can build `FROM rust-releaser` and copy `/opt/semrel`
-out of `semantic-release-rust`.
+out of `semantic-release`.
 
 ## The contract: `SEMREL_PREBAKED`
 
@@ -116,7 +114,7 @@ the lockfile's, and a package depending on its own name. See
 [`ops/docker/semantic-release/README.md`](https://forgejo.webgrip.dev/webgrip/infrastructure/src/branch/main/ops/docker/semantic-release/README.md) for
 how to regenerate a lockfile.
 
-Renovate groups all three toolchains into one PR and they must stay on the same semantic-release
-version. The three images version and release independently — there is nothing to sequence. A **major** bump is expected to fail the build: each Dockerfile asserts the major that
+Renovate groups both toolchains into one PR and they must stay on the same semantic-release
+version. The two images version and release independently — there is nothing to sequence. A **major** bump is expected to fail the build: each Dockerfile asserts the major that
 `webgrip/workflows`' composites target, so moving to 26 is a deliberate, coordinated change rather
 than something that arrives while nobody is looking.

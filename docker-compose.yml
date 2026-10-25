@@ -39,7 +39,3 @@ services:
     build:
       context: ops/docker/semantic-release-monorepo
       dockerfile: Dockerfile
-  semantic-release-rust:
-    build:
-      context: ops/docker/semantic-release-rust
-      dockerfile: Dockerfile

@@ -233,6 +233,8 @@ yq -r '.images | to_entries[] | select(.value.note) | .key' ops/security/cve-bud
   `bookworm-slim`: `semantic-release-cargo` runs cargo verification compiles, where musl-vs-glibc
   is a real behavioral change for sys-crates — its move needs a consumer-crate compatibility
   check first.
+* 2026-10-25 — `semantic-release-rust` retired (VIK-2321): no repository in the estate used it
+  and none publishes a cargo crate, so its held exception lapses with the image.
 * Refines: [ADR-0005](0005-openvex-and-cve-budgets.md) — this is how the budgets come down
 * Refined by: [ADR-0008](0008-cve-gate-runs-as-a-step.md) — the example leaves the hot path
 * External: [Docker Hardened Images catalog](https://github.com/docker-hardened-images/catalog)
