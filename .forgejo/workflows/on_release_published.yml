@@ -228,3 +228,19 @@ jobs:
           REGISTRY_USERNAME: ${{ secrets.HARBOR_ROBOT_USER }}
           REGISTRY_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
           DT_API_KEY: ${{ secrets.DT_API_KEY }}
+
+  release-copy-forgejo:
+    name: 'Copy to the Forgejo registry'
+    needs: [parse-release-tag, release-sign-harbor]
+    if: needs.parse-release-tag.outputs.image == 'infra-runner'
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: ./.forgejo/actions/copy-to-forgejo-registry
+        with:
+          image: ${{ needs.parse-release-tag.outputs.image }}
+          version: ${{ needs.parse-release-tag.outputs.version }}
+        env:
+          HARBOR_USER: ${{ secrets.HARBOR_ROBOT_USER }}
+          HARBOR_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
+          FORGEJO_TOKEN: ${{ secrets.WEBGRIP_CI_TOKEN }}
