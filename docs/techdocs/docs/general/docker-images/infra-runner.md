@@ -12,13 +12,17 @@ the Hetzner tokens, the state passphrase and the etcd backup keys from OpenBao. 
 those downloads to build time, where each one is pinned and verified once, and the signed image
 digest is what the runner pool pins.
 
-The image serves two ways:
+The image serves three ways:
 
 - **Host mode**, as the main container of the `unfold-infra` runner pool (homelab-cluster
   `kubernetes/apps/forgejo/forgejo-runner/app/infra`). The `runner-bin` init container injects
   `forgejo-runner` at `/dist`, and every step runs inside this image.
 - **Job container**, as `container:` for the secret-free pull-request `check` job on the shared
   `docker` pool.
+- **Host mode outside the homelab**, as the main container of unfold-cluster's `unfold-check`
+  runner pool. That cluster cannot reach Harbor, so it pulls the copy on `forgejo.webgrip.dev`,
+  which the release workflow's `release-copy-forgejo` job makes and checks byte for byte.
+  `copy_image_to_forgejo.yml` copies an earlier release by hand.
 
 Both need `node` on `PATH`, because JavaScript actions such as `actions/checkout` run with it.
 
@@ -30,7 +34,7 @@ Both need `node` on `PATH`, because JavaScript actions such as `actions/checkout
 | **User** | `runner`, uid and gid `1000`, `USER 1000` |
 | **Home** | `/home/runner`, owned by `runner`, also the working directory |
 | **Default command** | `bash` |
-| **Registry** | `harbor.webgrip.dev/webgrip/infra-runner` |
+| **Registry** | `harbor.webgrip.dev/webgrip/infra-runner`; releases are also copied, signature and attestations included, to `forgejo.webgrip.dev/webgrip/infra-runner` |
 | **Dockerfile** | [`ops/docker/infra-runner/Dockerfile`](../../../../../ops/docker/infra-runner/Dockerfile) |
 
 ## Tools

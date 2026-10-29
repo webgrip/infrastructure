@@ -1,0 +1,28 @@
+name: '[Workflow] Copy a released image to the Forgejo registry'
+
+on:
+  workflow_dispatch:
+    inputs:
+      image:
+        description: 'Image name under webgrip/, e.g. infra-runner'
+        required: true
+        type: string
+      version:
+        description: 'Released version, e.g. 0.2.0'
+        required: true
+        type: string
+
+jobs:
+  copy:
+    name: 'Copy to the Forgejo registry'
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: ./.forgejo/actions/copy-to-forgejo-registry
+        with:
+          image: ${{ inputs.image }}
+          version: ${{ inputs.version }}
+        env:
+          HARBOR_USER: ${{ secrets.HARBOR_ROBOT_USER }}
+          HARBOR_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
+          FORGEJO_TOKEN: ${{ secrets.WEBGRIP_CI_TOKEN }}

@@ -1,0 +1,64 @@
+name: "Copy a signed release to the Forgejo registry"
+description: >-
+  Copies a released image from Harbor to forgejo.webgrip.dev with its cosign signature and
+  attestations, for consumers outside the homelab that cannot reach Harbor, and fails unless
+  both registries serve the same digest.
+
+inputs:
+  image:
+    description: "Image name under webgrip/, e.g. infra-runner"
+    required: true
+  version:
+    description: "Released version tag, e.g. 0.2.0"
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Copy and compare digests
+      shell: bash
+      env:
+        IMAGE: ${{ inputs.image }}
+        VERSION: ${{ inputs.version }}
+      run: |
+        set -euo pipefail
+        : "${HARBOR_USER:?}" "${HARBOR_TOKEN:?}" "${FORGEJO_TOKEN:?}"
+        DOCKER_CONFIG="$(mktemp -d)"
+        export DOCKER_CONFIG
+        trap 'rm -rf "$DOCKER_CONFIG"' EXIT
+
+        accept='application/vnd.oci.image.index.v1+json, application/vnd.docker.distribution.manifest.list.v2+json, application/vnd.oci.image.manifest.v1+json, application/vnd.docker.distribution.manifest.v2+json'
+        repo="webgrip/${IMAGE}"
+
+        header_digest() {
+          tr -d '\r' | awk -F': ' 'tolower($1)=="docker-content-digest"{print $2}'
+        }
+
+        harbor_digest() {
+          curl -fsSI -u "${HARBOR_USER}:${HARBOR_TOKEN}" -H "Accept: ${accept}" \
+            "https://harbor.webgrip.dev/v2/${repo}/manifests/${VERSION}" | header_digest
+        }
+
+        forgejo_anonymous_digest() {
+          local token
+          token="$(curl -fsS "https://forgejo.webgrip.dev/v2/token?scope=repository:${repo}:pull&service=container_registry" \
+            | sed -E 's/.*"token":"([^"]+)".*/\1/')"
+          curl -fsSI -H "Authorization: Bearer ${token}" -H "Accept: ${accept}" \
+            "https://forgejo.webgrip.dev/v2/${repo}/manifests/${VERSION}" | header_digest
+        }
+
+        printf '%s' "$HARBOR_TOKEN" | cosign login harbor.webgrip.dev -u "$HARBOR_USER" --password-stdin
+        printf '%s' "$FORGEJO_TOKEN" | cosign login forgejo.webgrip.dev -u webgrip-ci --password-stdin
+
+        source_digest="$(harbor_digest)"
+        [ -n "$source_digest" ] || { echo "::error::harbor.webgrip.dev/${repo}:${VERSION} not found"; exit 1; }
+
+        cosign copy --force "harbor.webgrip.dev/${repo}:${VERSION}" "forgejo.webgrip.dev/${repo}:${VERSION}"
+
+        copied_digest="$(forgejo_anonymous_digest)"
+        [ "$copied_digest" = "$source_digest" ] || {
+          echo "::error::forgejo.webgrip.dev/${repo}:${VERSION} serves ${copied_digest:-nothing} anonymously, Harbor serves ${source_digest}"
+          exit 1
+        }
+        cosign tree "forgejo.webgrip.dev/${repo}@${source_digest}"
+        echo "copied ${repo}@${source_digest} to forgejo.webgrip.dev, anonymously pullable"
