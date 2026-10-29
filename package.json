@@ -8,8 +8,8 @@
   },
   "devDependencies": {
     "@webgrip/semantic-release-config": "2.0.0",
-    "conventional-changelog-conventionalcommits": "^10.2.1",
-    "semantic-release": "^25.0.9"
+    "conventional-changelog-conventionalcommits": "10.4.0",
+    "semantic-release": "25.0.9"
   },
   "overrides": {
     "tar": "^7.5.21",
