@@ -100,12 +100,9 @@
       "enabled": false
     },
     {
-      "description": "A bump of a tool that a Dockerfile downloads and verifies against a pinned *_SHA256 ARG recomputes that checksum from the new release, so the build-check verifies the new artifact instead of failing on the old checksum.",
-      "matchManagers": [
-        "custom.regex"
-      ],
-      "matchFileNames": [
-        "ops/docker/*/Dockerfile"
+      "description": "Every update outside Webgrip's agent packages carries the checksum task, because in executionMode branch Renovate runs only the task of the first update in a branch, sorted by name, and in a group that is rarely a Dockerfile tool: the all-non-major branch led with an npm package and its checksums stayed old. The script changes nothing when no *_VERSION ARG with a *_SHA256 partner moved. Agent packages keep the agentstd install task of the apm preset.",
+      "matchPackageNames": [
+        "!https://forgejo.webgrip.dev/webgrip/**"
       ],
       "postUpgradeTasks": {
         "commands": [
