@@ -109,7 +109,7 @@ RUN zstd --version
 # Whatever integrity TLS gives you ends at the CDN; this pins the artifact itself.
 # renovate: datasource=github-releases depName=helm/helm
 ARG HELM_VERSION=3.22.1
-ARG HELM_SHA256=15e041a93a590dce8100f39385cd98c84a765c9e36aeeb9e2dc6ff9e4769e2e0
+ARG HELM_SHA256=896cf63684a42a723d61c980369d6e588330927deb13676ca0d85006dd6da0ea
 RUN set -eux; \
     curl -fsSL "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz" -o /tmp/helm.tgz; \
     echo "${HELM_SHA256}  /tmp/helm.tgz" | sha256sum -c -; \
@@ -126,7 +126,7 @@ RUN set -eux; \
 # for the same reason as helm above — this was a bare curl of a binary straight onto PATH.
 # renovate: datasource=github-releases depName=mikefarah/yq
 ARG YQ_VERSION=4.54.1
-ARG YQ_SHA256=fa52a4e758c63d38299163fbdd1edfb4c4963247918bf9c1c5d31d84789eded4
+ARG YQ_SHA256=8e34fc298390875de416e6a4afcb8cabeceb25d9aa8506c1a2f9353cf702ea5f
 RUN set -eux; \
     curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64" \
       -o /tmp/yq; \
@@ -157,7 +157,7 @@ RUN set -eux; \
 # (the action's input default was still on 2.4.3, which is where this pin came from).
 # renovate: datasource=github-releases depName=sigstore/cosign
 ARG COSIGN_VERSION=2.6.5
-ARG COSIGN_SHA256=309779b0c4e409186b0a80daba99041fe2cf65a920ce645013901df6211895a9
+ARG COSIGN_SHA256=c3b4f5410e608af03a5eb0aaac84a4313d8da131248e08ff1759ac70c79d1644
 RUN set -eux; \
     curl -fsSL "https://github.com/sigstore/cosign/releases/download/v${COSIGN_VERSION}/cosign-linux-amd64" \
       -o /tmp/cosign; \
@@ -168,7 +168,7 @@ RUN set -eux; \
 
 # renovate: datasource=github-releases depName=anchore/syft
 ARG SYFT_VERSION=1.55.0
-ARG SYFT_SHA256=bf7b29ff57f06da30918266a0e1c2885a8f99784798d1bdb1628886aa015d788
+ARG SYFT_SHA256=bb65249542db5fedeeb4d3f9b018b75e7264dbfbbb10486f044581a92f90490d
 RUN set -eux; \
     curl -fsSL "https://github.com/anchore/syft/releases/download/v${SYFT_VERSION}/syft_${SYFT_VERSION}_linux_amd64.tar.gz" \
       -o /tmp/syft.tgz; \
