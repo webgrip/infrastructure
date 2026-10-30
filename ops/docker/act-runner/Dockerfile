@@ -26,7 +26,7 @@ RUN apk add --no-cache docker git bash curl
 # ci-runner's helm/yq (#88): fetch the release artifact, verify the published checksum, install.
 # renovate: datasource=github-releases depName=nektos/act
 ARG ACT_VERSION=0.2.92
-ARG ACT_SHA256=0191d6f1f3b716b5c55820032605d05fc3c1cdbf581ebeff655019e5dd1524c0
+ARG ACT_SHA256=c9e13f0eb77948a6d02eb2e06fa7220addfc5b9927ed2a1b35bcdae5441ac7a1
 
 RUN set -eux; \
     install -d /usr/local/bin; \
