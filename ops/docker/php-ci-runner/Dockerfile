@@ -2,7 +2,7 @@ ARG REGISTRY_DOCKERHUB=docker.io
 ARG COMPOSER_IMAGE=${REGISTRY_DOCKERHUB}/library/composer:2@sha256:1b73755de4f19775ba6087fd5313664493e06fab72b6fc27dc2044e87bb7c4c3
 ARG PHP_IMAGE=${REGISTRY_DOCKERHUB}/library/php:8.5-cli@sha256:f7476cffd8d6c48daa07fd80a58b85f97da095ad5a03fcf3361fd872122e3d91
 # renovate: datasource=github-releases depName=extism/extism
-ARG EXTISM_VERSION=1.30.0
+ARG EXTISM_VERSION=1.41.0
 # Node is not a PHP tool, but Forgejo JS actions (checkout@v4) are exec'd INSIDE the job
 # container, so a container without node fails on its first step. Digest-pinned, glibc
 # matched to the php Debian base.

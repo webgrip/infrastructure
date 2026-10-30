@@ -1,5 +1,5 @@
 [tools]
-uv = "0.12.24"
+uv = "0.13.6"
 
 [tasks.agents-install]
 run = "uvx --from 'git+https://forgejo.webgrip.dev/webgrip/agent-standards.git@v0.5.3#subdirectory=cli' agentstd install"

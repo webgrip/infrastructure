@@ -39,13 +39,13 @@ inputs:
     # Kept in lockstep with COSIGN_VERSION in ops/docker/ci-runner/Dockerfile — the runner image now
     # bakes cosign, and a mismatch here would silently install a different one over the top.
     # renovate: datasource=github-releases depName=sigstore/cosign
-    default: "v2.6.4"
+    default: "v2.6.5"
   syft-version:
     description: "Syft release to install"
     required: false
     # Kept in lockstep with SYFT_VERSION in ops/docker/ci-runner/Dockerfile.
     # renovate: datasource=github-releases depName=anchore/syft
-    default: "v1.50.0"
+    default: "v1.55.0"
   openbao-addr:
     description: "In-cluster OpenBao address (Vault-compatible API)"
     required: false

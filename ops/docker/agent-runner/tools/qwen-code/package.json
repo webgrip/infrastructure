@@ -2,6 +2,6 @@
   "name": "agent-runner-qwen-code",
   "private": true,
   "dependencies": {
-    "@qwen-code/qwen-code": "0.24.6"
+    "@qwen-code/qwen-code": "0.26.1"
   }
 }

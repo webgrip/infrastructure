@@ -4,7 +4,7 @@
   "private": true,
   "description": "Locked release toolchain for every image train in this repo, not a publishable package. Installed by .forgejo/actions/semantic-release-monorepo via `npm ci` at the repo root, so ops/docker/<image>/.releaserc.cjs resolves one deterministic tree. @webgrip/semantic-release-config 2.x builds the per-image trains itself and releases by tag alone (homelab ADR-0078). The `overrides` block mirrors @webgrip/semantic-release-config's own, verbatim: it is the only npm mechanism that can force the notes-toolchain pair (generator 15.0.0-beta.2 / analyzer 14.0.0-beta.3 sit outside semantic-release's ranges, and a nested stable copy produces empty release notes, runs 426-435). Keep the overrides in lockstep with the config's package.json when either moves.",
   "engines": {
-    "node": "^22.22.2 || >=24.15.0"
+    "node": "v26.13.0"
   },
   "devDependencies": {
     "@webgrip/semantic-release-config": "2.0.0",
@@ -12,8 +12,8 @@
     "semantic-release": "25.0.9"
   },
   "overrides": {
-    "tar": "^7.5.21",
-    "@semantic-release/commit-analyzer": "14.0.0-beta.3",
-    "@semantic-release/release-notes-generator": "15.0.0-beta.2"
+    "tar": "7.5.22",
+    "@semantic-release/commit-analyzer": "14.0.0-beta.4",
+    "@semantic-release/release-notes-generator": "15.0.0-beta.3"
   }
 }

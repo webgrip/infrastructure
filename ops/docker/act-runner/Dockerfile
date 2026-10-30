@@ -9,7 +9,7 @@
 # anonymous pulls, so unlike the other REGISTRY_* ARGs this one DEFAULTS to the proxy.
 ARG REGISTRY_DHI=harbor.webgrip.dev/dhi
 # renovate: datasource=docker depName=dhi.io/alpine-base versioning=docker
-ARG BASE_IMAGE=${REGISTRY_DHI}/alpine-base:3.23-dev@sha256:a5d8ac99e233c9141bbefb2afa1809923f420aeeeb11e9dbb463d0bddb943327
+ARG BASE_IMAGE=${REGISTRY_DHI}/alpine-base:3.24-dev@sha256:7182e0bc2f186386bb23bc0718508913450ba1876e93cf07e5e3cf263c4dbb63
 FROM ${BASE_IMAGE}
 
 ARG BASE_IMAGE
@@ -25,7 +25,7 @@ RUN apk add --no-cache docker git bash curl
 # the CDN and the repo's master branch at whatever commit is HEAD that day. Same house pattern as
 # ci-runner's helm/yq (#88): fetch the release artifact, verify the published checksum, install.
 # renovate: datasource=github-releases depName=nektos/act
-ARG ACT_VERSION=0.2.89
+ARG ACT_VERSION=0.2.92
 ARG ACT_SHA256=0191d6f1f3b716b5c55820032605d05fc3c1cdbf581ebeff655019e5dd1524c0
 
 RUN set -eux; \
