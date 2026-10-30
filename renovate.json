@@ -98,6 +98,24 @@
         "webgrip/workflows"
       ],
       "enabled": false
+    },
+    {
+      "description": "A bump of a tool that a Dockerfile downloads and verifies against a pinned *_SHA256 ARG recomputes that checksum from the new release, so the build-check verifies the new artifact instead of failing on the old checksum.",
+      "matchManagers": [
+        "custom.regex"
+      ],
+      "matchFileNames": [
+        "ops/docker/*/Dockerfile"
+      ],
+      "postUpgradeTasks": {
+        "commands": [
+          "./ops/scripts/update-release-checksums.py"
+        ],
+        "fileFilters": [
+          "ops/docker/*/Dockerfile"
+        ],
+        "executionMode": "branch"
+      }
     }
   ],
   "pip-compile": {
