@@ -13,7 +13,7 @@ ARG REGISTRY_WEBGRIP=harbor.webgrip.dev/webgrip
 # principle even against our own Harbor, and the whole point of budgeting this image is that its
 # baseline names an exact artifact. Renovate moves both together (digest-aware manager, #106).
 # renovate: datasource=docker depName=harbor.webgrip.dev/webgrip/rust-ci-runner versioning=docker
-ARG RUST_CI_RUNNER_VERSION=1.4.0@sha256:2ef5fcb9b81ff145ae3a0f0263bdaf5098874fb40145a1e97c65e6e9023a6638
+ARG RUST_CI_RUNNER_VERSION=1.4.1@sha256:315684ea932093a86ef2ca53765cba71ee1d06bf7f3ac7b47c85c276247b9c38
 
 FROM ${REGISTRY_WEBGRIP}/rust-ci-runner:${RUST_CI_RUNNER_VERSION}
 

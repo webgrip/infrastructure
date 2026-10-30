@@ -7,7 +7,7 @@
     "node": "^22.22.2 || >=24.15.0"
   },
   "devDependencies": {
-    "@webgrip/semantic-release-config": "2.0.0",
+    "@webgrip/semantic-release-config": "2.3.0",
     "conventional-changelog-conventionalcommits": "10.4.0",
     "semantic-release": "25.0.9"
   },

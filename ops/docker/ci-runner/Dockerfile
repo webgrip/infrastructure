@@ -28,7 +28,7 @@ ARG REGISTRY_WEBGRIP=harbor.webgrip.dev/webgrip
 # every other image is fit to sign were themselves taken from an artifact that never passed. This
 # pin closes that loop: gate binaries now come only from a release the gate itself admitted.
 # renovate: datasource=docker depName=harbor.webgrip.dev/webgrip/cve-gate versioning=docker
-ARG CVE_GATE_VERSION=0.3.4@sha256:6afd2c3aea931364810835b4c2f0121ad57f0b5c20f0b2ce44c336124e683bf2
+ARG CVE_GATE_VERSION=0.3.5@sha256:7a25696f0a9da14328208ed691c1ef9395a0398e9af8d68bf961427f58275c72
 FROM ${REGISTRY_WEBGRIP}/cve-gate:${CVE_GATE_VERSION} AS cve-gate-src
 
 FROM ${NODE_IMAGE} AS node
