@@ -168,6 +168,16 @@ per platform, and npm skips an optional dependency that fails to download withou
 install. Every install step therefore ends by running the tool (`moon --version`, `claude
 --version`): a build that lost the binary to a network error fails there instead of shipping.
 
+A single binary keeps its checksum in an ARG named after its version ARG: `HELM_VERSION` goes
+with `HELM_SHA256`, and one download per architecture with `GOOSE_SHA256_AMD64` and
+`GOOSE_SHA256_ARM64`. The download URL sits in the instruction that checks that ARG and uses the
+version ARG. When Renovate bumps the version, `ops/scripts/update-release-checksums.py` downloads
+the new release and writes its checksum in the same branch. Without that step every such bump
+failed the build-check on the old checksum (run 742). The script trusts the download as it is on
+the day of the bump, so the review of the Renovate pull request is the moment to compare it with
+the checksum the project publishes. Renovate may only run the script because homelab-cluster's
+`configmap-forgejo.yaml` lists it under `allowedCommands`.
+
 Renovate's npm and pip-compile managers bump the direct versions in these files and refresh the
 locks; monthly lock file maintenance refreshes the transitive dependencies. Both commit as
 `fix`, so the image it changes is released. Generate a new lock inside the image's own base, for
