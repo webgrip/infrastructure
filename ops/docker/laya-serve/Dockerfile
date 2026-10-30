@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1.7
+# syntax=docker/dockerfile:1.28@sha256:bb22d9815c728170f72750f4e5b0d672e06176142e1d602c7e66c050100b7e5b
 ARG REGISTRY_DHI=harbor.webgrip.dev/dhi
 ARG BUILD_IMAGE=${REGISTRY_DHI}/python:3.12-debian13-dev@sha256:d18c63b540914a6584f731ab1a4ffe45b6ec8a01aae66c07ae7bbe94b0adb2e7
 ARG BASE_IMAGE=${REGISTRY_DHI}/python:3.12-debian13@sha256:1bab11a972258285639bebc02b334326c7bdfc1740fb438540728a4f3f896235

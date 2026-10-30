@@ -8,7 +8,7 @@ ARG REGISTRY_DOCKERHUB=docker.io
 # One ARG carrying tag AND digest (house pattern): Renovate moves them together via the
 # digest-aware annotated-ARG manager.
 # renovate: datasource=docker depName=docker.io/library/node versioning=docker
-ARG NODE_IMAGE=${REGISTRY_DOCKERHUB}/library/node:24-bookworm-slim@sha256:3638d9a6fe4030bd716be989438248074489337ba3275657f93595428be4fc03
+ARG NODE_IMAGE=${REGISTRY_DOCKERHUB}/library/node:24-bookworm-slim@sha256:c86ecead9e55a5210ac1727de38a4ca840bf03dcaf34dc9749addbf383b1920c
 # renovate: datasource=docker depName=docker.io/library/rust versioning=docker
 ARG RUST_IMAGE=${REGISTRY_DOCKERHUB}/library/rust:1.97.0-slim-bookworm@sha256:6d220bf85c74e842a79da63997af8d2e74455c0b8847d8bb3a5888572334991d
 FROM ${RUST_IMAGE} AS rust
@@ -56,15 +56,15 @@ RUN rustup --version && rustc --version && cargo --version
 # file, and the latest/else branching meant the pinned path was never actually exercised. Pinned
 # at what 'latest' resolved to on 2026-08-08; Renovate moves each independently.
 # renovate: datasource=crate depName=cargo-release
-ARG CARGO_RELEASE_VERSION=1.1.4
+ARG CARGO_RELEASE_VERSION=1.1.7
 # renovate: datasource=crate depName=git-cliff
-ARG GIT_CLIFF_VERSION=2.13.1
+ARG GIT_CLIFF_VERSION=2.14.2
 # renovate: datasource=crate depName=cross
 ARG CROSS_VERSION=0.2.5
 # renovate: datasource=crate depName=wasm-bindgen-cli
-ARG WASM_BINDGEN_CLI_VERSION=0.2.127
+ARG WASM_BINDGEN_CLI_VERSION=0.2.129
 # renovate: datasource=crate depName=cargo-binstall
-ARG CARGO_BINSTALL_VERSION=1.26.0
+ARG CARGO_BINSTALL_VERSION=1.26.1
 RUN cargo install --locked cargo-binstall@${CARGO_BINSTALL_VERSION} && \
     cargo binstall --no-confirm cargo-release@${CARGO_RELEASE_VERSION} && \
     cargo binstall --no-confirm git-cliff@${GIT_CLIFF_VERSION} && \
