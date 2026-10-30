@@ -23,13 +23,13 @@
 ARG REGISTRY_DHI=harbor.webgrip.dev/dhi
 ARG REGISTRY_DOCKERHUB=docker.io
 # renovate: datasource=docker depName=dhi.io/node versioning=docker
-ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.19.0-alpine3.23-dev@sha256:d00350837e082dc254939ffcf53861b3b965ff159e506d6ab1775710f91a82fe
+ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.22.1-alpine3.23-dev@sha256:0e7bb431b722a59a87873c6b5e0dfc97d6164bf430214fd0de569e3a72f9f708
 # renovate: datasource=docker depName=dhi.io/python versioning=docker
-ARG BASE_IMAGE=${REGISTRY_DHI}/python:3.13.15-alpine3.24-dev@sha256:8e51f99fa957d0b2531c4936b178d67d997e76fe48d7150357143295a03b1fd4
+ARG BASE_IMAGE=${REGISTRY_DHI}/python:3.14.10-alpine3.24-dev@sha256:a856bc8f2464347152d6bdcbf43fe995c79551e9fc2482ee2f00c5ec2642e406
 # The jar-fetch stage only runs curl; its base never ships. Kept on the stock JRE image purely
 # to keep the fetched artifact byte-identical (see header note 3).
 # renovate: datasource=docker depName=docker.io/library/eclipse-temurin versioning=docker
-ARG JRE_IMAGE=${REGISTRY_DOCKERHUB}/library/eclipse-temurin:11.0.31_11-jre-jammy@sha256:76ffb747ad3a62a8b81ac3c76e2c3b1c06e475b1e10109d0a4dd604db627c9f5
+ARG JRE_IMAGE=${REGISTRY_DOCKERHUB}/library/eclipse-temurin:11.0.31_11-jre-jammy@sha256:eca8fa395077325c4065446e99e79af91c7283f10600d7f8c11530493e38a07c
 
 FROM ${NODE_IMAGE} AS node
 
@@ -103,7 +103,7 @@ COPY --from=node /usr/bin/node /usr/local/bin/node
 # site/ --config /etc/gitleaks/docs.toml`) — see gitleaks-docs.toml for the
 # deliberately-narrow allowlist rationale.
 # renovate: datasource=docker depName=ghcr.io/gitleaks/gitleaks versioning=docker
-COPY --from=harbor.webgrip.dev/ghcr/gitleaks/gitleaks:v8.30.1 /usr/bin/gitleaks /usr/local/bin/gitleaks
+COPY --from=harbor.webgrip.dev/ghcr/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f /usr/bin/gitleaks /usr/local/bin/gitleaks
 COPY gitleaks-docs.toml /etc/gitleaks/docs.toml
 
 # lychee: external link-rot checking (homelab estate item #15). Static musl

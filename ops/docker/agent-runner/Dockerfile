@@ -27,12 +27,12 @@ ARG REGISTRY_GHCR=ghcr.io
 # since July while agent-runner accrued 43 criticals from a stale python base.
 # uv is copied from its official image (reproducible; no `curl | sh`).
 # renovate: datasource=docker depName=ghcr.io/astral-sh/uv versioning=docker
-ARG UV_IMAGE=${REGISTRY_GHCR}/astral-sh/uv:0.9.2@sha256:6dbd7c42a9088083fa79e41431a579196a189bcee3ae68ba904ac2bf77765867
+ARG UV_IMAGE=${REGISTRY_GHCR}/astral-sh/uv:0.13.6@sha256:af22a52f5eafef3d78e551599d405c02df61919d18028f0cea8eda93bc9986d0
 # node 24 — for the agent's own workflow tooling (openspec, moon), not for running gates.
 # MUST match the base's libc: the node binary is dynamically linked, so an alpine base needs an
 # alpine node (and alpine 3.24 to match the python base's musl).
 # renovate: datasource=docker depName=dhi.io/node versioning=docker
-ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.19.0-alpine3.24-dev@sha256:4b70bb724239d33250044c831c04746c75c4041e1247fecd9372b5da59d5d972
+ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.22.1-alpine3.24-dev@sha256:c7999456f9380ed100bb430baeb4fdbf4fec59c51d3bab2b0bd3ea77a44e3677
 # ADR-0006 Stage 2. python 3.12 still, matching CI's python:3.12 for the domain scripts.
 #
 # ALPINE, and the reason is measured: the digest refresh (v1.0.4) recovered nothing — 43/101
@@ -49,10 +49,10 @@ ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.19.0-alpine3.24-dev@sha256:4b70bb724239d3
 #
 # BUILD PREREQUISITE: the `dhi` Harbor proxy project (homelab-cluster ADR-0023).
 # renovate: datasource=docker depName=dhi.io/python versioning=docker
-ARG BASE_IMAGE=${REGISTRY_DHI}/python:3.12.13-alpine3.24-dev@sha256:cf1c0e16904b7e831e430a02811cd36381c0e5b8ccf615be9be37fed0953260b
+ARG BASE_IMAGE=${REGISTRY_DHI}/python:3.14.10-alpine3.24-dev@sha256:a856bc8f2464347152d6bdcbf43fe995c79551e9fc2482ee2f00c5ec2642e406
 
 # renovate: datasource=github-releases depName=aaif-goose/goose
-ARG GOOSE_VERSION=1.52.0
+ARG GOOSE_VERSION=1.56.0
 ARG GOOSE_SHA256_AMD64=fdc86653285a89f7dcad6e76736af1688ab2cde44661b089328b2fc40bb79f9f
 ARG GOOSE_SHA256_ARM64=4584ba8840fc77c2f3e48758f45543c18f1c1293d704941a8eeb5220852ce653
 

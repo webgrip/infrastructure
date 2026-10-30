@@ -8,7 +8,7 @@
 # anonymous pulls, so unlike the other REGISTRY_* ARGs this one DEFAULTS to the proxy.
 ARG REGISTRY_DHI=harbor.webgrip.dev/dhi
 # renovate: datasource=docker depName=dhi.io/alpine-base versioning=docker
-ARG BASE_IMAGE=${REGISTRY_DHI}/alpine-base:3.23-dev@sha256:a5d8ac99e233c9141bbefb2afa1809923f420aeeeb11e9dbb463d0bddb943327
+ARG BASE_IMAGE=${REGISTRY_DHI}/alpine-base:3.24-dev@sha256:7182e0bc2f186386bb23bc0718508913450ba1876e93cf07e5e3cf263c4dbb63
 FROM ${BASE_IMAGE}
 
 ARG IMAGE_CREATED=1970-01-01T00:00:00Z
@@ -49,7 +49,7 @@ RUN install -d /usr/local/bin
 # pinned path is now the only path. A Renovate version bump without its checksum fails the
 # build rather than shipping unverified.
 # renovate: datasource=github-releases depName=kubernetes/kubernetes
-ARG KUBECTL_VERSION="v1.34.10"
+ARG KUBECTL_VERSION="v1.37.1"
 ARG KUBECTL_SHA256="95bd70842bd11a524d24acd5b68726899e3488e153e45e2b4ae846545beda050"
 RUN curl -fsSLO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" && \
     echo "${KUBECTL_SHA256}  kubectl" | sha256sum -c - && \
@@ -58,7 +58,7 @@ RUN curl -fsSLO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/ku
 
 # Direct release tarball, not `curl | bash` of get-helm-3 from helm's master branch.
 # renovate: datasource=github-releases depName=helm/helm
-ARG HELM_VERSION="3.18.6"
+ARG HELM_VERSION="3.22.1"
 ARG HELM_SHA256="3f43c0aa57243852dd542493a0f54f1396c0bc8ec7296bbb2c01e802010819ce"
 RUN curl -fsSLO "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz" && \
     echo "${HELM_SHA256}  helm-v${HELM_VERSION}-linux-amd64.tar.gz" | sha256sum -c - && \
@@ -67,7 +67,7 @@ RUN curl -fsSLO "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz" &
     rm -rf linux-amd64 "helm-v${HELM_VERSION}-linux-amd64.tar.gz"
 
 # renovate: datasource=github-releases depName=digitalocean/doctl
-ARG DO_CLI_VERSION="1.166.0"
+ARG DO_CLI_VERSION="1.186.0"
 ARG DO_CLI_SHA256="1596424b64091a7939bde561daf2402ca8a141966429928e688d20d17091ec89"
 RUN curl -fsSL -o doctl.tar.gz "https://github.com/digitalocean/doctl/releases/download/v${DO_CLI_VERSION}/doctl-${DO_CLI_VERSION}-linux-amd64.tar.gz" && \
     echo "${DO_CLI_SHA256}  doctl.tar.gz" | sha256sum -c - && \
@@ -76,7 +76,7 @@ RUN curl -fsSL -o doctl.tar.gz "https://github.com/digitalocean/doctl/releases/d
     rm doctl.tar.gz
 
 # renovate: datasource=github-releases depName=mikefarah/yq
-ARG YQ_VERSION="4.53.3"
+ARG YQ_VERSION="4.54.1"
 ARG YQ_SHA256="fa52a4e758c63d38299163fbdd1edfb4c4963247918bf9c1c5d31d84789eded4"
 RUN wget -q "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64" -O /usr/local/bin/yq && \
     echo "${YQ_SHA256}  /usr/local/bin/yq" | sha256sum -c - && \

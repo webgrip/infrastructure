@@ -1,7 +1,7 @@
 # Release re-entry touch: run 135 dropped this train (npm 404); the matrix is push-diff.
 
 # renovate: datasource=docker depName=ghcr.io/actions/actions-runner versioning=docker
-ARG RUNNER_VERSION=2.335.1@sha256:08c30b0a7105f64bddfc485d2487a22aa03932a791402393352fdf674bda2c29
+ARG RUNNER_VERSION=2.338.2@sha256:759a1d94a15b05941aba5196974ff43fe15b4cbba29b694b35cbc32a1166b232
 ARG REGISTRY_GHCR=ghcr.io
 ARG REGISTRY_DOCKERHUB=docker.io
 # renovate: datasource=docker depName=docker.io/library/node versioning=docker
@@ -108,7 +108,7 @@ RUN zstd --version
 # binary, piped straight into tar, landing on PATH in the image that runs every CI job in the org.
 # Whatever integrity TLS gives you ends at the CDN; this pins the artifact itself.
 # renovate: datasource=github-releases depName=helm/helm
-ARG HELM_VERSION=3.21.3
+ARG HELM_VERSION=3.22.1
 ARG HELM_SHA256=15e041a93a590dce8100f39385cd98c84a765c9e36aeeb9e2dc6ff9e4769e2e0
 RUN set -eux; \
     curl -fsSL "https://get.helm.sh/helm-v${HELM_VERSION}-linux-amd64.tar.gz" -o /tmp/helm.tgz; \
@@ -125,7 +125,7 @@ RUN set -eux; \
 # 4.44.3 -> 4.53.3: nine minor versions stale despite the Renovate annotation. Checksum-verified
 # for the same reason as helm above — this was a bare curl of a binary straight onto PATH.
 # renovate: datasource=github-releases depName=mikefarah/yq
-ARG YQ_VERSION=4.53.3
+ARG YQ_VERSION=4.54.1
 ARG YQ_SHA256=fa52a4e758c63d38299163fbdd1edfb4c4963247918bf9c1c5d31d84789eded4
 RUN set -eux; \
     curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64" \
@@ -156,7 +156,7 @@ RUN set -eux; \
 # attestations; it is its own change, not a side effect of this one. 2.6.4 is the latest 2.x
 # (the action's input default was still on 2.4.3, which is where this pin came from).
 # renovate: datasource=github-releases depName=sigstore/cosign
-ARG COSIGN_VERSION=2.6.4
+ARG COSIGN_VERSION=2.6.5
 ARG COSIGN_SHA256=309779b0c4e409186b0a80daba99041fe2cf65a920ce645013901df6211895a9
 RUN set -eux; \
     curl -fsSL "https://github.com/sigstore/cosign/releases/download/v${COSIGN_VERSION}/cosign-linux-amd64" \
@@ -167,7 +167,7 @@ RUN set -eux; \
     cosign version
 
 # renovate: datasource=github-releases depName=anchore/syft
-ARG SYFT_VERSION=1.50.0
+ARG SYFT_VERSION=1.55.0
 ARG SYFT_SHA256=bf7b29ff57f06da30918266a0e1c2885a8f99784798d1bdb1628886aa015d788
 RUN set -eux; \
     curl -fsSL "https://github.com/anchore/syft/releases/download/v${SYFT_VERSION}/syft_${SYFT_VERSION}_linux_amd64.tar.gz" \
@@ -266,7 +266,7 @@ RUN ln -s ../lib/node_modules/npm/bin/npm-cli.js /usr/bin/npm && \
 # (observed 2026-07-19/20, nuala runs 30-37, verified in the dind daemon logs). Official
 # glibc build, laid out exactly where forgejo-runner looks.
 # renovate: datasource=node-version depName=node versioning=node
-ARG EXTERNAL_NODE20_VERSION=20.19.5
+ARG EXTERNAL_NODE20_VERSION=20.20.2
 RUN mkdir -p /home/runner/externals/node20 && \
     curl -fsSL "https://nodejs.org/dist/v${EXTERNAL_NODE20_VERSION}/node-v${EXTERNAL_NODE20_VERSION}-linux-x64.tar.gz" \
       | tar -xz --strip-components=1 -C /home/runner/externals/node20 && \
