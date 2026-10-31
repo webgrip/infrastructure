@@ -62,7 +62,7 @@ ARG GIT_CLIFF_VERSION=2.14.2
 # renovate: datasource=crate depName=cross
 ARG CROSS_VERSION=0.2.5
 # renovate: datasource=crate depName=wasm-bindgen-cli
-ARG WASM_BINDGEN_CLI_VERSION=0.2.129
+ARG WASM_BINDGEN_CLI_VERSION=0.2.130
 # renovate: datasource=crate depName=cargo-binstall
 ARG CARGO_BINSTALL_VERSION=1.26.1
 RUN cargo install --locked cargo-binstall@${CARGO_BINSTALL_VERSION} && \
