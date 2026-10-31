@@ -47,13 +47,50 @@ runs:
             "https://forgejo.webgrip.dev/v2/${repo}/manifests/${VERSION}" | header_digest
         }
 
+        json_field() {
+          sed -nE "s/.*\"$1\":\"([^\"]+)\".*/\\1/p"
+        }
+
+        forgejo_push_preflight() {
+          local login token status location headers
+          login="$(curl -fsS -u "webgrip-ci:${FORGEJO_TOKEN}" https://forgejo.webgrip.dev/api/v1/user | json_field login)" || {
+            echo "::error::WEBGRIP_CI_TOKEN does not authenticate to the Forgejo API"
+            return 1
+          }
+          [ "$login" = webgrip-ci ] || {
+            echo "::error::WEBGRIP_CI_TOKEN belongs to '${login}', not webgrip-ci"
+            return 1
+          }
+          token="$(curl -fsS -u "webgrip-ci:${FORGEJO_TOKEN}" \
+            "https://forgejo.webgrip.dev/v2/token?scope=repository:${repo}:pull,push&service=container_registry" | json_field token)"
+          headers="$(mktemp)"
+          status="$(curl -sS -o /dev/stderr -D "$headers" -w '%{http_code}' -X POST \
+            -H "Authorization: Bearer ${token}" "https://forgejo.webgrip.dev/v2/${repo}/blobs/uploads/")"
+          location="$(tr -d '\r' < "$headers" | awk -F': ' 'tolower($1)=="location"{print $2}')"
+          rm -f "$headers"
+          if [ "$status" != 202 ]; then
+            echo "::error::webgrip-ci authenticates but may not push to forgejo.webgrip.dev/${repo}: HTTP ${status} on starting an upload. Check that the token carries write:package and that webgrip-ci's org team has the packages unit."
+            return 1
+          fi
+          case "$location" in
+            http*) curl -fsS -o /dev/null -X DELETE -H "Authorization: Bearer ${token}" "$location" || true ;;
+            /*) curl -fsS -o /dev/null -X DELETE -H "Authorization: Bearer ${token}" "https://forgejo.webgrip.dev${location}" || true ;;
+          esac
+          echo "webgrip-ci may push to forgejo.webgrip.dev/${repo}"
+        }
+
+        forgejo_push_preflight
+
         printf '%s' "$HARBOR_TOKEN" | cosign login harbor.webgrip.dev -u "$HARBOR_USER" --password-stdin
         printf '%s' "$FORGEJO_TOKEN" | cosign login forgejo.webgrip.dev -u webgrip-ci --password-stdin
 
         source_digest="$(harbor_digest)"
         [ -n "$source_digest" ] || { echo "::error::harbor.webgrip.dev/${repo}:${VERSION} not found"; exit 1; }
 
-        cosign copy --force "harbor.webgrip.dev/${repo}:${VERSION}" "forgejo.webgrip.dev/${repo}:${VERSION}"
+        cosign copy --force "harbor.webgrip.dev/${repo}:${VERSION}" "forgejo.webgrip.dev/${repo}:${VERSION}" || {
+          echo "::error::webgrip-ci passed the push check with an explicit token, so cosign did not present the Forgejo login it was given"
+          exit 1
+        }
 
         copied_digest="$(forgejo_anonymous_digest)"
         [ "$copied_digest" = "$source_digest" ] || {
