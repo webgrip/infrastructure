@@ -9,7 +9,7 @@ release mechanics and the traps that a single workflow file does not reveal.
 ## What is here
 
 `ops/docker/<image>/` is the unit of release — around twenty runner, releaser and tooling
-images (`agent-runner`, `ci-runner`, `semantic-release*`, `techdocs-*`, the language `*-ci-runner`
+images (`agent-runner`, `ci-runner`, `rust-releaser`, `techdocs-*`, the language `*-ci-runner`
 family, `static-site-ci-runner`, `helm-deploy`, `infra-runner`, `cve-gate`, `vikunja-mcp`). Alongside them:
 `ops/scripts/`, `ops/security/`, `ops/vex/`.
 

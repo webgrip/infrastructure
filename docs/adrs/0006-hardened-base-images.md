@@ -235,6 +235,9 @@ yq -r '.images | to_entries[] | select(.value.note) | .key' ops/security/cve-bud
   check first.
 * 2026-10-25 — `semantic-release-rust` retired (VIK-2321): no repository in the estate used it
   and none publishes a cargo crate, so its held exception lapses with the image.
+* 2026-11-01 — `semantic-release` and `semantic-release-monorepo` retired from this repository:
+  every image here releases with `webgrip-release` from the root toolchain, and
+  `harbor.webgrip.dev/webgrip/semantic-release` is built by webgrip/semantic-release-config alone.
 * Refines: [ADR-0005](0005-openvex-and-cve-budgets.md) — this is how the budgets come down
 * Refined by: [ADR-0008](0008-cve-gate-runs-as-a-step.md) — the example leaves the hot path
 * External: [Docker Hardened Images catalog](https://github.com/docker-hardened-images/catalog)
