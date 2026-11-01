@@ -50,7 +50,7 @@ inputs:
 
 outputs:
   version:
-    description: "Bare semver of the release (from the exec successCmd writing to $GITHUB_OUTPUT; empty if none)"
+    description: "Bare semver of the release, from webgrip-release's released output (empty if none)"
     value: ${{ steps.semantic-release.outputs.version }}
   tag:
     description: "Full git tag of the release, e.g. rust-ci-runner-v1.4.0 (empty if none)"
@@ -180,90 +180,26 @@ runs:
         echo "BUILD_CANDIDATE_REF=${{ inputs.registry }}/webgrip/${{ inputs.package-name }}:cand" >> "$GITHUB_ENV"
         echo "BUILD_SBOM_GENERATOR=${{ inputs.sbom-generator }}" >> "$GITHUB_ENV"
 
-    - name: Run semantic-release
+    - name: Run webgrip-release
       shell: bash
       id: semantic-release
       env:
-        GITHUB_OUTPUT: $GITHUB_OUTPUT
-        # Literal flag (NOT a vars.* lookup, which is empty when the repo var is unset) that
-        # .releaserc.js keys on to select @saithodev/semantic-release-gitea over @semantic-release/github.
-        SEMANTIC_RELEASE_GITEA: "true"
-        # Forgejo: @saithodev/semantic-release-gitea targets the Gitea-compatible API. Fall back to the
-        # runner's instance URL (github.server_url) when the FORGEJO_INSTANCE_URL repo var is unset.
-        GITEA_URL: ${{ vars.FORGEJO_INSTANCE_URL || github.server_url }}
-        GITEA_TOKEN: ${{ inputs.token || github.token }}
-        # Identity for @semantic-release/git's version-bump commit-back (Forgejo-gated in .releaserc.js).
-        # checkout@v5 persisted the FORGEJO_TOKEN credentials, so the push back to Forgejo authenticates.
-        GIT_AUTHOR_NAME: webgrip-ci
-        GIT_AUTHOR_EMAIL: ci@webgrip.nl
-        GIT_COMMITTER_NAME: webgrip-ci
-        GIT_COMMITTER_EMAIL: ci@webgrip.nl
+        RELEASE_TOKEN: ${{ inputs.token || github.token }}
+        FORGE_URL: ${{ vars.FORGEJO_INSTANCE_URL || 'https://forgejo.webgrip.dev' }}
+        PACKAGE_PATH: ${{ inputs.package-path }}
       run: |
         set -euo pipefail
 
-        pkg_dir="${GITHUB_WORKSPACE}/${{ inputs.package-path }}"
-        pkg_name="${{ inputs.package-name }}"
-        pkg_json="$pkg_dir/package.json"
-        created_pkg_json="false"
-
-        if [[ ! -d "$pkg_dir" ]]; then
-          echo "package-path does not exist: $pkg_dir" >&2
+        if [[ ! -d "${GITHUB_WORKSPACE}/${PACKAGE_PATH}" ]]; then
+          echo "::error::package-path does not exist: ${PACKAGE_PATH}"
           exit 1
         fi
 
-        if [[ ! -f "$pkg_json" ]]; then
-          printf '{\n  "name": "%s",\n  "version": "0.0.0",\n  "private": true\n}\n' "$pkg_name" > "$pkg_json"
-          created_pkg_json="true"
-        fi
-
-        cleanup() {
-          if [[ "$created_pkg_json" == "true" ]]; then
-            rm -f "$pkg_json" || true
-          fi
-        }
-        trap cleanup EXIT
-
-        cd "$pkg_dir"
-
-        # Baseline: start every image from 0.0.0 (semantic-release otherwise hardcodes the first
-        # release to 1.0.0). Idempotent — a no-op for images that already carry <name>-v* tags.
-        seed_prefix="${pkg_name}-v"
-        if [[ -z "$(git tag -l "${seed_prefix}[0-9]*")" ]]; then
-          root="$(git rev-list --max-parents=0 HEAD | tail -1)"
-          echo "Seeding ${seed_prefix}0.0.0 at root commit ${root}."
-          git tag "${seed_prefix}0.0.0" "${root}"
-          git push origin "${seed_prefix}0.0.0"
-        fi
-
-        # Plugin shape lives once in @webgrip/semantic-release-config; each ops/docker/<image>/
-        # .releaserc.cjs is a small makeConfig() that requires it, resolving UPWARD into the
-        # repo-root node_modules that `npm ci` below produces.
-        forge_url="${{ vars.FORGEJO_INSTANCE_URL || 'https://forgejo.webgrip.dev' }}"
-        forge_host="${forge_url#http*://}"
-        npm config set "@webgrip:registry" "${forge_url}/api/packages/webgrip/npm/"
-        npm config set "//${forge_host}/api/packages/webgrip/npm/:_authToken" "${GITEA_TOKEN}"
-
-        # THE TOOLCHAIN IS A COMMITTED MANIFEST, NOT AN AD-HOC INSTALL. The repo-root
-        # package.json + package-lock.json pin semantic-release, the shared config,
-        # semantic-release-monorepo and the notes preset; `npm ci` reproduces that tree
-        # byte-for-byte, and the root manifest's `overrides` force the notes-toolchain pair
-        # the config's PR #10 chose (generator 15.0.0-beta.2 / analyzer 14.0.0-beta.3).
-        #
-        # Overrides are the ONLY npm mechanism that can do this: both betas sit outside
-        # semantic-release's own ^14/^13 ranges, so ANY manifest-less install (`--no-save
-        # --no-package-lock`, the previous shape here) is REQUIRED by npm to nest stable
-        # copies under semantic-release — and its plugin loader (resolve-from its own dir
-        # before cwd) loads the nested copy. Measured, runs 426-435: explicit install
-        # arguments looked like a fix and fixed nothing. Overrides need a root manifest,
-        # which is also why baking them into the semantic-release IMAGE trees (ce07256)
-        # could never reach this path. semantic-release-monorepo's README documents this
-        # root-install mode for monorepos; Renovate maintains the lockfile.
+        forge_host="${FORGE_URL#http*://}"
+        npm config set "@webgrip:registry" "${FORGE_URL}/api/packages/webgrip/npm/"
+        npm config set "//${forge_host}/api/packages/webgrip/npm/:_authToken" "${RELEASE_TOKEN}"
         (cd "${GITHUB_WORKSPACE}" && npm ci)
 
-        # Fail LOUD if the resolved tree ever drifts from the sanctioned pair — the failure
-        # mode this guards (generator 14 + preset 10) renders EMPTY notes silently, and
-        # months of org releases shipped that way once already. Second layer on top of the
-        # config's own load-time guard, because silence is the enemy here.
         node -e '
           const path = require("path"), fs = require("fs");
           const root = process.env.GITHUB_WORKSPACE;
@@ -277,43 +213,17 @@ runs:
           console.log(`notes toolchain OK: generator ${gen} + preset ${preset}, single copy`);
         '
 
-        # cwd is the package dir, so semantic-release discovers ops/docker/<image>/.releaserc.cjs
-        # (a makeConfig() from @webgrip/semantic-release-config). GITEA_URL is set above, so it selects
-        # the Gitea/Forgejo publish plugin. (semantic-release has no --config flag; the package
-        # config always wins via cosmiconfig regardless, so plugin selection lives in the config.)
-        #
-        # Retry loop: when several images release from one push, each job's @semantic-release/git
-        # version-bump push-back races the others (strategy.max-parallel is ignored by Forgejo,
-        # so jobs DO run concurrently). The race has TWO symptoms, both losing BEFORE the tag
-        # exists, so a hard-reset onto the moved main + rerun is safe:
-        #   - non-fast-forward: the push-back itself is rejected, rc != 0 (runs 124/125/127)
-        #   - behind-remote: semantic-release's up-to-date check sees main moved by a sibling's
-        #     bump commit and exits 0 WITHOUT publishing ("The local branch main is behind the
-        #     remote one") — run 141 silently dropped mkdocs-runner and techdocs-runner 1.0.1
-        #     this way, because an rc-only check treats it as success.
-        # The rerun's verifyRelease build re-uses the still-warm buildx builder, so it's cheap.
-        for attempt in 1 2 3; do
-          set +e
-          # Explicit bin path, not `npx`: npx falls back to a REGISTRY FETCH when it finds no
-          # local install, which would silently reintroduce the exact unpinned-toolchain
-          # failure the committed manifest exists to end.
-          "${GITHUB_WORKSPACE}/node_modules/.bin/semantic-release" 2>&1 | tee /tmp/semrel.log
-          rc=${PIPESTATUS[0]}
-          set -e
-          if [ "$rc" -eq 0 ] && ! grep -q 'is behind the remote one' /tmp/semrel.log; then
-            break
-          fi
-          if [ "$attempt" -lt 3 ] && grep -Eq 'fetch first|non-fast-forward|is behind the remote one' /tmp/semrel.log; then
-            echo "::warning::a concurrent release job moved ${GITHUB_REF_NAME} mid-run (attempt ${attempt}); resetting onto the updated branch and retrying"
-            git -C "$GITHUB_WORKSPACE" fetch origin "$GITHUB_REF_NAME"
-            git -C "$GITHUB_WORKSPACE" reset --hard "origin/$GITHUB_REF_NAME"
-            continue
-          fi
-          # Retries exhausted or a non-retryable error. rc can still be 0 here (behind-remote on
-          # the last attempt) — that's a DROPPED release, not a success; fail loudly.
-          [ "$rc" -eq 0 ] && rc=1
-          exit "$rc"
-        done
+        release_outputs="$(mktemp)"
+        GITHUB_OUTPUT="$release_outputs" "${GITHUB_WORKSPACE}/node_modules/.bin/webgrip-release" \
+          --layout trains \
+          --trains "${PACKAGE_PATH}" \
+          --forge-url "${FORGE_URL}"
+
+        released="$(sed -n 's/^released=//p' "$release_outputs")"
+        {
+          printf 'released=%s\n' "$released"
+          printf '%s' "$released" | jq -r 'if length > 0 then "version=\(.[0].version)\ntag=\(.[0].tag)" else empty end'
+        } >> "$GITHUB_OUTPUT"
 
     # No manual dispatch of on_release_published.yml: releases are created with the
     # webgrip-ci bot PAT (inputs.token), and only same-token actions are loop-suppressed —
