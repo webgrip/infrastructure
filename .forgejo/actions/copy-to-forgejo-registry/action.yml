@@ -22,7 +22,7 @@ runs:
         VERSION: ${{ inputs.version }}
       run: |
         set -euo pipefail
-        : "${HARBOR_USER:?}" "${HARBOR_TOKEN:?}" "${FORGEJO_TOKEN:?}"
+        : "${HARBOR_USER:?}" "${HARBOR_TOKEN:?}" "${WEBGRIP_CI_TOKEN:?}"
         DOCKER_CONFIG="$(mktemp -d)"
         export DOCKER_CONFIG
         trap 'rm -rf "$DOCKER_CONFIG"' EXIT
@@ -53,7 +53,7 @@ runs:
 
         forgejo_push_preflight() {
           local login token status location headers
-          login="$(curl -fsS -u "webgrip-ci:${FORGEJO_TOKEN}" https://forgejo.webgrip.dev/api/v1/user | json_field login)" || {
+          login="$(curl -fsS -u "webgrip-ci:${WEBGRIP_CI_TOKEN}" https://forgejo.webgrip.dev/api/v1/user | json_field login)" || {
             echo "::error::WEBGRIP_CI_TOKEN does not authenticate to the Forgejo API"
             return 1
           }
@@ -61,7 +61,7 @@ runs:
             echo "::error::WEBGRIP_CI_TOKEN belongs to '${login}', not webgrip-ci"
             return 1
           }
-          token="$(curl -fsS -u "webgrip-ci:${FORGEJO_TOKEN}" \
+          token="$(curl -fsS -u "webgrip-ci:${WEBGRIP_CI_TOKEN}" \
             "https://forgejo.webgrip.dev/v2/token?scope=repository:${repo}:pull,push&service=container_registry" | json_field token)"
           headers="$(mktemp)"
           status="$(curl -sS -o /dev/stderr -D "$headers" -w '%{http_code}' -X POST \
@@ -82,7 +82,7 @@ runs:
         forgejo_push_preflight
 
         printf '%s' "$HARBOR_TOKEN" | cosign login harbor.webgrip.dev -u "$HARBOR_USER" --password-stdin
-        printf '%s' "$FORGEJO_TOKEN" | cosign login forgejo.webgrip.dev -u webgrip-ci --password-stdin
+        printf '%s' "$WEBGRIP_CI_TOKEN" | cosign login forgejo.webgrip.dev -u webgrip-ci --password-stdin
 
         source_digest="$(harbor_digest)"
         [ -n "$source_digest" ] || { echo "::error::harbor.webgrip.dev/${repo}:${VERSION} not found"; exit 1; }
