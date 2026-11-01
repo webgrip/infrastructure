@@ -243,4 +243,4 @@ jobs:
         env:
           HARBOR_USER: ${{ secrets.HARBOR_ROBOT_USER }}
           HARBOR_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
-          FORGEJO_TOKEN: ${{ secrets.WEBGRIP_CI_TOKEN }}
+          WEBGRIP_CI_TOKEN: ${{ secrets.WEBGRIP_CI_TOKEN }}

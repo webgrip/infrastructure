@@ -22,7 +22,9 @@ The image serves three ways:
 - **Host mode outside the homelab**, as the main container of unfold-cluster's `unfold-check`
   runner pool. That cluster cannot reach Harbor, so it pulls the copy on `forgejo.webgrip.dev`,
   which the release workflow's `release-copy-forgejo` job makes and checks byte for byte.
-  `copy_image_to_forgejo.yml` copies an earlier release by hand.
+  `copy_image_to_forgejo.yml` copies an earlier release by hand. The copy pushes as `webgrip-ci`
+  with the token in `WEBGRIP_CI_TOKEN`; a step variable named `FORGEJO_TOKEN` is replaced by the
+  job's built-in token, which belongs to `forgejo-actions` and may not push packages.
 
 Both need `node` on `PATH`, because JavaScript actions such as `actions/checkout` run with it.
 
