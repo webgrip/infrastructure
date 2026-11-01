@@ -165,7 +165,7 @@ jobs:
       # did before ADR-0009.
       - name: Build and push (no candidate)
         if: ${{ steps.promote.outputs.promoted != 'true' }}
-        uses: https://forgejo.webgrip.dev/webgrip/workflows/.forgejo/composite-actions/docker-build-push-registry-fast@main
+        uses: https://forgejo.webgrip.dev/webgrip/workflows/.forgejo/composite-actions/docker-build-push-registry-fast@8e06dbdab4907dc97d43515eb9275eadc8ff9271 # v4.0.0
         env:
           REGISTRY_USERNAME: ${{ secrets.HARBOR_ROBOT_USER }}
           REGISTRY_TOKEN: ${{ secrets.HARBOR_ROBOT_TOKEN }}
