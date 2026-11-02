@@ -67,7 +67,7 @@ USER root
 #
 # zstd: actions/cache compresses with zstd only when the binary is on PATH, and falls back to
 # single-threaded gzip otherwise. Without it, saving a ~170 MB cache took ~37 s per entry on a
-# loaded runner (glide run 467: pnpm store 38 s, mise installs 37 s), and every restore paid the
+# loaded runner (unfold CI run 467: pnpm store 38 s, mise installs 37 s), and every restore paid the
 # same codec on the way back in.
 RUN apt-get update && \
     apt-get install -y \

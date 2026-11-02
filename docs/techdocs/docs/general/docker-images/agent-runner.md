@@ -1,6 +1,6 @@
 # Agent Runner
 
-The image an unattended agent Run executes in. Glide's Ploeg workers start it (as
+The image an unattended agent Run executes in. Ploeg workers start it (as
 `executor.runnerImage`), and the pod runs it as uid 65532 with no network beyond the model
 gateway. This page covers the agent tools baked into it. The reasons behind the rest of the
 Dockerfile (DHI Alpine base, no language toolchains, no docker client) are in
@@ -25,8 +25,8 @@ Dockerfile (DHI Alpine base, no language toolchains, no docker client) are in
 | Node.js | 24.19.0 | copied from `dhi.io/node` | runtime for the npm tools |
 
 Qwen Code and Goose are the agents behind Ploeg's `qwen-code` and `goose` ACP profiles. The
-command lines and environment each profile sets are in Glide's
-`apps/ploeg/docs/contracts/acp-profiles.md`. Ploeg does not install agents, so a profile only
+command lines and environment each profile sets are in Ploeg's
+[`docs/contracts/acp-profiles.md`](https://github.com/ploeg-hq/ploeg/blob/development/docs/contracts/acp-profiles.md). Ploeg does not install agents, so a profile only
 works in an image that has its binary on `PATH`.
 
 Every tool gets its own version check during the build: `qwen --version` and `opencode --version`
@@ -49,7 +49,7 @@ renames or breaks a binary therefore fails the build, and a Run never sees it.
   until someone copies the new digests from the release page (GitHub publishes one per asset)
   into `GOOSE_SHA256_AMD64` and `GOOSE_SHA256_ARM64`. It fails closed, the same way the
   act-runner download does.
-- Qwen Code ships a new release every few days. Bump it on purpose, and run Glide's
+- Qwen Code ships a new release every few days. Bump it on purpose, and run Unfold's
   `mise run harness-conformance` against the new image before a Team relies on it.
 
 ### What the Qwen Code install contains, and what the build removes
@@ -88,7 +88,7 @@ per-Run directory or on the Run's permission mode.
 ## Before a Team switches to Qwen Code or Goose
 
 Both agents read configuration from the repository they work on. The image cannot switch that
-off, so Ploeg has to neutralise it before either profile is used for real work (Glide ticket
+off, so Ploeg has to neutralise it before either profile is used for real work (Unfold ticket
 #1278):
 
 - **Goose 1.52.0 enables MCP servers from `<working directory>/.agents/plugins/`.** Plugin
