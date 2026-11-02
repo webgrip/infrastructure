@@ -25,8 +25,8 @@ RUN apk add --no-cache docker git bash curl
 # the CDN and the repo's master branch at whatever commit is HEAD that day. Same house pattern as
 # ci-runner's helm/yq (#88): fetch the release artifact, verify the published checksum, install.
 # renovate: datasource=github-releases depName=nektos/act
-ARG ACT_VERSION=0.2.92
-ARG ACT_SHA256=c9e13f0eb77948a6d02eb2e06fa7220addfc5b9927ed2a1b35bcdae5441ac7a1
+ARG ACT_VERSION=0.2.94
+ARG ACT_SHA256=33e6748e3c07affb6855f19fb7a28bc6c344c1d0888fae0564e6d34d4a71915a
 
 RUN set -eux; \
     install -d /usr/local/bin; \
