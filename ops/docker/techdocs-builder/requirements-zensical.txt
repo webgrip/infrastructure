@@ -4,6 +4,8 @@
 #
 #    pip-compile --allow-unsafe --generate-hashes --output-file=requirements-zensical.txt --strip-extras requirements-zensical.in
 #
+--extra-index-url https://forgejo.webgrip.dev/api/packages/webgrip/pypi/simple/
+
 click==8.4.2 \
     --hash=sha256:9a6cea6e60b17ebe0a44c5cc636d94f09bd66142c1cd7d8b4cd731c4917a15f6 \
     --hash=sha256:e6f9f66136c816745b9d65817da91d61d957fb16e02e4dcd0552553c5a197b76
@@ -257,6 +259,10 @@ tomli==2.4.1 \
     --hash=sha256:ff18e6a727ee0ab0388507b89d1bc6a22b138d1e2fa56d1ad494586d61d2eae9 \
     --hash=sha256:ff2983983d34813c1aeb0fa89091e76c3a22889ee83ab27c5eeb45100560c049
     # via zensical
+webgrip-zensical-theme==0.1.0 \
+    --hash=sha256:17c65992fd80abb173d5182a1d03190343aaebc1fea8e2b980c26bf0ed71da2d \
+    --hash=sha256:a109b03d1623236334936f41496a74ce0d529801874c509294b87dec177f48bc
+    # via -r requirements-zensical.in
 zensical==0.0.53 \
     --hash=sha256:0f4c1219c534d3cccc0b86093748dc009e0e9d80d4dad8d65e2150c846aa1123 \
     --hash=sha256:10b0cb72861b14bd985bc5ad0203c35b1da7a19c87c194df3189fab7a910db04 \
@@ -271,4 +277,6 @@ zensical==0.0.53 \
     --hash=sha256:c203493598d6cad890d7cb48f9d75693f648fe0d2347b2f147406a99fd7bb101 \
     --hash=sha256:e016062c3299c84be811848d1e81ad0f3f711615f0bed87bb0a1b47f6968a5a4 \
     --hash=sha256:ec34844b3bc1855f5c10b99efbeebd27abcd983a9144dbad965609e65915c050
-    # via -r requirements-zensical.in
+    # via
+    #   -r requirements-zensical.in
+    #   webgrip-zensical-theme

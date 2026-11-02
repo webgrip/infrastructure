@@ -10,3 +10,8 @@ markdown==3.11.2
 # via techdocs-core; the `dot` binary is in the image).
 markdown-inline-mermaid==1.0.4
 markdown-graphviz-inline==1.1.3
+# The estate's docs theme, from the Forgejo PyPI registry (--extra-index-url
+# below, emitted into the lock); hash-locked, so a same-named package on
+# pypi.org cannot stand in for it.
+--extra-index-url https://forgejo.webgrip.dev/api/packages/webgrip/pypi/simple/
+webgrip-zensical-theme==0.1.0
