@@ -49,7 +49,7 @@ ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.22.1-alpine3.24-dev@sha256:c7999456f9380e
 #
 # BUILD PREREQUISITE: the `dhi` Harbor proxy project (homelab-cluster ADR-0023).
 # renovate: datasource=docker depName=dhi.io/python versioning=docker
-ARG BASE_IMAGE=${REGISTRY_DHI}/python:3.14.10-alpine3.24-dev@sha256:a856bc8f2464347152d6bdcbf43fe995c79551e9fc2482ee2f00c5ec2642e406
+ARG BASE_IMAGE=${REGISTRY_DHI}/python:3.12.13-alpine3.24-dev@sha256:cf1c0e16904b7e831e430a02811cd36381c0e5b8ccf615be9be37fed0953260b
 
 # renovate: datasource=github-releases depName=aaif-goose/goose
 ARG GOOSE_VERSION=1.57.0
