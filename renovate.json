@@ -101,6 +101,16 @@
         ],
         "executionMode": "branch"
       }
+    },
+    {
+      "description": "agent-runner's base Python stays on 3.12: OpenHands declares requires-python ==3.12.* (1.16.0 and main, 2026-11-03), and the image installs it into the base interpreter with UV_PYTHON_DOWNLOADS=never. The 3.12 -> 3.14 bump of 2026-10-30 broke every agent-runner release (cffi 1.17.1 from the OpenHands constraints does not build on 3.14). Lift this when OpenHands widens requires-python.",
+      "matchFileNames": [
+        "ops/docker/agent-runner/**"
+      ],
+      "matchDepNames": [
+        "dhi.io/python"
+      ],
+      "allowedVersions": "/^3\\.12\\./"
     }
   ],
   "pip-compile": {
