@@ -111,6 +111,16 @@
         "dhi.io/python"
       ],
       "allowedVersions": "/^3\\.12\\./"
+    },
+    {
+      "description": "The root package.json's engines.node states the Node the release toolchain runs on, which is the node-version of setup-node in .forgejo/actions/semantic-release-monorepo/action.yml. Renovate pinned it on its own to v26.13.0 on 2026-10-30 while CI stayed on 24.22.2, so every release logged EBADENGINE. It moves by hand, together with that node-version.",
+      "matchFileNames": [
+        "package.json"
+      ],
+      "matchDepTypes": [
+        "engines"
+      ],
+      "enabled": false
     }
   ],
   "pip-compile": {
