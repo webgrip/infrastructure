@@ -27,7 +27,7 @@ ARG REGISTRY_GHCR=ghcr.io
 # since July while agent-runner accrued 43 criticals from a stale python base.
 # uv is copied from its official image (reproducible; no `curl | sh`).
 # renovate: datasource=docker depName=ghcr.io/astral-sh/uv versioning=docker
-ARG UV_IMAGE=${REGISTRY_GHCR}/astral-sh/uv:0.13.6@sha256:af22a52f5eafef3d78e551599d405c02df61919d18028f0cea8eda93bc9986d0
+ARG UV_IMAGE=${REGISTRY_GHCR}/astral-sh/uv:0.13.7@sha256:96f40d3904aad8d0bd010539001d36c8e2188b981e1334471a90c4a1d93bb490
 # node 24 — for the agent's own workflow tooling (openspec, moon), not for running gates.
 # MUST match the base's libc: the node binary is dynamically linked, so an alpine base needs an
 # alpine node (and alpine 3.24 to match the python base's musl).
