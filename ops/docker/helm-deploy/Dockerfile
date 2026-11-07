@@ -8,7 +8,7 @@
 # anonymous pulls, so unlike the other REGISTRY_* ARGs this one DEFAULTS to the proxy.
 ARG REGISTRY_DHI=harbor.webgrip.dev/dhi
 # renovate: datasource=docker depName=dhi.io/alpine-base versioning=docker
-ARG BASE_IMAGE=${REGISTRY_DHI}/alpine-base:3.24-dev@sha256:7182e0bc2f186386bb23bc0718508913450ba1876e93cf07e5e3cf263c4dbb63
+ARG BASE_IMAGE=${REGISTRY_DHI}/alpine-base:3.24-dev@sha256:52a1dd05ab0348e71cf244d595d9ce59268c68ac3fdd6338c18997fe035b36a7
 FROM ${BASE_IMAGE}
 
 ARG IMAGE_CREATED=1970-01-01T00:00:00Z
@@ -76,8 +76,8 @@ RUN curl -fsSL -o doctl.tar.gz "https://github.com/digitalocean/doctl/releases/d
     rm doctl.tar.gz
 
 # renovate: datasource=github-releases depName=mikefarah/yq
-ARG YQ_VERSION="4.54.1"
-ARG YQ_SHA256="8e34fc298390875de416e6a4afcb8cabeceb25d9aa8506c1a2f9353cf702ea5f"
+ARG YQ_VERSION="4.54.2"
+ARG YQ_SHA256="44c7759059b4910827a0059a2757b22001e59360cdecdb2ef8dedc4b6c7e9f32"
 RUN wget -q "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64" -O /usr/local/bin/yq && \
     echo "${YQ_SHA256}  /usr/local/bin/yq" | sha256sum -c - && \
     chmod +x /usr/local/bin/yq

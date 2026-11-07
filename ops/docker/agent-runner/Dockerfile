@@ -32,7 +32,7 @@ ARG UV_IMAGE=${REGISTRY_GHCR}/astral-sh/uv:0.13.7@sha256:96f40d3904aad8d0bd01053
 # MUST match the base's libc: the node binary is dynamically linked, so an alpine base needs an
 # alpine node (and alpine 3.24 to match the python base's musl).
 # renovate: datasource=docker depName=dhi.io/node versioning=docker
-ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.22.1-alpine3.24-dev@sha256:c7999456f9380ed100bb430baeb4fdbf4fec59c51d3bab2b0bd3ea77a44e3677
+ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.22.2-alpine3.24-dev@sha256:0057d010be89409475a50d93a024e412a3bdf9139bb0134c368546c9928f7842
 # ADR-0006 Stage 2. python 3.12 still, matching CI's python:3.12 for the domain scripts.
 #
 # ALPINE, and the reason is measured: the digest refresh (v1.0.4) recovered nothing — 43/101
@@ -49,7 +49,7 @@ ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.22.1-alpine3.24-dev@sha256:c7999456f9380e
 #
 # BUILD PREREQUISITE: the `dhi` Harbor proxy project (homelab-cluster ADR-0023).
 # renovate: datasource=docker depName=dhi.io/python versioning=docker
-ARG BASE_IMAGE=${REGISTRY_DHI}/python:3.12.13-alpine3.24-dev@sha256:cf1c0e16904b7e831e430a02811cd36381c0e5b8ccf615be9be37fed0953260b
+ARG BASE_IMAGE=${REGISTRY_DHI}/python:3.12.16-alpine3.24-dev@sha256:f8f546cdd69cba4685a1bd4926c6910d94ba8836ece920e5fad63714c9fd36b3
 
 # renovate: datasource=github-releases depName=aaif-goose/goose
 ARG GOOSE_VERSION=1.57.0

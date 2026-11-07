@@ -125,8 +125,8 @@ RUN set -eux; \
 # 4.44.3 -> 4.53.3: nine minor versions stale despite the Renovate annotation. Checksum-verified
 # for the same reason as helm above — this was a bare curl of a binary straight onto PATH.
 # renovate: datasource=github-releases depName=mikefarah/yq
-ARG YQ_VERSION=4.54.1
-ARG YQ_SHA256=8e34fc298390875de416e6a4afcb8cabeceb25d9aa8506c1a2f9353cf702ea5f
+ARG YQ_VERSION=4.54.2
+ARG YQ_SHA256=44c7759059b4910827a0059a2757b22001e59360cdecdb2ef8dedc4b6c7e9f32
 RUN set -eux; \
     curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64" \
       -o /tmp/yq; \
@@ -167,8 +167,8 @@ RUN set -eux; \
     cosign version
 
 # renovate: datasource=github-releases depName=anchore/syft
-ARG SYFT_VERSION=1.55.0
-ARG SYFT_SHA256=bb65249542db5fedeeb4d3f9b018b75e7264dbfbbb10486f044581a92f90490d
+ARG SYFT_VERSION=1.56.0
+ARG SYFT_SHA256=1c2493cfcf52d3367d6cb25780d9190c111c2219c34c820574c43e8bae15c528
 RUN set -eux; \
     curl -fsSL "https://github.com/anchore/syft/releases/download/v${SYFT_VERSION}/syft_${SYFT_VERSION}_linux_amd64.tar.gz" \
       -o /tmp/syft.tgz; \

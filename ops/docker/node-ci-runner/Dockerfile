@@ -21,7 +21,7 @@
 # anonymous pulls, so unlike the other REGISTRY_* ARGs this one DEFAULTS to the proxy.
 ARG REGISTRY_DHI=harbor.webgrip.dev/dhi
 # renovate: datasource=docker depName=dhi.io/node versioning=docker
-ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.22.1-alpine3.23-dev@sha256:0e7bb431b722a59a87873c6b5e0dfc97d6164bf430214fd0de569e3a72f9f708
+ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.22.2-alpine3.23-dev@sha256:d331ca42569f4d69779a8a74cf722f7ae709637f49205fcfc1b26ce198c16922
 
 FROM ${NODE_IMAGE}
 

@@ -45,7 +45,7 @@ inputs:
     required: false
     # Kept in lockstep with SYFT_VERSION in ops/docker/ci-runner/Dockerfile.
     # renovate: datasource=github-releases depName=anchore/syft
-    default: "v1.55.0"
+    default: "v1.56.0"
   openbao-addr:
     description: "In-cluster OpenBao address (Vault-compatible API)"
     required: false
