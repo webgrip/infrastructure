@@ -3,7 +3,7 @@ ARG REGISTRY_MCR=mcr.microsoft.com
 # every upstream rebuild, and this image's budget is the largest and least reducible in the estate
 # (three browser engines) — it above all needs its baseline to describe a fixed artifact.
 # renovate: datasource=docker depName=mcr.microsoft.com/playwright versioning=docker
-ARG BASE_IMAGE=${REGISTRY_MCR}/playwright:v1.64.1-noble@sha256:2f05f8a734509a7b3f26a912639488ee08f58a7b292d14d62271bcff9038768f
+ARG BASE_IMAGE=${REGISTRY_MCR}/playwright:v1.65.0-noble@sha256:9beb546099e11f52d62e505537914870e01a67e0e6b00ae41da4775324e73dbe
 FROM ${BASE_IMAGE}
 
 ARG IMAGE_CREATED=1970-01-01T00:00:00Z

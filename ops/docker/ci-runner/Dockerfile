@@ -1,7 +1,7 @@
 # Release re-entry touch: run 135 dropped this train (npm 404); the matrix is push-diff.
 
 # renovate: datasource=docker depName=ghcr.io/actions/actions-runner versioning=docker
-ARG RUNNER_VERSION=2.338.2@sha256:759a1d94a15b05941aba5196974ff43fe15b4cbba29b694b35cbc32a1166b232
+ARG RUNNER_VERSION=2.338.2@sha256:6d0b2d80d80f143f77dcb676e50920100bbb547e39e883454d57f45ab8c31300
 ARG REGISTRY_GHCR=ghcr.io
 ARG REGISTRY_DOCKERHUB=docker.io
 # renovate: datasource=docker depName=docker.io/library/node versioning=docker
@@ -125,8 +125,8 @@ RUN set -eux; \
 # 4.44.3 -> 4.53.3: nine minor versions stale despite the Renovate annotation. Checksum-verified
 # for the same reason as helm above — this was a bare curl of a binary straight onto PATH.
 # renovate: datasource=github-releases depName=mikefarah/yq
-ARG YQ_VERSION=4.54.1
-ARG YQ_SHA256=8e34fc298390875de416e6a4afcb8cabeceb25d9aa8506c1a2f9353cf702ea5f
+ARG YQ_VERSION=4.54.3
+ARG YQ_SHA256=129534601871538efe0ba4c5e62a34fb1d5f469bcb975c4fddeb467d82974973
 RUN set -eux; \
     curl -fsSL "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64" \
       -o /tmp/yq; \
@@ -167,8 +167,8 @@ RUN set -eux; \
     cosign version
 
 # renovate: datasource=github-releases depName=anchore/syft
-ARG SYFT_VERSION=1.55.0
-ARG SYFT_SHA256=bb65249542db5fedeeb4d3f9b018b75e7264dbfbbb10486f044581a92f90490d
+ARG SYFT_VERSION=1.57.0
+ARG SYFT_SHA256=9c077a7d43029b3b13e98a8db720661e700c4d58db6352153a06395ae4a2a704
 RUN set -eux; \
     curl -fsSL "https://github.com/anchore/syft/releases/download/v${SYFT_VERSION}/syft_${SYFT_VERSION}_linux_amd64.tar.gz" \
       -o /tmp/syft.tgz; \
