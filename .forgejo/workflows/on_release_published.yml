@@ -232,7 +232,7 @@ jobs:
   release-copy-forgejo:
     name: 'Copy to the Forgejo registry'
     needs: [parse-release-tag, release-sign-harbor]
-    if: needs.parse-release-tag.outputs.image == 'infra-runner'
+    if: contains(fromJSON('["infra-runner","php-ci-runner","rust-ci-runner","node-ci-runner"]'), needs.parse-release-tag.outputs.image)
     runs-on: docker
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

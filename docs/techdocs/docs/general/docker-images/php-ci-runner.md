@@ -9,7 +9,7 @@ The PHP CI Runner provides a lightweight, reproducible container environment for
 | **Base Image** | `php:8.4-cli` (digest-pinned; configurable via build arg) |
 | **PHP Version** | 8.4 (currently resolves to `8.4.18-cli-trixie`) |
 | **Composer** | 2.x (currently resolves to `2.9.5`) |
-| **Registry** | `webgrip/php-ci-runner` |
+| **Registry** | `webgrip/php-ci-runner`; releases are also copied, signature and attestations included, to `forgejo.webgrip.dev/webgrip/php-ci-runner`, which the gVisor CI runners pull from |
 | **Dockerfile** | [`ops/docker/php-ci-runner/Dockerfile`](../../../../../ops/docker/php-ci-runner/Dockerfile) |
 
 ## Included Tooling
