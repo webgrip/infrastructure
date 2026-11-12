@@ -18,7 +18,7 @@ This image serves as the primary development and CI environment for Rust project
 | **Base Image** | `rust:1.87.0-slim-bookworm` → `debian:bookworm-slim` |
 | **Architecture** | Multi-platform (AMD64, ARM64) |
 | **Size** | ~800MB (optimized via multi-stage build) |
-| **Registry** | `webgrip/rust-ci-runner` |
+| **Registry** | `webgrip/rust-ci-runner`; releases are also copied, signature and attestations included, to `forgejo.webgrip.dev/webgrip/rust-ci-runner`, which the gVisor CI runners pull from |
 | **Dockerfile** | [`ops/docker/rust-ci-runner/Dockerfile`](../../../../../ops/docker/rust-ci-runner/Dockerfile) |
 
 ## Installed Tools
