@@ -6,7 +6,7 @@ ARG REGISTRY_WEBGRIP=harbor.webgrip.dev/webgrip
 # Tag AND digest (house pattern, cf. ci-runner's CVE_GATE_VERSION): the whole point of budgeting
 # this image is that its baseline names an exact artifact. Renovate moves both together (#106).
 # renovate: datasource=docker depName=harbor.webgrip.dev/webgrip/techdocs-builder versioning=docker
-ARG TECHDOCS_BUILDER_VERSION=1.8.2@sha256:2a5f94c84b26a4bc9d490964de6fbf82c8fe90b427fcd7d01c34d23459e282d4
+ARG TECHDOCS_BUILDER_VERSION=1.9.0@sha256:f2c906edf5b842e217372a09b07d3cd99c9b4ac2e22d7c8da20c6d213b66db4a
 FROM ${REGISTRY_WEBGRIP}/techdocs-builder:${TECHDOCS_BUILDER_VERSION} AS mkdocs
 
 ARG IMAGE_CREATED=1970-01-01T00:00:00Z
