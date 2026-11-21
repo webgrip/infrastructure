@@ -23,9 +23,9 @@
 ARG REGISTRY_DHI=harbor.webgrip.dev/dhi
 ARG REGISTRY_DOCKERHUB=docker.io
 # renovate: datasource=docker depName=dhi.io/node versioning=docker
-ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.22.1-alpine3.23-dev@sha256:0e7bb431b722a59a87873c6b5e0dfc97d6164bf430214fd0de569e3a72f9f708
+ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.22.3-alpine3.23-dev@sha256:abe5e2eb4166f422dea213c4181c1ab069f63bb5d4b4bb0878abba2039fefec6
 # renovate: datasource=docker depName=dhi.io/python versioning=docker
-ARG BASE_IMAGE=${REGISTRY_DHI}/python:3.14.10-alpine3.24-dev@sha256:a856bc8f2464347152d6bdcbf43fe995c79551e9fc2482ee2f00c5ec2642e406
+ARG BASE_IMAGE=${REGISTRY_DHI}/python:3.15.2-alpine3.24-dev@sha256:85fd30d48a23f83babe5f725b45dc37c30fc4cd5a52eaa33e36ecd1ceeff9e8a
 # The jar-fetch stage only runs curl; its base never ships. Kept on the stock JRE image purely
 # to keep the fetched artifact byte-identical (see header note 3).
 # renovate: datasource=docker depName=docker.io/library/eclipse-temurin versioning=docker

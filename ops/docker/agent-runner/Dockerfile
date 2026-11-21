@@ -27,12 +27,12 @@ ARG REGISTRY_GHCR=ghcr.io
 # since July while agent-runner accrued 43 criticals from a stale python base.
 # uv is copied from its official image (reproducible; no `curl | sh`).
 # renovate: datasource=docker depName=ghcr.io/astral-sh/uv versioning=docker
-ARG UV_IMAGE=${REGISTRY_GHCR}/astral-sh/uv:0.13.7@sha256:96f40d3904aad8d0bd010539001d36c8e2188b981e1334471a90c4a1d93bb490
+ARG UV_IMAGE=${REGISTRY_GHCR}/astral-sh/uv:0.13.9@sha256:d3b601f0c7b118bc1753febf7c41cc80981df678445e0254284eecf84db79a7d
 # node 24 — for the agent's own workflow tooling (openspec, moon), not for running gates.
 # MUST match the base's libc: the node binary is dynamically linked, so an alpine base needs an
 # alpine node (and alpine 3.24 to match the python base's musl).
 # renovate: datasource=docker depName=dhi.io/node versioning=docker
-ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.22.1-alpine3.24-dev@sha256:c7999456f9380ed100bb430baeb4fdbf4fec59c51d3bab2b0bd3ea77a44e3677
+ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.22.3-alpine3.24-dev@sha256:c20f11384f43d7c6b530116d1db03996ca730caad9cf0eb0be9abcd97eb16887
 # ADR-0006 Stage 2. python 3.12 still, matching CI's python:3.12 for the domain scripts.
 #
 # ALPINE, and the reason is measured: the digest refresh (v1.0.4) recovered nothing — 43/101
@@ -49,12 +49,12 @@ ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.22.1-alpine3.24-dev@sha256:c7999456f9380e
 #
 # BUILD PREREQUISITE: the `dhi` Harbor proxy project (homelab-cluster ADR-0023).
 # renovate: datasource=docker depName=dhi.io/python versioning=docker
-ARG BASE_IMAGE=${REGISTRY_DHI}/python:3.12.13-alpine3.24-dev@sha256:cf1c0e16904b7e831e430a02811cd36381c0e5b8ccf615be9be37fed0953260b
+ARG BASE_IMAGE=${REGISTRY_DHI}/python:3.12.16-alpine3.24-dev@sha256:11ffd7d64ae8381f338cfffe0a2d07294e249e8fc2c88144b31d61c0332e8279
 
 # renovate: datasource=github-releases depName=aaif-goose/goose
-ARG GOOSE_VERSION=1.57.0
-ARG GOOSE_SHA256_AMD64=6c3a05e30e1a425dc06a410dbe24b3f3697c9721b1ea2340434ddda6b64267ae
-ARG GOOSE_SHA256_ARM64=00a32522f0421ed72fc06f36bfc44c8e51cffefb4daf22a81bb84ccd29d1a1ce
+ARG GOOSE_VERSION=1.60.1
+ARG GOOSE_SHA256_AMD64=15478c207e7ad9196d3671b158c6c8559833ab5712fcea24f972773fbbf05cd5
+ARG GOOSE_SHA256_ARM64=9cf89d2f549631021b9faac6ef2cc464d60e20516ee40a4077b47b759743ad94
 
 FROM ${UV_IMAGE} AS uv
 FROM ${NODE_IMAGE} AS node
