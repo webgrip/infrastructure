@@ -8,7 +8,7 @@ ARG REGISTRY_DOCKERHUB=docker.io
 # One ARG carrying tag AND digest (house pattern): Renovate moves them together via the
 # digest-aware annotated-ARG manager.
 # renovate: datasource=docker depName=docker.io/library/node versioning=docker
-ARG NODE_IMAGE=${REGISTRY_DOCKERHUB}/library/node:24-bookworm-slim@sha256:c86ecead9e55a5210ac1727de38a4ca840bf03dcaf34dc9749addbf383b1920c
+ARG NODE_IMAGE=${REGISTRY_DOCKERHUB}/library/node:24-bookworm-slim@sha256:873f586f3794f52281bd039bf02c048a0be08fde619338f9941bad1eb6b34530
 # renovate: datasource=docker depName=docker.io/library/rust versioning=docker
 ARG RUST_IMAGE=${REGISTRY_DOCKERHUB}/library/rust:1.97.0-slim-bookworm@sha256:6d220bf85c74e842a79da63997af8d2e74455c0b8847d8bb3a5888572334991d
 FROM ${RUST_IMAGE} AS rust
@@ -64,7 +64,7 @@ ARG CROSS_VERSION=0.2.5
 # renovate: datasource=crate depName=wasm-bindgen-cli
 ARG WASM_BINDGEN_CLI_VERSION=0.2.130
 # renovate: datasource=crate depName=cargo-binstall
-ARG CARGO_BINSTALL_VERSION=1.26.2
+ARG CARGO_BINSTALL_VERSION=1.28.0
 RUN cargo install --locked cargo-binstall@${CARGO_BINSTALL_VERSION} && \
     cargo binstall --no-confirm cargo-release@${CARGO_RELEASE_VERSION} && \
     cargo binstall --no-confirm git-cliff@${GIT_CLIFF_VERSION} && \

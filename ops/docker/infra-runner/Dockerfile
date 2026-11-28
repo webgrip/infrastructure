@@ -1,7 +1,7 @@
-# syntax=docker/dockerfile:1@sha256:4edf897a3ffa55b89f906fc8cc78afdb3f1834cc9c7083565e611a8a7d5fe99e
+# syntax=docker/dockerfile:1@sha256:572cebbc2b15e6f84c077742952674889cb63cd5e9b80abdffcbe587b6f19183
 ARG REGISTRY_DHI=harbor.webgrip.dev/dhi
 # renovate: datasource=docker depName=dhi.io/node versioning=docker
-ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.22.1-alpine3.24-dev@sha256:c7999456f9380ed100bb430baeb4fdbf4fec59c51d3bab2b0bd3ea77a44e3677
+ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.22.3-alpine3.24-dev@sha256:417af41fd2803f7dab71a0d2602711d1bd3f69cc064000555e9ecd8f52733bb5
 
 FROM ${NODE_IMAGE}
 
@@ -30,8 +30,8 @@ RUN apk add --no-cache \
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
 # renovate: datasource=github-releases depName=opentofu/opentofu
-ARG TOFU_VERSION=1.13.2
-ARG TOFU_SHA256=ac05d9952662c7db28dd57e93f0a68018837bfdf9342384ec0987977c16a9645
+ARG TOFU_VERSION=1.13.10
+ARG TOFU_SHA256=f606b6117ee03177374806d56d580bde7b512aff69f86d2b9f3148dced4ca375
 RUN archive="/tmp/tofu_${TOFU_VERSION}_linux_amd64.tar.gz" \
  && curl -fsSL -o "${archive}" "https://github.com/opentofu/opentofu/releases/download/v${TOFU_VERSION}/tofu_${TOFU_VERSION}_linux_amd64.tar.gz" \
  && echo "${TOFU_SHA256}  ${archive}" | sha256sum -c - \
@@ -50,8 +50,8 @@ RUN archive="/tmp/age-v${AGE_VERSION}-linux-amd64.tar.gz" \
  && rm -rf "${archive}" /tmp/age
 
 # renovate: datasource=github-releases depName=etcd-io/etcd
-ARG ETCD_VERSION=3.7.3
-ARG ETCD_SHA256=5dfa9cc3b3ce3b4b491fbcc2057d3daa166bcc6676f743fcd20f8e5760cb9775
+ARG ETCD_VERSION=3.7.4
+ARG ETCD_SHA256=a0d47d07d081c12611fe69dc81a16ae8dd758401c0fe3a83d508823a1dac558e
 RUN archive="/tmp/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz" \
  && unpacked="/tmp/etcd-v${ETCD_VERSION}-linux-amd64" \
  && curl -fsSL -o "${archive}" "https://github.com/etcd-io/etcd/releases/download/v${ETCD_VERSION}/etcd-v${ETCD_VERSION}-linux-amd64.tar.gz" \

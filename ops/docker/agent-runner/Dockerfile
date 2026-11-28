@@ -27,12 +27,12 @@ ARG REGISTRY_GHCR=ghcr.io
 # since July while agent-runner accrued 43 criticals from a stale python base.
 # uv is copied from its official image (reproducible; no `curl | sh`).
 # renovate: datasource=docker depName=ghcr.io/astral-sh/uv versioning=docker
-ARG UV_IMAGE=${REGISTRY_GHCR}/astral-sh/uv:0.13.7@sha256:96f40d3904aad8d0bd010539001d36c8e2188b981e1334471a90c4a1d93bb490
+ARG UV_IMAGE=${REGISTRY_GHCR}/astral-sh/uv:0.13.10@sha256:a3ea1357342c1a4bf9a0c53a3deb1b55379aefa037338d8113d5771efa01774f
 # node 24 — for the agent's own workflow tooling (openspec, moon), not for running gates.
 # MUST match the base's libc: the node binary is dynamically linked, so an alpine base needs an
 # alpine node (and alpine 3.24 to match the python base's musl).
 # renovate: datasource=docker depName=dhi.io/node versioning=docker
-ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.22.1-alpine3.24-dev@sha256:c7999456f9380ed100bb430baeb4fdbf4fec59c51d3bab2b0bd3ea77a44e3677
+ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.22.3-alpine3.24-dev@sha256:417af41fd2803f7dab71a0d2602711d1bd3f69cc064000555e9ecd8f52733bb5
 # ADR-0006 Stage 2. python 3.12 still, matching CI's python:3.12 for the domain scripts.
 #
 # ALPINE, and the reason is measured: the digest refresh (v1.0.4) recovered nothing — 43/101
@@ -49,12 +49,12 @@ ARG NODE_IMAGE=${REGISTRY_DHI}/node:24.22.1-alpine3.24-dev@sha256:c7999456f9380e
 #
 # BUILD PREREQUISITE: the `dhi` Harbor proxy project (homelab-cluster ADR-0023).
 # renovate: datasource=docker depName=dhi.io/python versioning=docker
-ARG BASE_IMAGE=${REGISTRY_DHI}/python:3.12.13-alpine3.24-dev@sha256:cf1c0e16904b7e831e430a02811cd36381c0e5b8ccf615be9be37fed0953260b
+ARG BASE_IMAGE=${REGISTRY_DHI}/python:3.12.16-alpine3.24-dev@sha256:3407d3457703122ba38603c4eb081d07395f66ca1b0293ef1e6b8b3491ca421c
 
 # renovate: datasource=github-releases depName=aaif-goose/goose
-ARG GOOSE_VERSION=1.57.0
-ARG GOOSE_SHA256_AMD64=6c3a05e30e1a425dc06a410dbe24b3f3697c9721b1ea2340434ddda6b64267ae
-ARG GOOSE_SHA256_ARM64=00a32522f0421ed72fc06f36bfc44c8e51cffefb4daf22a81bb84ccd29d1a1ce
+ARG GOOSE_VERSION=1.61.0
+ARG GOOSE_SHA256_AMD64=fe0bf93375f46cab8854ff57e6570d6765144d7d0f70831d70619b22c32fcc21
+ARG GOOSE_SHA256_ARM64=ba9224ca2b49ce8e7f00ab0c82317ade8eb44de9e6731a5d68dd3f7f9adae4c1
 
 FROM ${UV_IMAGE} AS uv
 FROM ${NODE_IMAGE} AS node
@@ -96,7 +96,7 @@ ARG GOOSE_VERSION
 # renovate: datasource=pypi depName=openhands
 ARG OPENHANDS_VERSION=1.16.0
 # renovate: datasource=pypi depName=pyyaml
-ARG PYYAML_VERSION=6.0.3
+ARG PYYAML_VERSION=6.0.4
 # Skills loadout (board #268). The core set is baked from the webgrip marketplace at BUILD
 # time so a run needs no network for its core skills; per-ticket extras are cloned at runtime
 # by the entrypoint when OPENHANDS_SKILLS_PROFILE is set. CI can override SKILLS_REPO with

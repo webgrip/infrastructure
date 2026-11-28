@@ -8,7 +8,7 @@
 # anonymous pulls, so unlike the other REGISTRY_* ARGs this one DEFAULTS to the proxy.
 ARG REGISTRY_DHI=harbor.webgrip.dev/dhi
 # renovate: datasource=docker depName=dhi.io/alpine-base versioning=docker
-ARG BASE_IMAGE=${REGISTRY_DHI}/alpine-base:3.24-dev@sha256:7182e0bc2f186386bb23bc0718508913450ba1876e93cf07e5e3cf263c4dbb63
+ARG BASE_IMAGE=${REGISTRY_DHI}/alpine-base:3.24-dev@sha256:ab3130d401f94092d65c15d38566fbffdba1b4fe0f766968003535cdddf6d2e0
 FROM ${BASE_IMAGE}
 
 ARG IMAGE_CREATED=1970-01-01T00:00:00Z
@@ -49,8 +49,8 @@ RUN install -d /usr/local/bin
 # pinned path is now the only path. A Renovate version bump without its checksum fails the
 # build rather than shipping unverified.
 # renovate: datasource=github-releases depName=kubernetes/kubernetes
-ARG KUBECTL_VERSION="v1.37.2"
-ARG KUBECTL_SHA256="c04487523e7aa7d1493f7808174c899db93d7a9cf57531420cd76b9bd415f8f4"
+ARG KUBECTL_VERSION="v1.37.3"
+ARG KUBECTL_SHA256="9a1b55af2795b25dd288dbef62387db9b5530087ab918d28c6ad067f2e3cb07c"
 RUN curl -fsSLO "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" && \
     echo "${KUBECTL_SHA256}  kubectl" | sha256sum -c - && \
     install -m 0755 kubectl /usr/local/bin/kubectl && \
@@ -76,8 +76,8 @@ RUN curl -fsSL -o doctl.tar.gz "https://github.com/digitalocean/doctl/releases/d
     rm doctl.tar.gz
 
 # renovate: datasource=github-releases depName=mikefarah/yq
-ARG YQ_VERSION="4.54.1"
-ARG YQ_SHA256="8e34fc298390875de416e6a4afcb8cabeceb25d9aa8506c1a2f9353cf702ea5f"
+ARG YQ_VERSION="4.54.3"
+ARG YQ_SHA256="129534601871538efe0ba4c5e62a34fb1d5f469bcb975c4fddeb467d82974973"
 RUN wget -q "https://github.com/mikefarah/yq/releases/download/v${YQ_VERSION}/yq_linux_amd64" -O /usr/local/bin/yq && \
     echo "${YQ_SHA256}  /usr/local/bin/yq" | sha256sum -c - && \
     chmod +x /usr/local/bin/yq
